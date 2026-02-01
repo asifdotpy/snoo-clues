@@ -163,6 +163,9 @@ class SnooCluesGame {
   private isWinner: boolean = false;
   private hasPlayed: boolean = false;
   private streak: number = 0;
+  private coldCasesSolved: number = 0;
+  private currentGameMode: 'daily' | 'unlimited' | null = null;
+  private targetSubreddit: string = "";
 
   // DOM Elements
   private clue1Text!: HTMLElement;
@@ -191,11 +194,18 @@ class SnooCluesGame {
   private shareBtn!: HTMLButtonElement;
   private closeWinModalBtn!: HTMLButtonElement;
   private closePlayedModalBtn!: HTMLButtonElement;
+  private selectionModal!: HTMLElement;
+  private startDailyBtn!: HTMLButtonElement;
+  private startColdBtn!: HTMLButtonElement;
+  private keepTrainingBtn!: HTMLButtonElement;
+  private gameContainer!: HTMLElement;
+  private gameSubtitle!: HTMLElement;
+  private coldCasesSolvedVal!: HTMLElement;
 
   constructor() {
     this.initDOMElements();
     this.attachEventListeners();
-    this.initGame();
+    this.showSelectionHub();
     this.fetchLeaderboard();
   }
 
@@ -224,6 +234,12 @@ class SnooCluesGame {
     this.caseClosedStamp = document.getElementById('case-closed-stamp')!;
     this.leaderboardList = document.getElementById('leaderboardList')!;
     this.shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
+    this.selectionModal = document.getElementById("selectionModal")!;
+    this.startDailyBtn = document.getElementById("startDailyBtn") as HTMLButtonElement;
+    this.startColdBtn = document.getElementById("startColdBtn") as HTMLButtonElement;
+    this.keepTrainingBtn = document.getElementById("keep-training-btn") as HTMLButtonElement;
+    this.gameContainer = document.querySelector(".game-container")!;
+    this.gameSubtitle = document.querySelector(".game-subtitle")!;
     this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
     this.closePlayedModalBtn = this.playedModal.querySelector(".close-modal-btn") as HTMLButtonElement;
   }
@@ -241,11 +257,48 @@ class SnooCluesGame {
     this.shareBtn.addEventListener("click", () => this.shareResult());
     this.closeWinModalBtn.addEventListener("click", () => this.closeModal("win"));
     this.closePlayedModalBtn.addEventListener("click", () => this.closeModal("played"));
+
+    this.startDailyBtn.addEventListener("click", () => this.initGame('daily'));
+    this.startColdBtn.addEventListener("click", () => this.initGame('unlimited'));
+    this.keepTrainingBtn.addEventListener("click", () => {
+      this.closeModal("win");
+      this.initGame('unlimited');
+    });
   }
 
-  private async initGame(): Promise<void> {
+  private showSelectionHub(): void {
+    this.selectionModal.classList.remove("hidden");
+  }
+
+  private hideSelectionHub(): void {
+    this.selectionModal.classList.add("hidden");
+  }
+
+  private async initGame(mode: 'daily' | 'unlimited'): Promise<void> {
+    this.currentGameMode = mode;
+    this.hideSelectionHub();
+
+    // Reset UI state for new game
+    this.isWinner = false;
+    this.submitBtn.disabled = false;
+    this.guessInput.disabled = false;
+    this.guessInput.value = "";
+    this.caseClosedStamp.classList.add('hidden');
+    this.caseClosedStamp.classList.remove('stamped');
+    this.feedbackMessage.textContent = "";
+
+    // Toggle aesthetics
+    if (mode === 'unlimited') {
+      this.gameContainer.classList.add('cold-case');
+      this.gameSubtitle.textContent = "Cold Case Investigation (Practice)";
+    } else {
+      this.gameContainer.classList.remove('cold-case');
+      this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
+    }
+
     try {
-      const response = await fetch("/api/game/init");
+      const endpoint = mode === 'daily' ? "/api/game/init" : "/api/game/random";
+      const response = await fetch(endpoint);
       if (!response.ok) throw new Error("Init failed");
 
       const data = (await response.json()) as GameInitResponse;
@@ -254,19 +307,15 @@ class SnooCluesGame {
       this.hasPlayed = data.hasPlayedToday;
       this.isWinner = data.isWinner;
       this.streak = data.streak;
+      this.coldCasesSolved = data.coldCasesSolved;
 
-      this.clue1Text.textContent = this.clues[0];
-      this.clue2Text.textContent = this.clues[1];
-      this.clue3Text.textContent = this.clues[2];
-      this.attemptsCount.textContent = this.attempts.toString();
-      this.streakValue.textContent = this.streak.toString();
+      // If unlimited, the "answer" is stored in targetSubreddit to check locally or on server
+      // But we'll let the server handle validation for security
+      // The random endpoint doesn't send the answer, only clues.
 
-      if (data.rank) {
-        this.rankValue.textContent = data.rank;
-        this.winRankName.textContent = data.rank.split(' ')[0] ?? "Detective";
-      }
+      this.updateGameUI();
 
-      if (this.hasPlayed) {
+      if (this.hasPlayed && mode === 'daily') {
         this.playedAttemptsCount.textContent = this.attempts.toString();
         this.playedStreakVal.textContent = this.streak.toString();
         const playedAnswer = document.getElementById('played-answer');
@@ -277,6 +326,22 @@ class SnooCluesGame {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  private updateGameUI(): void {
+    this.clue1Text.textContent = this.clues[0];
+    this.clue2Text.textContent = this.clues[1];
+    this.clue3Text.textContent = this.clues[2];
+    this.attemptsCount.textContent = this.attempts.toString();
+    this.streakValue.textContent = this.streak.toString();
+
+    // Reset cards
+    [this.clue2Card, this.clue3Card].forEach(c => {
+      c.classList.add("locked");
+      c.classList.remove("visible");
+    });
+    [this.clue2Text, this.clue3Text].forEach(t => t.classList.add("hidden"));
+    [this.revealClue2Btn, this.revealClue3Btn].forEach(b => b.style.display = "block");
   }
 
   private revealClue(n: 2 | 3): void {
@@ -299,23 +364,30 @@ class SnooCluesGame {
       const response = await fetch("/api/game/guess", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ guess }),
+        body: JSON.stringify({
+          guess,
+          mode: this.currentGameMode
+        }),
       });
       const data = (await response.json()) as GuessResponse;
       this.attempts = data.attempts;
       this.attemptsCount.textContent = this.attempts.toString();
       this.streak = data.streak ?? this.streak;
       this.streakValue.textContent = this.streak.toString();
+      this.coldCasesSolved = data.coldCasesSolved ?? this.coldCasesSolved;
 
       if (data.correct) {
         this.isWinner = true;
         this.answerText.textContent = `r/${data.answer ?? guess}`;
         this.winAttempts.textContent = this.attempts.toString();
         this.winStreakVal.textContent = this.streak.toString();
+
+        // Update rank if returned
         if (data.rank) {
           this.rankValue.textContent = data.rank;
           this.winRankName.textContent = data.rank.split(' ')[0] ?? "Detective";
         }
+
         this.showModal("win");
         setTimeout(() => {
           this.caseClosedStamp.classList.remove('hidden');

@@ -30,6 +30,7 @@ The implementation uses a **hybrid approach**:
 ### ✨ Visual & UX Polish
 - **Detective Notebook Theme**: Premium aged paper aesthetic with typewriter-style typography.
 - **"Case Closed" Stamp**: A dramatic red stamp animation triggers upon correctly identifying a community.
+- **Cold Case Aesthetic**: Unlimited practice mode features a **light blue notebook** with a **"PRACTICE" watermark** to distinguish it from official daily files.
 - **Responsive Design**: Tailored for both Desktop and Reddit Mobile.
 
 ---
@@ -40,8 +41,8 @@ The implementation uses a **hybrid approach**:
 
 #### [index.ts](file:///home/asif1/games/snoo-clues/src/server/index.ts)
 
-**✅ Added Daily Puzzles Data**
-- Expanded puzzle set with 10 community-curated subreddits and clues.
+**✅ Expanded Subreddit Database**
+- Added 50+ diverse subreddits to the "Cold Case" pool for unlimited replayability.
 - Today's case (2026-02-01): **r/aww**
 
 **✅ Implemented Redis State & Logic**
@@ -52,7 +53,8 @@ The implementation uses a **hybrid approach**:
 
 **✅ Created Robust API**
 - `GET /api/game/init` - User status, clues, streaks, and ranks.
-- `POST /api/game/guess` - Real-time validation, streak updates, and leaderboard increments.
+- `GET /api/game/random` - **(NEW)** Fetches a random subreddit puzzle for unlimited play.
+- `POST /api/game/guess` - Supports both 'Daily' and 'Unlimited' modes with synchronized tracking.
 - `GET /api/game/leaderboard` - Community rankings.
 - `POST /api/game/share` - Automated Reddit celebration comments.
 
@@ -61,9 +63,11 @@ The implementation uses a **hybrid approach**:
 ### 2. Client-Side Implementation
 
 #### [index.html](file:///home/asif1/games/snoo-clues/src/client/index.html)
+- Added **Case Selection Hub**: A mode-choosing modal for new investigators.
 - Added **Rank Badge** and **Streak Counter** to the header.
 - Implemented **Leaderboard Section** at the bottom of the notebook.
 - Added **Stamp Container** for the victory animation.
+- Added **"KEEP TRAINING"** button to the victory screen.
 
 #### [style.css](file:///home/asif1/games/snoo-clues/src/client/style.css)
 - Refined **Typewriter Aesthetics** and hand-drawn dashed lines.

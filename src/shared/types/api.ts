@@ -18,6 +18,7 @@ export type GameInitResponse = {
   attempts: number;
   isWinner: boolean;
   streak: number;
+  coldCasesSolved: number;
   answer?: string | undefined;
   rank?: string | undefined;
 };
@@ -32,6 +33,7 @@ export type GuessResponse = {
   answer?: string | undefined; // Only sent if correct
   attempts: number;
   streak?: number | undefined;
+  coldCasesSolved?: number | undefined;
   rank?: string | undefined;
 };
 

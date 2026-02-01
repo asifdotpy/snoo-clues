@@ -19,6 +19,23 @@
     <progress value="0" max="100" id="progress" hidden="1"></progress>
   </div>
 
+  <div class="modal hidden" id="selectionModal">
+    <div class="modal-content selection-hub">
+      <h2>Case Selection</h2>
+      <p>Choose your investigation mode:</p>
+      <div class="selection-options">
+        <button class="selection-btn daily-btn" id="startDailyBtn">
+          <span class="btn-title">TODAY'S INVESTIGATION</span>
+          <span class="btn-subtitle">The 24-hour daily challenge</span>
+        </button>
+        <button class="selection-btn cold-btn" id="startColdBtn">
+          <span class="btn-title">BROWSE COLD CASES</span>
+          <span class="btn-subtitle">Unlimited practice files</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Snoo-Clues Game Overlay -->
   <div class="game-overlay" id="gameOverlay">
     <div class="game-container">
@@ -92,6 +109,7 @@
       <p id="win-streak-msg" class="win-streak">Current Streak: <span id="win-streak-val">0</span> days! 🔥</p>
       <div class="modal-actions">
         <button id="share-btn" class="share-btn">📢 Share to Reddit</button>
+        <button id="keep-training-btn" class="training-btn">🔥 KEEP TRAINING: Open a Cold Case</button>
         <button class="close-modal-btn">Close</button>
       </div>
     </div>

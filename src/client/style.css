@@ -661,3 +661,98 @@ progress[value]::-webkit-progress-value {
     font-size: 1.5rem;
   }
 }
+/* SELECTION HUB */
+.selection-hub {
+  background: #fdf5e6;
+  border: 4px solid #333;
+  box-shadow: 20px 20px 0 rgba(0, 0, 0, 0.4);
+}
+
+.selection-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.selection-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border: 3px solid #333;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-align: center;
+}
+
+.selection-btn .btn-title {
+  font-weight: 900;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.selection-btn .btn-subtitle {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.daily-btn {
+  background: #ff4500;
+  color: white;
+}
+
+.cold-btn {
+  background: #4a90e2;
+  color: white;
+}
+
+.selection-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  filter: brightness(1.1);
+}
+
+/* COLD CASE AESTHETIC */
+.game-container.cold-case {
+  background: #e6f3ff;
+  /* Light blue paper */
+  border-color: #b3d9ff;
+}
+
+.game-container.cold-case::after {
+  content: "COLD CASE FILE - FOR TRAINING ONLY";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(74, 144, 226, 0.1);
+  pointer-events: none;
+  z-index: 1;
+  white-space: nowrap;
+  letter-spacing: 5px;
+}
+
+.training-btn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 10px;
+  transition: all 0.2s;
+}
+
+.training-btn:hover {
+  background: #357abd;
+  transform: translateY(-2px);
+}
