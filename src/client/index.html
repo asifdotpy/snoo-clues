@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>Devvit Game</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+  <body>
+    <canvas
+      class="game-canvas"
+      id="canvas"
+      oncontextmenu="event.preventDefault()"
+      tabindex="-1"
+    >
+    </canvas>
+    <div class="loading" id="loading">
+      <div class="spinner" id="spinner"></div>
+      <div class="status" id="status">Loading Game...</div>
+      <progress value="0" max="100" id="progress" hidden="1"></progress>
+    </div>
+
+    <!-- Snoo-Clues Game Overlay -->
+    <div class="game-overlay" id="gameOverlay">
+      <div class="game-container">
+        <header class="game-header">
+          <h1>🔍 Snoo-Clues</h1>
+          <p class="game-subtitle">Guess today's subreddit!</p>
+        </header>
+
+        <div class="clues-container" id="cluesContainer">
+          <div class="clue-card visible" id="clue1Card">
+            <div class="clue-header">
+              <span class="clue-number">Clue #1</span>
+            </div>
+            <p class="clue-text" id="clue1Text">Loading...</p>
+          </div>
+
+          <div class="clue-card locked" id="clue2Card">
+            <div class="clue-header">
+              <span class="clue-number">Clue #2</span>
+              <button class="reveal-btn" id="revealClue2">Show Clue</button>
+            </div>
+            <p class="clue-text hidden" id="clue2Text">???</p>
+          </div>
+
+          <div class="clue-card locked" id="clue3Card">
+            <div class="clue-header">
+              <span class="clue-number">Clue #3</span>
+              <button class="reveal-btn" id="revealClue3">Show Clue</button>
+            </div>
+            <p class="clue-text hidden" id="clue3Text">???</p>
+          </div>
+        </div>
+
+        <div class="guess-section" id="guessSection">
+          <div class="attempts-counter" id="attemptsCounter">
+            Attempts: <span id="attemptsCount">0</span>
+          </div>
+          <div class="input-group">
+            <span class="subreddit-prefix">r/</span>
+            <input
+              type="text"
+              id="guessInput"
+              class="guess-input"
+              placeholder="subreddit name"
+              autocomplete="off"
+            />
+            <button class="submit-btn" id="submitBtn">Submit</button>
+          </div>
+          <p class="feedback-message" id="feedbackMessage"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal hidden" id="winModal">
+      <div class="modal-content win">
+        <h2>🎉 Congratulations!</h2>
+        <p>You solved today's Snoo-Clues!</p>
+        <p class="answer-reveal">The answer was: <strong>r/<span id="answerText"></span></strong></p>
+        <p class="win-attempts">You got it in <strong><span id="winAttempts"></span></strong> attempt(s)!</p>
+        <button class="share-btn" id="shareBtn">📢 Share to Reddit</button>
+        <button class="close-modal-btn" id="closeWinModal">Close</button>
+      </div>
+    </div>
+
+    <!-- Already Played Modal -->
+    <div class="modal hidden" id="playedModal">
+      <div class="modal-content">
+        <h2>✅ Already Completed</h2>
+        <p>You've already solved today's puzzle!</p>
+        <p class="played-stats">
+          You completed it in <strong><span id="playedAttempts"></span></strong> attempt(s).
+        </p>
+        <p class="next-puzzle">Come back tomorrow for a new puzzle! 🌅</p>
+        <button class="close-modal-btn" id="closePlayedModal">Close</button>
+      </div>
+    </div>
+
+    <script type="module" src="main.ts" defer></script>
+  </body>
+</html>

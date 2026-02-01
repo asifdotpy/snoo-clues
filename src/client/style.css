@@ -1,0 +1,503 @@
+@-webkit-keyframes rotation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes rotation {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to {
+    -moz-transform: rotate(360deg);
+  }
+}
+
+@-o-keyframes rotation {
+  from {
+    -o-transform: rotate(0deg);
+  }
+  to {
+    -o-transform: rotate(360deg);
+  }
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+html {
+  background: #060612;
+}
+
+body {
+  font-family: arial;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: fill-available;
+  min-height: 100svh;
+  min-width: 100vw;
+  background: radial-gradient(56.63% 56.63% at 50% 43.37%, #1c1726 0%, #060612 100%);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  place-items: center;
+}
+
+body.scrollingDisabled {
+  overflow: hidden;
+}
+
+.game-canvas {
+  display: none;
+  border: 0px none;
+  background-color: black;
+  position: relative;
+  transition: opacity 5s ease-in;
+  -webkit-transition: opacity 5s ease-in;
+  opacity: 0;
+  filter: blur(0) grayscale(0);
+  margin-top: auto;
+  margin-bottom: auto;
+  image-rendering: optimizeSpeed;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -o-crisp-edges;
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+.game-canvas.active {
+  animation-name: fadeIn;
+  animation-duration: 2s;
+  opacity: 1;
+}
+
+.spinner {
+  height: 30px;
+  width: 30px;
+  -webkit-animation: rotation 0.8s linear infinite;
+  -moz-animation: rotation 0.8s linear infinite;
+  -o-animation: rotation 0.8s linear infinite;
+  animation: rotation 0.8s linear infinite;
+  border: 5px solid #bdff00;
+  border-top: 5px solid #719900;
+  border-radius: 100%;
+}
+
+.status {
+  display: inline-block;
+  vertical-align: top;
+  font-weight: bold;
+  color: white;
+}
+
+#progress {
+  width: 250px;
+  height: 10px;
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 5px;
+}
+
+progress[value]::-webkit-progress-bar {
+  background-color: #8492a6;
+  height: 10px;
+  border-radius: 15px;
+}
+
+progress[value]::-webkit-progress-value {
+  background-image: -webkit-linear-gradient(left, #719900, #bdff00);
+  height: 10px;
+  border-radius: 15px;
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.loading > * {
+  padding: 10px;
+  margin: 10px;
+}
+
+/* ========================================
+   SNOO-CLUES GAME OVERLAY STYLES
+   ======================================== */
+
+.game-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.game-container {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(28, 23, 38, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.game-header h1 {
+  color: #ff4500;
+  font-size: 2.5rem;
+  margin: 0 0 8px 0;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-subtitle {
+  color: #a0a0a0;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.clues-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.clue-card {
+  background: rgba(40, 35, 50, 0.8);
+  border-radius: 12px;
+  padding: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.clue-card.visible {
+  border-color: #ff4500;
+  box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
+}
+
+.clue-card.locked {
+  opacity: 0.7;
+}
+
+.clue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.clue-number {
+  color: #ff4500;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.reveal-btn {
+  background: linear-gradient(135deg, #ff4500, #ff6a33);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.reveal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 69, 0, 0.4);
+}
+
+.reveal-btn:active {
+  transform: translateY(0);
+}
+
+.clue-text {
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+  transition: opacity 0.3s ease;
+}
+
+.clue-text.hidden {
+  opacity: 0.3;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.guess-section {
+  background: rgba(40, 35, 50, 0.6);
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.attempts-counter {
+  color: #bdff00;
+  font-weight: bold;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.attempts-counter span {
+  color: #ff4500;
+  font-size: 1.2rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.subreddit-prefix {
+  color: #ff4500;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 12px 8px;
+}
+
+.guess-input {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(20, 15, 30, 0.8);
+  color: white;
+  outline: none;
+  transition: border-color 0.2s ease;
+  text-transform: lowercase;
+}
+
+.guess-input:focus {
+  border-color: #ff4500;
+}
+
+.guess-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #ff4500, #ff6a33);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 69, 0, 0.5);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.feedback-message {
+  text-align: center;
+  margin: 12px 0 0 0;
+  min-height: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.feedback-message.success {
+  color: #bdff00;
+}
+
+.feedback-message.error {
+  color: #ff6b6b;
+}
+
+/* MODALS */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #1c1726 0%, #2d2438 100%);
+  padding: 32px;
+  border-radius: 16px;
+  max-width: 450px;
+  width: 90%;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.modal-content.win {
+  border-color: #bdff00;
+  box-shadow: 0 12px 40px rgba(189, 255, 0, 0.3);
+}
+
+.modal-content h2 {
+  color: #ff4500;
+  font-size: 2rem;
+  margin: 0 0 16px 0;
+}
+
+.modal-content p {
+  color: #e0e0e0;
+  margin: 12px 0;
+  font-size: 1.1rem;
+}
+
+.answer-reveal {
+  color: #bdff00 !important;
+  font-size: 1.3rem !important;
+  margin: 20px 0 !important;
+}
+
+.win-attempts {
+  color: #ff4500 !important;
+  font-size: 1.2rem !important;
+}
+
+.played-stats {
+  color: #bdff00 !important;
+  font-size: 1.2rem !important;
+}
+
+.next-puzzle {
+  font-size: 1rem !important;
+  color: #a0a0a0 !important;
+}
+
+.share-btn,
+.close-modal-btn {
+  background: linear-gradient(135deg, #ff4500, #ff6a33);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 8px;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.close-modal-btn {
+  background: linear-gradient(135deg, #555, #777);
+}
+
+.share-btn:hover,
+.close-modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 69, 0, 0.5);
+}
+
+.share-btn:active,
+.close-modal-btn:active {
+  transform: translateY(0);
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 640px) {
+  .game-container {
+    padding: 16px;
+  }
+
+  .game-header h1 {
+    font-size: 2rem;
+  }
+
+  .clue-text {
+    font-size: 1rem;
+  }
+
+  .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .submit-btn {
+    width: 100%;
+  }
+
+  .modal-content {
+    padding: 24px;
+  }
+
+  .modal-content h2 {
+    font-size: 1.5rem;
+  }
+}
