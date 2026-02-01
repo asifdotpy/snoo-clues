@@ -48,24 +48,21 @@
   }
 }
 
-html {
-  background: #060612;
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: transparent !important;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: arial;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  min-height: fill-available;
-  min-height: 100svh;
-  min-width: 100vw;
-  background: radial-gradient(56.63% 56.63% at 50% 43.37%, #1c1726 0%, #060612 100%);
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  place-items: center;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 body.scrollingDisabled {
@@ -73,22 +70,15 @@ body.scrollingDisabled {
 }
 
 .game-canvas {
-  display: none;
-  border: 0px none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
   background-color: black;
-  position: relative;
-  transition: opacity 5s ease-in;
-  -webkit-transition: opacity 5s ease-in;
-  opacity: 0;
-  filter: blur(0) grayscale(0);
-  margin-top: auto;
-  margin-bottom: auto;
-  image-rendering: optimizeSpeed;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: -o-crisp-edges;
-  image-rendering: pixelated;
-  -ms-interpolation-mode: nearest-neighbor;
+  border: 0;
 }
 
 .game-canvas.active {
@@ -159,48 +149,44 @@ progress[value]::-webkit-progress-value {
    ======================================== */
 
 .game-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 20px;
-  z-index: 100;
+  align-items: flex-start;
+  height: 100vh;
+  width: 100vw;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+  position: relative;
 }
 
 .game-container {
-  width: 100%;
-  max-width: 600px;
-  background: #fdfaf0;
+  background: #fdf5e6;
   /* Aged paper color */
-  background-image:
-    linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
-    linear-gradient(#eee .1em, transparent .1em);
-  background-size: 100% 1.2em;
-  border-radius: 4px;
-  /* Sharper corners like a notebook */
-  padding: 30px;
-  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5), inset 0 0 100px rgba(0, 0, 0, 0.05);
-  border: 1px solid #dcdcdc;
+  width: 92%;
+  max-width: 400px;
+  margin: 10px auto;
+  min-height: 95vh;
   position: relative;
-  font-family: 'Courier New', Courier, monospace;
-  /* Typewriter feel */
+  padding: 40px 20px 80px 50px;
+  /* Buffer for margin and footer */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #dcd0c0;
+  font-family: inherit;
+  text-align: left;
 }
 
-/* Margin line */
 .game-container::before {
-  content: '';
+  content: "";
   position: absolute;
+  left: 40px;
   top: 0;
-  left: 80px;
-  height: 100%;
+  bottom: 0;
   width: 2px;
   background: rgba(255, 0, 0, 0.2);
 }
+
+/* Old margin line removed - now handled in .game-container::before above */
 
 .rank-badge {
   background: #eee;
@@ -270,9 +256,7 @@ progress[value]::-webkit-progress-value {
 
 .game-header {
   text-align: left;
-  /* Shifted to look like a title */
   margin-bottom: 30px;
-  margin-left: 70px;
 }
 
 .game-header h1 {
@@ -300,15 +284,15 @@ progress[value]::-webkit-progress-value {
 }
 
 .clue-card {
-  background: white;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 2px;
   padding: 20px;
-  border: 1px solid #ccc;
-  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.05);
   position: relative;
-  margin-left: 70px;
-  transform: rotate(-1deg);
-  /* Slight tilt for 'placed paper' look */
+  margin-bottom: 15px;
+  transform: rotate(-0.5deg);
 }
 
 .clue-card:nth-child(even) {
@@ -377,9 +361,11 @@ progress[value]::-webkit-progress-value {
   border-radius: 0;
   padding: 0;
   border: none;
-  margin-left: 70px;
-  border-top: 2px solid #333;
+  border-top: 1px solid #333;
   padding-top: 25px;
+  margin-top: 20px;
+  padding-bottom: 40px;
+  /* Safe space for simulator bottom bars */
 }
 
 .attempts-counter {
@@ -406,25 +392,32 @@ progress[value]::-webkit-progress-value {
 .subreddit-prefix {
   color: #333;
   background: #eee;
-  padding: 12px;
-  border: 2px solid #333;
+  padding: 12px 10px;
+  border: 1px solid #333;
   border-right: none;
   font-weight: bold;
 }
 
 .guess-input {
-  border: 2px solid #333;
+  border: 1px solid #333;
   border-radius: 0;
   background: white;
   color: #333;
   padding: 12px 15px;
+  flex: 1;
+  font-family: inherit;
+  font-size: 1rem;
 }
 
 .submit-btn {
   background: #333;
+  color: white;
+  border: none;
   border-radius: 0;
-  padding: 14px 25px;
+  padding: 12px 20px;
   font-family: inherit;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .submit-btn:hover {
@@ -569,8 +562,7 @@ progress[value]::-webkit-progress-value {
 
 .leaderboard-section {
   margin-top: 40px;
-  margin-left: 70px;
-  border-top: 2px dashed #999;
+  border-top: 1px dashed #999;
   padding-top: 20px;
 }
 
@@ -621,24 +613,33 @@ progress[value]::-webkit-progress-value {
 /* RESPONSIVE DESIGN */
 @media (max-width: 640px) {
   .game-container {
-    padding: 16px;
+    padding: 30px 15px 80px 50px;
+    /* Keep left padding for margin line */
   }
 
   .game-header h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .clue-text {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .input-group {
-    flex-direction: column;
-    align-items: stretch;
+    /* Keep horizontal if possible or adjust */
+    margin-bottom: 20px;
+  }
+
+  .subreddit-prefix {
+    padding: 10px 8px;
+  }
+
+  .guess-input {
+    padding: 10px;
   }
 
   .submit-btn {
-    width: 100%;
+    padding: 10px 15px;
   }
 
   .modal-content {
