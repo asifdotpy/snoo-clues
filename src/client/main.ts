@@ -300,7 +300,15 @@ class SnooCluesGame {
       this.closeModal("win");
       this.initGame('unlimited');
     });
-    this.backToSelectionBtn.addEventListener("click", () => this.goBackToSelection());
+
+    // Use event delegation for the back button to ensure it's always responsive
+    document.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.id === "backToSelection" || target.closest("#backToSelection"))) {
+        this.goBackToSelection();
+      }
+    });
+
     this.playedToColdBtn.addEventListener("click", () => {
       this.closeModal("played");
       this.initGame('unlimited');
@@ -308,7 +316,9 @@ class SnooCluesGame {
   }
 
   private goBackToSelection(): void {
+    console.log("[Navigation] Returning to Hub");
     if (this.isWinner || confirm("Are you sure you want to exit this case? Progress will be lost.")) {
+      this.currentGameMode = null;
       window.dispatchMascotAction?.('switch_mode');
       this.showSelectionHub();
     }

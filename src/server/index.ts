@@ -15,64 +15,12 @@ import {
 } from "@devvit/web/server";
 import express from "express";
 import { createPost } from "./core/post.js";
+import { calculateNewStreak, getPuzzleByDate } from "./logic.js";
+import { ALL_PUZZLES } from "./data/puzzles.js";
 
 // ##########################################################################
 // # DAILY PUZZLES DATA
 // ##########################################################################
-
-const ALL_PUZZLES: Omit<DailyPuzzle, 'date'>[] = [
-  { subreddit: "aww", clues: ["Dedicated to things that make you go 'awww!'", "Cute animals, babies, and heartwarming moments", "🐶🐱👶 Wholesome places on Reddit"] },
-  { subreddit: "askreddit", clues: ["Curiosity meets community through interrogation", "Source of 'what is your secret' stories", "❓ Largest Q&A forum"] },
-  { subreddit: "gaming", clues: ["Digital battlefield for pixels and passion", "Controllers, keyboards, and frame rates", "🎮 Primary hub for electronic entertainment"] },
-  { subreddit: "funny", clues: ["Pharmacist of laughter", "Visual gags and situational comedy", "😂 Massive collection of humor"] },
-  { subreddit: "todayilearned", clues: ["Unofficial repository of trivia", "Yesterday's obscurities become today's front page", "🧠 TIL stands for..."] },
-  { subreddit: "science", clues: ["Digital observatory for evidence-based reality", "Peer-reviewed findings", "🔬 Strictly moderated hub"] },
-  { subreddit: "movies", clues: ["Cinematic headquarters for film buffs", "Trailers and casting news", "🎬 Motion picture industry dissection"] },
-  { subreddit: "pics", clues: ["Window into the world via photography", "From politics to pretty rocks", "📷 Default hub for visual captures"] },
-  { subreddit: "technology", clues: ["Frontier of innovation and silicon", "AI breakthroughs and privacy concerns", "💻 Future of computing"] },
-  { subreddit: "music", clues: ["Auditory archive for melodies", "New releases and throwback classics", "🎵 The universal language"] },
-  { subreddit: "worldnews", clues: ["Global echo chamber of current events", "Headlines from every corner of the earth", "🌍 International reporting hub"] },
-  { subreddit: "showerthoughts", clues: ["Epiphanies born in the bathroom", "Mind-bending realizations about mundane things", "🚿 Deep thoughts while scrubbing"] },
-  { subreddit: "explainlikeimfive", clues: ["Complex concepts for simple minds", "Physics and economics made easy", "👶 ELI5: The simplification engine"] },
-  { subreddit: "space", clues: ["The final frontier in digital form", "Galaxies, nebulas, and rocket launches", "🚀 Observatory for the cosmos"] },
-  { subreddit: "natureisfm", clues: ["The brutal beauty of the wild", "Predators and survival on camera", "🌋 Nature's uncensored reality"] },
-  { subreddit: "earthporn", clues: ["Stunning landscapes without the Snoos", "High-resolution natural beauty", "🏔️ Earth's most photogenic spots"] },
-  { subreddit: "nonononoyes", clues: ["Anxiety-inducing moments with a happy ending", "Near misses and narrow escapes", "😰 Close calls caught on film"] },
-  { subreddit: "dataisbeautiful", clues: ["Information transformed into art", "Charts, graphs, and visual statistics", "📊 Data visualization at its best"] },
-  { subreddit: "books", clues: ["The digital library for bibliophiles", "Literary discussions and recommendations", "📚 Where stories never end"] },
-  { subreddit: "food", clues: ["The internet's communal kitchen", "Recipes, food porn, and culinary experiments", "🍲 Gourmet and everyday eats"] },
-  { subreddit: "travel", clues: ["Digital passport for the wanderlust-stricken", "Hidden gems and tourist traps", "✈️ Global exploration hub"] },
-  { subreddit: "history", clues: ["Chronicle of humanity's past", "Ancient civilizations and recent events", "🏛️ Learning from what came before"] },
-  { subreddit: "art", clues: ["Museum without walls", "Paintings, sculptures, and digital works", "🎨 Creative expression hub"] },
-  { subreddit: "philosophy", clues: ["Digital agora for deep thinking", "Existence, ethics, and logic", "⚖️ Contemplating the big questions"] },
-  { subreddit: "fitness", clues: ["Gym without the membership fee", "Workout routines and nutritional advice", "💪 Pursuit of the physical peak"] },
-  { subreddit: "diy", clues: ["The 'do it yourself' workshop", "Home renovations and craft projects", "🔨 Building it with your own hands"] },
-  { subreddit: "gadgets", clues: ["Review site for the latest tech", "Smartphones, wearables, and hardware", "📱 Tools of the modern era"] },
-  { subreddit: "tifu", clues: ["Chronicles of daily disasters", "Confessions of mistakes made today", "🤦 TIFU by posting this..."] },
-  { subreddit: "nosleep", clues: ["Original horror stories that feel real", "Don't read these in the dark", "👁️ Fiction that keeps you awake"] },
-  { subreddit: "personalfinance", clues: ["Budgeting and investment sanctuary", "401ks, debt, and saving strategies", "💰 Mastering your money"] },
-  { subreddit: "futurology", clues: ["Speculation on what lies ahead", "Post-scarcity, longevity, and automation", "🤖 Thinking about tomorrow"] },
-  { subreddit: "nottheonion", clues: ["Real news that sounds like satire", "Truth is stranger than fiction", "🧅 Reality mimicking parody"] },
-  { subreddit: "lifehacks", clues: ["Shortcuts for a better existence", "Efficiency tips for daily tasks", "💡 Smarter ways to live"] },
-  { subreddit: "relationships", clues: ["Advice for the heart and social circle", "Navigating human connections", "❤️ Problem solving for people"] },
-  { subreddit: "philosophy", clues: ["Agora for deep thinkers", "Existence and ethics", "📜 Contemplating the human condition"] },
-  { subreddit: "sports", clues: ["The ultimate arena for competition", "Scores, highlights, and team news", "⚽ Every game, every league"] },
-  { subreddit: "television", clues: ["The small screen's digital hub", "Streaming news and episode discussions", "📺 Binge-watching headquarters"] },
-  { subreddit: "mildlyinteresting", clues: ["Things that are... okay, I guess", "Not quite mind-blowing, but enough", "🤔 Interest at a moderate level"] },
-  { subreddit: "interestingasf", clues: ["Truly fascinating captures", "Higher tier of curiosity", "🤩 Mind-blowing discoveries"] },
-  { subreddit: "oldpeoplereddit", clues: ["Technological confusion and wholesome posts", "Grandma's first day on the site", "👵 Typing in all caps"] },
-  { subreddit: "unpopularopinion", clues: ["The controversial debate floor", "Opinions that go against the grain", "🗣️ Where agreement is rare"] },
-  { subreddit: "creepy", clues: ["Eerie images and unsettling vibes", "Ghost stories and dark aesthetics", "👻 Spine-chilling content"] },
-  { subreddit: "architecture", clues: ["The blueprint for building design", "Skyscrapers and historic ruins", "🏛️ Beauty in built form"] },
-  { subreddit: "astronomy", clues: ["Stargazing and celestial events", "Cosmology and telescope talk", "🔭 Eyes on the night sky"] },
-  { subreddit: "environment", clues: ["Climate change and conservation news", "Protecting the planet one post at a time", "🌿 Earth's defense hub"] },
-  { subreddit: "legaladvice", clues: ["Crowdsourced council for law", "Navigating the justice system", "⚖️ Not a substitute for a lawyer"] },
-  { subreddit: "medizine", clues: ["The digital ward for health news", "Breakthroughs and medical mysteries", "🧪 Science of the human body"] },
-  { subreddit: "parenting", clues: ["Support group for the sleep-deprived", "Raising humans from diapers to dorms", "🍼 The hardest job in the world"] },
-  { subreddit: "photography", clues: ["The lens-crafters community", "Exposure, composition, and gear", "📸 Mastering the frozen moment"] },
-  { subreddit: "writing", clues: ["The workshop for aspiring authors", "Plot, character, and grammar", "📝 Crafting the written word"] },
-  { subreddit: "psychology", clues: ["Mapping the human mind", "Behavioral studies and mental health", "🧠 Why we do what we do"] }
-];
 
 const DAILY_PUZZLES: DailyPuzzle[] = ALL_PUZZLES.slice(0, 10).map((p, i) => ({
   ...p,
@@ -113,15 +61,13 @@ async function updateStreak(postId: string, username: string, today: string): Pr
   const sKey = streakKey(postId, username);
   const dKey = lastWinDateKey(postId, username);
   const lastWinDate = await redis.get(dKey);
-  let currentStreak = await getUserStreak(postId, username);
-  if (lastWinDate) {
-    const yesterday = new Date(new Date(today).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    if (lastWinDate === yesterday) currentStreak += 1;
-    else if (lastWinDate !== today) currentStreak = 1;
-  } else currentStreak = 1;
-  await redis.set(sKey, currentStreak.toString());
+  const currentStreak = await getUserStreak(postId, username);
+
+  const newStreak = calculateNewStreak(lastWinDate, today, currentStreak);
+
+  await redis.set(sKey, newStreak.toString());
   await redis.set(dKey, today);
-  return currentStreak;
+  return newStreak;
 }
 
 function leaderboardKey(postId: string): string {
@@ -153,9 +99,7 @@ function getDetectiveRank(score: number): string {
 }
 
 function getTodaysPuzzle(): DailyPuzzle {
-  const today = new Date().toISOString().split('T')[0];
-  const puzzle = DAILY_PUZZLES.find(p => p.date === today);
-  return puzzle ?? DAILY_PUZZLES[0];
+  return getPuzzleByDate(getTodayDateKey(), DAILY_PUZZLES);
 }
 
 function getTodayDateKey(): string {

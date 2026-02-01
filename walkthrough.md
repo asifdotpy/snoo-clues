@@ -42,6 +42,12 @@ Established a bidirectional communication bridge between the Devvit UI and the G
 - **Visual Integration**: Forced `background: transparent` and adjusted notebook geometry (`max-height: 90vh`) to reveal the GameMaker canvas underneath.
 - **Auditory Immersion**: Implemented server-synced audio triggers for "Paper Rustle" and "Victory Fanfare".
 
+### 🧪 Quality Assurance & Robustness
+Ensured the investigator portal is rock-solid through rigorous testing:
+- **Event Delegation**: Fixed the "Change Case" navigation using robust event delegation to ensure the back-button is always responsive.
+- **TDD (Test-Driven Development)**: Implemented **Vitest** unit tests for critical server logic, including streak calculations and puzzle selection.
+- **Automated Auditor**: Created `tools/audit-puzzles.js` to automatically scan the 40+ subreddit database for duplicates, invalid clue counts, and metadata quality.
+
 ---
 
 ## Changes Made
