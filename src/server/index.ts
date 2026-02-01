@@ -35,54 +35,81 @@ const DAILY_PUZZLES: DailyPuzzle[] = [
     date: "2026-02-02",
     subreddit: "askreddit",
     clues: [
-      "A place where curiosity meets community",
-      "Questions ranging from profound to silly",
-      "❓ What's the best question you've asked?"
+      "A place where curiosity meets community through interrogation",
+      "The source of those 'what is your secret' YouTube videos",
+      "❓ The largest question-and-answer forum on the site"
     ]
   },
   {
     date: "2026-02-03",
     subreddit: "gaming",
     clues: [
-      "Controllers, keyboards, and epic battles",
-      "Where pixels meet passion",
-      "🎮 From retro to next-gen, all are welcome"
+      "A digital battlefield for pixels and passion",
+      "Controllers, keyboards, and heated debates about frame rates",
+      "🎮 The primary hub for all things electronic entertainment"
     ]
   },
   {
     date: "2026-02-04",
     subreddit: "funny",
     clues: [
-      "Laughter is the best medicine, and this is the pharmacy",
-      "Memes, jokes, and unexpected moments",
-      "😂 Making millions smile every day"
+      "The pharmacist of laughter, though some jokes are generic",
+      "Visual gags, situational comedy, and occasional groans",
+      "😂 A massive collection of attempts at humor"
     ]
   },
   {
     date: "2026-02-05",
     subreddit: "todayilearned",
     clues: [
-      "Knowledge shared one fact at a time",
-      "Mind-blowing discoveries and historical tidbits",
-      "🧠 TIL stands for..."
+      "The unofficial repository of 'did you know?' trivia",
+      "Where yesterday's obscurities become today's front page",
+      "🧠 TIL stands for... actually, you probably know this"
     ]
   },
   {
     date: "2026-02-06",
     subreddit: "science",
     clues: [
-      "Where evidence-based discussion thrives",
-      "From astronomy to zoology",
-      "🔬 Peer-reviewed knowledge for the curious"
+      "The digital observatory for evidence-based reality",
+      "Peer-reviewed findings and complex research papers",
+      "🔬 A strictly moderated hub for academic discovery"
     ]
   },
   {
     date: "2026-02-07",
     subreddit: "movies",
     clues: [
-      "Lights, camera, discussion!",
-      "From blockbusters to indie gems",
-      "🎬 Where film enthusiasts gather"
+      "The cinematic headquarters for film buffs",
+      "Trailers, casting news, and deep analysis of the silver screen",
+      "🎬 Where the motion picture industry is dissected"
+    ]
+  },
+  {
+    date: "2026-02-08",
+    subreddit: "pics",
+    clues: [
+      "A window into the world, one photograph at a time",
+      "From political protests to a picture of a really nice rock",
+      "📷 The default hub for high-quality (and low-quality) visual captures"
+    ]
+  },
+  {
+    date: "2026-02-09",
+    subreddit: "technology",
+    clues: [
+      "The frontier of innovation, gadgets, and silicon",
+      "AI breakthroughs, privacy concerns, and software updates",
+      "💻 Where the future of computing is debated daily"
+    ]
+  },
+  {
+    date: "2026-02-10",
+    subreddit: "music",
+    clues: [
+      "The auditory archive for melodies and rhythms",
+      "New releases, throwback classics, and independent artists",
+      "🎵 The universal language, hosted on Reddit"
     ]
   }
 ];
