@@ -48,6 +48,13 @@ Ensured the investigator portal is rock-solid through rigorous testing:
 - **TDD (Test-Driven Development)**: Implemented **Vitest** unit tests for critical server logic, including streak calculations and puzzle selection.
 - **Automated Auditor**: Created `tools/audit-puzzles.js` to automatically scan the 40+ subreddit database for duplicates, invalid clue counts, and metadata quality.
 
+### 📜 Onboarding & Education
+Implemented the "Daily Briefing" system to guide investigators:
+- **Memo UI**: A tilted, paper-clipped Post-it note that slides in daily with fresh tips.
+- **Rotating Tips**: 10+ educational tips covering subreddit syntax, clue sources, and Reddit trivia.
+- **Persistent Handbook**: A floating `?` button that allows investigators to re-open the briefing or view rules at any time.
+- **Thematic Triggers**: Appearance is synced with a "Paper Rustle" sound and mascot reaction.
+
 ---
 
 ## Changes Made
@@ -150,6 +157,8 @@ The project is fully version-controlled on GitHub:
 ✅ Detective Rank system
 ✅ Premium 'Case Closed' animations
 ✅ Multi-modal UX (Daily vs. Unlimited)
+✅ **(NEW)** Daily Briefing system with investigator tips
+✅ **(NEW)** Persistent Investigation Handbook (?)
 ✅ GameMaker $5k prize eligibility locked in!
 
 Ready for Reddit Hackathon submission! 🚀

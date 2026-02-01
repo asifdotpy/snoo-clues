@@ -821,3 +821,104 @@ progress[value]::-webkit-progress-value {
   opacity: 1;
   transform: translateY(0);
 }
+/* ========================================
+   DAILY BRIEFING & HANDBOOK
+   ======================================== */
+
+.briefing-memo {
+  position: fixed;
+  top: -400px; /* Hidden above */
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 280px;
+  background: #fff9c4; /* Post-it yellow */
+  padding: 20px;
+  box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+  z-index: 2000;
+  transition: top 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-left: 2px solid rgba(0,0,0,0.05);
+}
+
+.briefing-memo.visible {
+  top: 40px;
+}
+
+.memo-clip {
+  position: absolute;
+  top: -10px;
+  right: 40px;
+  width: 15px;
+  height: 40px;
+  background: #90a4ae;
+  border-radius: 10px;
+  transform: rotate(5deg);
+  box-shadow: 2px 2px 2px rgba(0,0,0,0.2);
+}
+
+.memo-content h3 {
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0 0 10px 0;
+  color: #333;
+  border-bottom: 1px dashed #ccc;
+  font-size: 1.1rem;
+}
+
+.memo-content p {
+  font-family: 'Handlee', cursive, sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.memo-btn {
+  background: #333;
+  color: #fff9c4;
+  border: none;
+  padding: 8px 15px;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.memo-btn:hover {
+  transform: scale(1.05);
+}
+
+.handbook-pill {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #ff4500;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border: 4px solid #333;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #333;
+  z-index: 1000;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.handbook-pill:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #333;
+}
+
+.handbook-pill:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #333;
+}
+
+@media (max-width: 600px) {
+  .briefing-memo {
+    width: 240px;
+  }
+}

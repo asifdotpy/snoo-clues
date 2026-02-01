@@ -209,11 +209,32 @@ class SnooCluesGame {
   private currentModeTag!: HTMLElement;
   private playedToColdBtn!: HTMLButtonElement;
 
+  // Briefing Elements
+  private briefingMemo!: HTMLElement;
+  private briefingText!: HTMLElement;
+  private dismissBriefingBtn!: HTMLButtonElement;
+  private handbookBtn!: HTMLButtonElement;
+
+  private briefingTips: string[] = [
+    "Recruit! Remember: Subreddit names are like nicknames for communities. No spaces allowed!",
+    "Sleuth Tip: Clue #1 is a snippet from the sub's 'About' page. It's the purest description of the community.",
+    "Did you know? Reddit has over 100,000 active communities. Snoo-Clues helps you find the hidden gems!",
+    "Mobile Tip: You can swipe through the clue cards to see the full investigation file.",
+    "Expert Advice: Clues often mention 'Snoos' or 'Redditors' - use these synonyms to identify the vibe.",
+    "Archive Note: If you solve a case in one try, you earn the 'Master Investigator' title faster!",
+    "Case Study: Some subreddits have 'NSFW' rules. We only investigate SFW communities here, Chief.",
+    "Pro Tip: If you're stuck, look for clues about hobbies, locations, or specific interests like 'gaming' or 'cooking'.",
+    "History Lesson: Snoo is the official mascot of Reddit. He's been helping investigators since 2005!",
+    "Global Search: Keep an eye out for clues mentioning international cities or languages to narrow down geography subs.",
+    "Wholesome Alert: If the clue mentions kittens or heartwarming stories, prioritize 'wholesome' or 'aww' themed subs."
+  ];
+
   constructor() {
     this.initDOMElements();
     this.attachEventListeners();
     this.showSelectionHub();
     this.fetchLeaderboard();
+    this.checkDailyBriefing();
   }
 
   private initDOMElements(): void {
@@ -252,6 +273,11 @@ class SnooCluesGame {
     this.backToSelectionBtn = document.getElementById("backToSelection") as HTMLButtonElement;
     this.currentModeTag = document.getElementById("currentModeTag")!;
     this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
+
+    this.briefingMemo = document.getElementById("briefingMemo")!;
+    this.briefingText = document.getElementById("briefingText")!;
+    this.dismissBriefingBtn = document.getElementById("dismissBriefing") as HTMLButtonElement;
+    this.handbookBtn = document.getElementById("handbookBtn") as HTMLButtonElement;
 
     this.setupHybridBridge();
   }
@@ -313,6 +339,38 @@ class SnooCluesGame {
       this.closeModal("played");
       this.initGame('unlimited');
     });
+
+    this.dismissBriefingBtn.addEventListener("click", () => this.hideBriefing());
+    this.handbookBtn.addEventListener("click", () => this.showBriefing(true));
+  }
+
+  private checkDailyBriefing(): void {
+    const today = new Date().toISOString().split('T')[0];
+    const lastSeen = localStorage.getItem('last_briefing_date');
+
+    if (lastSeen !== today) {
+      setTimeout(() => this.showBriefing(), 1500);
+    }
+  }
+
+  private showBriefing(force: boolean = false): void {
+    const tipIndex = Math.floor(Math.random() * this.briefingTips.length);
+    this.briefingText.textContent = this.briefingTips[tipIndex];
+    this.briefingMemo.classList.add("visible");
+    this.briefingMemo.classList.remove("hidden");
+    this.playSound('rustle');
+    window.dispatchMascotAction?.('switch_mode'); // Simple animation trigger
+
+    if (!force) {
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem('last_briefing_date', today);
+    }
+  }
+
+  private hideBriefing(): void {
+    this.briefingMemo.classList.remove("visible");
+    this.briefingMemo.classList.add("hidden");
+    this.playSound('rustle');
   }
 
   private goBackToSelection(): void {
