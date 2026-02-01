@@ -54,11 +54,12 @@
 
 html,
 body {
-  background: transparent !important;
-  height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  width: 100%;
   margin: 0;
   padding: 0;
+  background: #000;
+  height: 100%;
 }
 
 body {
@@ -75,10 +76,11 @@ body.scrollingDisabled {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -1;
+  z-index: 1;
   pointer-events: none;
   background-color: black;
   border: 0;
+  object-fit: cover;
 }
 
 .game-canvas.active {
@@ -152,26 +154,28 @@ progress[value]::-webkit-progress-value {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 0;
   position: relative;
+  z-index: 5;
 }
 
 .game-container {
-  background: #fdf5e6;
-  /* Aged paper color */
-  width: 92%;
-  max-width: 400px;
-  margin: 10px auto;
-  min-height: 95vh;
   position: relative;
-  padding: 40px 20px 80px 50px;
-  /* Buffer for margin and footer */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 1px solid #dcd0c0;
+  z-index: 10;
+  width: 94%;
+  max-width: 420px;
+  margin: 12px auto;
+  background: #fdf5e6;
+  /* Aged Cream */
+  padding: 30px 15px 40px 45px;
+  /* Large 45px left padding */
+  border-radius: 2px 15px 15px 2px;
+  /* Rounded right side */
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.6), inset 2px 0 5px rgba(0, 0, 0, 0.1);
   font-family: inherit;
   text-align: left;
 }
@@ -179,26 +183,28 @@ progress[value]::-webkit-progress-value {
 .game-container::before {
   content: "";
   position: absolute;
-  left: 40px;
+  left: 35px;
   top: 0;
   bottom: 0;
   width: 2px;
-  background: rgba(255, 0, 0, 0.2);
+  background: rgba(255, 0, 0, 0.3);
+  border-left: 1px solid rgba(255, 0, 0, 0.1);
 }
 
 /* Old margin line removed - now handled in .game-container::before above */
 
 .rank-badge {
   background: #eee;
-  border: 1px solid #333;
+  border: 2px solid #333;
   color: #333;
-  padding: 2px 8px;
+  padding: 4px 12px;
   border-radius: 4px;
   font-size: 0.7rem;
   font-weight: bold;
   margin-top: 5px;
   display: inline-block;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: inherit;
+  transform: rotate(1deg);
 }
 
 .rank-badge span {
@@ -242,12 +248,15 @@ progress[value]::-webkit-progress-value {
 .streak-badge {
   background: #333;
   color: #fff;
-  padding: 5px 12px;
+  padding: 4px 12px;
+  border: 2px solid #333;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: bold;
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
   white-space: nowrap;
+  display: inline-block;
+  transform: rotate(-1deg);
 }
 
 .streak-badge span {
@@ -285,14 +294,13 @@ progress[value]::-webkit-progress-value {
 
 .clue-card {
   width: 100%;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 2px;
-  padding: 20px;
-  border: 1px solid #eee;
-  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 20px;
+  transform: rotate(-1deg);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   position: relative;
-  margin-bottom: 15px;
-  transform: rotate(-0.5deg);
 }
 
 .clue-card:nth-child(even) {
@@ -382,41 +390,44 @@ progress[value]::-webkit-progress-value {
   text-decoration: underline;
 }
 
-.input-group {
+.input-row {
   display: flex;
+  width: 100%;
   gap: 0;
-  align-items: center;
-  margin-bottom: 15px;
+  border: 2px solid #333;
+  background: #fff;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-.subreddit-prefix {
-  color: #333;
+.r-prefix {
   background: #eee;
-  padding: 12px 10px;
-  border: 1px solid #333;
-  border-right: none;
+  padding: 10px;
   font-weight: bold;
+  border-right: 2px solid #333;
+  display: flex;
+  align-items: center;
 }
 
 .guess-input {
-  border: 1px solid #333;
-  border-radius: 0;
-  background: white;
-  color: #333;
-  padding: 12px 15px;
-  flex: 1;
+  border: none;
+  flex-grow: 1;
+  padding: 10px;
+  width: 10px;
+  /* Let flex-grow handle it */
+  outline: none;
   font-family: inherit;
   font-size: 1rem;
 }
 
 .submit-btn {
-  background: #333;
-  color: white;
   border: none;
-  border-radius: 0;
-  padding: 12px 20px;
-  font-family: inherit;
+  border-left: 2px solid #333;
+  background: #ff4500;
+  color: white;
+  padding: 0 15px;
   cursor: pointer;
+  text-transform: uppercase;
   font-weight: bold;
 }
 
@@ -562,7 +573,7 @@ progress[value]::-webkit-progress-value {
 
 .leaderboard-section {
   margin-top: 40px;
-  border-top: 1px dashed #999;
+  border-top: 2px dashed #ccc;
   padding-top: 20px;
 }
 
@@ -625,12 +636,12 @@ progress[value]::-webkit-progress-value {
     font-size: 0.95rem;
   }
 
-  .input-group {
-    /* Keep horizontal if possible or adjust */
+  .input-row {
+    /* Flexible row should naturally adjust, but we can fine-tune if needed */
     margin-bottom: 20px;
   }
 
-  .subreddit-prefix {
+  .r-prefix {
     padding: 10px 8px;
   }
 
