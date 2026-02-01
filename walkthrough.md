@@ -26,10 +26,25 @@ The implementation uses a **hybrid approach**:
 - Each puzzle contains: date, subreddit answer, and 3 clues
 - Today's puzzle (2026-02-01): **r/aww**
 
-**✅ Implemented Redis State Management**
-- `played:{postId}:{username}:{date}` - Tracks daily completion
-- `attempts:{postId}:{username}:{date}` - Counts user attempts
-- `winner:{postId}:{username}:{date}` - Marks winners
+**✅ Implemented Leaderboard & Redis State Management**
+
+### 🏆 Global Leaderboard
+- **Detective Rankings**: Tracks all users' total successful investigations.
+- **Redis ZSET**: Uses high-performance sorted sets for instantaneous ranking.
+- **Real-time Updates**: Rankings refresh immediately after a successful case closure.
+- **Top 10**: Displays the most elite detectives in the community.
+
+---
+
+## Technical Details
+
+### Redis Keys
+- `played:{postId}:{username}:{date}` - Daily completion
+- `attempts:{postId}:{username}:{date}` - Attempt count
+- `winner:{postId}:{username}:{date}` - Win flag
+- `streak:{postId}:{username}` - Current daily streak
+- `last_win_date:{postId}:{username}` - Date tracking for streak logic
+- `leaderboard:{postId}` - Global user scores (ZSET)
 - All keys have 7-day TTL for automatic cleanup
 
 **✅ Created Game Endpoints**

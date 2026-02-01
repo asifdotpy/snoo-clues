@@ -523,6 +523,57 @@ progress[value]::-webkit-progress-value {
 }
 
 
+.leaderboard-section {
+  margin-top: 40px;
+  margin-left: 70px;
+  border-top: 2px dashed #999;
+  padding-top: 20px;
+}
+
+.leaderboard-section h3 {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px dotted #ccc;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.leaderboard-item.loading {
+  font-style: italic;
+  color: #888;
+  border-bottom: none;
+}
+
+.leaderboard-rank {
+  font-weight: bold;
+  color: #ff4500;
+  margin-right: 10px;
+}
+
+.leaderboard-name {
+  flex: 1;
+}
+
+.leaderboard-score {
+  font-weight: bold;
+  color: #333;
+}
+
 /* RESPONSIVE DESIGN */
 @media (max-width: 640px) {
   .game-container {

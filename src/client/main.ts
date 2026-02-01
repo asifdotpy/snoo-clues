@@ -416,6 +416,7 @@ class SnooCluesGame {
   private playedStreakVal!: HTMLElement;
   private streakValue!: HTMLElement;
   private winStreakVal!: HTMLElement;
+  private leaderboardList!: HTMLElement;
   private shareBtn!: HTMLButtonElement;
   private closeWinModalBtn!: HTMLButtonElement;
   private closePlayedModalBtn!: HTMLButtonElement;
@@ -424,6 +425,7 @@ class SnooCluesGame {
     this.initDOMElements();
     this.attachEventListeners();
     this.initGame();
+    this.fetchLeaderboard();
   }
 
   private initDOMElements(): void {
@@ -446,6 +448,7 @@ class SnooCluesGame {
     this.playedStreakVal = document.getElementById('played-streak-val')!;
     this.streakValue = document.getElementById('streak-value')!;
     this.winStreakVal = document.getElementById('win-streak-val')!;
+    this.leaderboardList = document.getElementById('leaderboardList')!;
     this.shareBtn = document.getElementById("shareBtn") as HTMLButtonElement;
     this.closeWinModalBtn = document.getElementById("closeWinModal") as HTMLButtonElement;
     this.closePlayedModalBtn = document.getElementById("closePlayedModal") as HTMLButtonElement;
@@ -566,6 +569,7 @@ class SnooCluesGame {
         this.showFeedback("🎉 Correct! You solved it!", "success");
         this.showModal("win");
         this.disableInput();
+        this.fetchLeaderboard(); // Update leaderboard after win
       } else {
         // Incorrect guess
         this.showFeedback("❌ Not quite! Try again.", "error");
@@ -626,6 +630,36 @@ class SnooCluesGame {
   private showFeedback(message: string, type: "success" | "error"): void {
     this.feedbackMessage.textContent = message;
     this.feedbackMessage.className = `feedback-message ${type}`;
+  }
+
+  private async fetchLeaderboard(): Promise<void> {
+    try {
+      const response = await fetch("/api/game/leaderboard");
+      if (!response.ok) throw new Error("Failed to fetch leaderboard");
+
+      const data = (await response.json()) as LeaderboardResponse;
+      this.renderLeaderboard(data.leaderboard);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      this.leaderboardList.innerHTML = '<div class="leaderboard-item error">Failed to load rankings</div>';
+    }
+  }
+
+  private renderLeaderboard(entries: LeaderboardEntry[]): void {
+    if (entries.length === 0) {
+      this.leaderboardList.innerHTML = '<div class="leaderboard-item">No investigations solved yet.</div>';
+      return;
+    }
+
+    this.leaderboardList.innerHTML = entries
+      .map((entry, index) => `
+        <div class="leaderboard-item">
+          <span class="leaderboard-rank">#${index + 1}</span>
+          <span class="leaderboard-name">${entry.username}</span>
+          <span class="leaderboard-score">${entry.score} pts</span>
+        </div>
+      `)
+      .join("");
   }
 
   private showModal(type: "win" | "played"): void {

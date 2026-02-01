@@ -42,3 +42,13 @@ export type ShareResponse = {
   success: boolean;
   commentUrl?: string;
 };
+
+export type LeaderboardEntry = {
+  username: string;
+  score: number;
+};
+
+export type LeaderboardResponse = {
+  type: "leaderboard_data";
+  leaderboard: LeaderboardEntry[];
+};

@@ -6,7 +6,9 @@ import {
   GuessRequest,
   GuessResponse,
   ShareRequest,
-  ShareResponse
+  ShareResponse,
+  LeaderboardEntry,
+  LeaderboardResponse,
 } from "../shared/types/api";
 import {
   createServer,
@@ -155,6 +157,27 @@ async function updateStreak(postId: string, username: string, today: string): Pr
   await redis.set(sKey, currentStreak.toString());
   await redis.set(dKey, today);
   return currentStreak;
+}
+
+function leaderboardKey(postId: string): string {
+  return `leaderboard:${postId}`;
+}
+
+async function incrementUserScore(postId: string, username: string): Promise<number> {
+  const key = leaderboardKey(postId);
+  // Using zIncrBy to keep track of total wins/points
+  await redis.zIncrBy(key, username, 1);
+  return await redis.zScore(key, username) || 0;
+}
+
+async function getTopDetectives(postId: string): Promise<LeaderboardEntry[]> {
+  const key = leaderboardKey(postId);
+  const top = await redis.zRange(key, 0, 9, { by: 'rank', reverse: true });
+
+  return Promise.all(top.map(async (member) => {
+    const score = await redis.zScore(key, member.member) || 0;
+    return { username: member.member, score: score };
+  }));
 }
 
 // ##########################################################################
@@ -357,6 +380,8 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
       await markAsWinner(postId, username, today);
       // Update streak
       streak = await updateStreak(postId, username, today);
+      // Increment leaderboard score
+      await incrementUserScore(postId, username);
     }
 
     const response: GuessResponse & { streak?: number } = {
@@ -368,9 +393,28 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     };
 
     res.json(response);
-  } catch (err) {
-    console.error("POST /api/game/guess error:", err);
-    res.status(500).json({ error: "Failed to process guess" });
+  } catch (error) {
+    console.error("Error submitting guess:", error);
+    res.status(500).json({ error: "Failed to submit guess" });
+  }
+});
+
+router.get("/api/game/leaderboard", async (_req, res): Promise<void> => {
+  try {
+    const { postId } = context;
+    if (!postId) {
+      res.status(400).json({ error: "Missing postId" });
+      return;
+    }
+    const leaderboard = await getTopDetectives(postId);
+    const response: LeaderboardResponse = {
+      type: "leaderboard_data",
+      leaderboard
+    };
+    res.json(response);
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    res.status(500).json({ error: "Failed to fetch leaderboard" });
   }
 });
 
