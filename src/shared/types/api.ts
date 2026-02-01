@@ -18,7 +18,8 @@ export type GameInitResponse = {
   attempts: number;
   isWinner: boolean;
   streak: number;
-  answer?: string;
+  answer?: string | undefined;
+  rank?: string | undefined;
 };
 
 export type GuessRequest = {
@@ -31,6 +32,7 @@ export type GuessResponse = {
   answer?: string | undefined; // Only sent if correct
   attempts: number;
   streak?: number | undefined;
+  rank?: string | undefined;
 };
 
 export type ShareRequest = {
@@ -40,7 +42,7 @@ export type ShareRequest = {
 export type ShareResponse = {
   type: "share_result";
   success: boolean;
-  commentUrl?: string;
+  commentUrl?: string | undefined;
 };
 
 export type LeaderboardEntry = {

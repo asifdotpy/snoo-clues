@@ -24,7 +24,10 @@
     <div class="game-container">
       <header class="game-header">
         <div class="header-top">
-          <h1>Snoo-Clues</h1>
+          <div class="header-titles">
+            <h1>Snoo-Clues</h1>
+            <div id="detective-rank" class="rank-badge">RANK: <span id="rank-value">Rookie Sleuth</span></div>
+          </div>
           <div id="streak-counter" class="streak-badge">🔥 Streak: <span id="streak-value">0</span></div>
         </div>
         <p class="game-subtitle">The Daily Subreddit Investigation</p>
@@ -79,8 +82,11 @@
   <!-- Win Modal -->
   <div class="modal hidden" id="winModal">
     <div class="modal-content win">
+      <div class="stamp-container">
+        <div id="case-closed-stamp" class="case-closed-stamp hidden">CASE CLOSED</div>
+      </div>
       <h2>Case Solved!</h2>
-      <p>Excellent work, Detective. You've identified the community:</p>
+      <p>Excellent work, <span id="win-rank-name">Detective</span>. You've identified the community:</p>
       <p id="correct-answer" class="answer-reveal">r/...</p>
       <p class="win-attempts">Solved in <span id="win-attempts-count">0</span> attempt(s)</p>
       <p id="win-streak-msg" class="win-streak">Current Streak: <span id="win-streak-val">0</span> days! 🔥</p>

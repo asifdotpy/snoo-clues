@@ -1,26 +1,23 @@
-import express from "express";
 import {
-  InitResponse,
   DailyPuzzle,
   GameInitResponse,
   GuessRequest,
   GuessResponse,
   ShareRequest,
-  ShareResponse,
   LeaderboardEntry,
-  LeaderboardResponse,
 } from "../shared/types/api";
 import {
   createServer,
   context,
   getServerPort,
   reddit,
-  redis
+  redis,
 } from "@devvit/web/server";
-import { createPost } from "./core/post";
+import express from "express";
+import { createPost } from "./core/post.js";
 
 // ##########################################################################
-// # DAILY PUZZLES DATA - Snoo-Clues Game
+// # DAILY PUZZLES DATA
 // ##########################################################################
 
 const DAILY_PUZZLES: DailyPuzzle[] = [
@@ -125,35 +122,20 @@ function lastWinDateKey(postId: string, username: string): string {
 }
 
 async function getUserStreak(postId: string, username: string): Promise<number> {
-  const key = streakKey(postId, username);
-  const value = await redis.get(key);
+  const value = await redis.get(streakKey(postId, username));
   return value ? parseInt(value, 10) : 0;
 }
 
 async function updateStreak(postId: string, username: string, today: string): Promise<number> {
   const sKey = streakKey(postId, username);
   const dKey = lastWinDateKey(postId, username);
-
   const lastWinDate = await redis.get(dKey);
   let currentStreak = await getUserStreak(postId, username);
-
   if (lastWinDate) {
     const yesterday = new Date(new Date(today).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    if (lastWinDate === yesterday) {
-      // Consecutive day!
-      currentStreak += 1;
-    } else if (lastWinDate === today) {
-      // Already won today, don't increment
-    } else {
-      // Streak broken
-      currentStreak = 1;
-    }
-  } else {
-    // First win ever
-    currentStreak = 1;
-  }
-
+    if (lastWinDate === yesterday) currentStreak += 1;
+    else if (lastWinDate !== today) currentStreak = 1;
+  } else currentStreak = 1;
   await redis.set(sKey, currentStreak.toString());
   await redis.set(dKey, today);
   return currentStreak;
@@ -165,32 +147,36 @@ function leaderboardKey(postId: string): string {
 
 async function incrementUserScore(postId: string, username: string): Promise<number> {
   const key = leaderboardKey(postId);
-  // Using zIncrBy to keep track of total wins/points
   await redis.zIncrBy(key, username, 1);
-  return await redis.zScore(key, username) || 0;
+  const score = await redis.zScore(key, username);
+  return score || 0;
 }
 
 async function getTopDetectives(postId: string): Promise<LeaderboardEntry[]> {
   const key = leaderboardKey(postId);
   const top = await redis.zRange(key, 0, 9, { by: 'rank', reverse: true });
-
   return Promise.all(top.map(async (member) => {
     const score = await redis.zScore(key, member.member) || 0;
     return { username: member.member, score: score };
   }));
 }
 
-// ##########################################################################
-// # GAME HELPER FUNCTIONS
-// ##########################################################################
+function getDetectiveRank(score: number): string {
+  if (score <= 1) return "Rookie Sleuth";
+  if (score <= 5) return "Private Eye";
+  if (score <= 10) return "Senior Detective";
+  if (score <= 20) return "Inspector";
+  return "Master Investigator";
+}
 
-function getTodaysPuzzle(): DailyPuzzle | null {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  return DAILY_PUZZLES.find(p => p.date === today) || DAILY_PUZZLES[0]; // Fallback to first puzzle
+function getTodaysPuzzle(): DailyPuzzle {
+  const today = new Date().toISOString().split('T')[0];
+  const puzzle = DAILY_PUZZLES.find(p => p.date === today);
+  return puzzle ?? DAILY_PUZZLES[0];
 }
 
 function getTodayDateKey(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split('T')[0] ?? "unknown";
 }
 
 function playedKey(postId: string, username: string, date: string): string {
@@ -211,20 +197,15 @@ async function getUsername(): Promise<string> {
 }
 
 async function hasPlayedToday(postId: string, username: string, date: string): Promise<boolean> {
-  const key = playedKey(postId, username, date);
-  const value = await redis.get(key);
-  return value === "true";
+  return (await redis.get(playedKey(postId, username, date))) === "true";
 }
 
 async function isWinner(postId: string, username: string, date: string): Promise<boolean> {
-  const key = winnerKey(postId, username, date);
-  const value = await redis.get(key);
-  return value === "true";
+  return (await redis.get(winnerKey(postId, username, date))) === "true";
 }
 
 async function getUserAttempts(postId: string, username: string, date: string): Promise<number> {
-  const key = attemptsKey(postId, username, date);
-  const value = await redis.get(key);
+  const value = await redis.get(attemptsKey(postId, username, date));
   return value ? parseInt(value, 10) : 0;
 }
 
@@ -232,170 +213,112 @@ async function incrementAttempts(postId: string, username: string, date: string)
   const key = attemptsKey(postId, username, date);
   const current = await getUserAttempts(postId, username, date);
   const newValue = current + 1;
-  await redis.set(key, newValue.toString(), { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }); // 7 days TTL
+  await redis.set(key, newValue.toString(), { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
   return newValue;
 }
 
 async function markAsPlayed(postId: string, username: string, date: string): Promise<void> {
-  const key = playedKey(postId, username, date);
-  await redis.set(key, "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }); // 7 days TTL
+  await redis.set(playedKey(postId, username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
 }
 
 async function markAsWinner(postId: string, username: string, date: string): Promise<void> {
-  const key = winnerKey(postId, username, date);
-  await redis.set(key, "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }); // 7 days TTL
+  await redis.set(winnerKey(postId, username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
   await markAsPlayed(postId, username, date);
 }
 
-// ##########################################################################
-
 const app = express();
-
-// Middleware for JSON body parsing
 app.use(express.json());
-// Middleware for URL-encoded body parsing
 app.use(express.urlencoded({ extended: true }));
-// Middleware for plain text body parsing
 app.use(express.text());
 
 const router = express.Router();
 
-router.get<
-  { postId: string },
-  InitResponse | { status: string; message: string }
->("/api/init", async (_req, res): Promise<void> => {
+router.get("/api/init", async (_req, res): Promise<void> => {
   const { postId } = context;
-
   if (!postId) {
-    console.error("API Init Error: postId not found in devvit context");
-    res.status(400).json({
-      status: "error",
-      message: "postId is required but missing from context",
-    });
+    res.status(400).json({ status: "error", message: "postId is required" });
     return;
   }
-
   try {
-    const username = await reddit.getCurrentUsername();
-
-    res.json({
-      type: "init",
-      postId: postId,
-      username: username ?? "anonymous",
-    });
+    const username = await getUsername();
+    res.json({ type: "init", postId: postId, username: username });
   } catch (error) {
-    console.error(`API Init Error for post ${postId}:`, error);
-    let errorMessage = "Unknown error during initialization";
-    if (error instanceof Error) {
-      errorMessage = `Initialization failed: ${error.message}`;
-    }
-    res.status(400).json({ status: "error", message: errorMessage });
+    res.status(400).json({ status: "error", message: "Initialization failed" });
   }
 });
 
-// ##########################################################################
-// # SNOO-CLUES GAME API ENDPOINTS
-// ##########################################################################
-
-// GET /api/game/init - Send today's clues and user status
 router.get("/api/game/init", async (_req, res): Promise<void> => {
   try {
     const { postId } = context;
     if (!postId) {
-      return res.status(400).json({ error: "Missing postId in context" });
+      res.status(400).json({ error: "Missing postId" });
+      return;
     }
-
     const username = await getUsername();
     const today = getTodayDateKey();
     const puzzle = getTodaysPuzzle();
-
-    if (!puzzle) {
-      return res.status(404).json({ error: "No puzzle available for today" });
-    }
-
     const hasPlayed = await hasPlayedToday(postId, username, today);
     const attempts = await getUserAttempts(postId, username, today);
     const winner = await isWinner(postId, username, today);
     const streak = await getUserStreak(postId, username);
-
-    const response: GameInitResponse & { streak: number } = {
+    const score = await redis.zScore(leaderboardKey(postId), username) || 0;
+    res.json({
       type: "game_init",
       clues: puzzle.clues,
       hasPlayedToday: hasPlayed,
       attempts: attempts,
       isWinner: winner,
       streak: streak,
-      answer: winner ? puzzle.subreddit : undefined
-    };
-
-    res.json(response);
+      answer: winner ? puzzle.subreddit : undefined,
+      rank: getDetectiveRank(score)
+    } as GameInitResponse);
   } catch (err) {
-    console.error("GET /api/game/init error:", err);
-    res.status(500).json({ error: "Failed to initialize game" });
+    res.status(500).json({ error: "Failed" });
   }
 });
 
-// POST /api/game/guess - Validate user's guess
 router.post("/api/game/guess", async (req, res): Promise<void> => {
   try {
     const { postId } = context;
     if (!postId) {
-      return res.status(400).json({ error: "Missing postId in context" });
+      res.status(400).json({ error: "Missing postId" });
+      return;
     }
-
     const username = await getUsername();
     if (username === "anonymous") {
-      return res.status(401).json({ error: "Login required" });
+      res.status(401).json({ error: "Login required" });
+      return;
     }
-
     const today = getTodayDateKey();
     const puzzle = getTodaysPuzzle();
-
-    if (!puzzle) {
-      return res.status(404).json({ error: "No puzzle available for today" });
+    if (await isWinner(postId, username, today)) {
+      res.status(400).json({ error: "Already solved" });
+      return;
     }
-
-    // Check if already won today
-    const winner = await isWinner(postId, username, today);
-    if (winner) {
-      return res.status(400).json({ error: "You've already solved today's puzzle!" });
-    }
-
     const { guess } = req.body as GuessRequest;
-    if (!guess || typeof guess !== "string") {
-      return res.status(400).json({ error: "Invalid guess" });
+    if (!guess) {
+      res.status(400).json({ error: "Invalid" });
+      return;
     }
-
-    // Increment attempts
     const attempts = await incrementAttempts(postId, username, today);
-
-    // Normalize and compare (lowercase, trim)
-    const normalizedGuess = guess.toLowerCase().trim();
-    const normalizedAnswer = puzzle.subreddit.toLowerCase().trim();
-    let isCorrect = normalizedGuess === normalizedAnswer;
+    const isCorrect = guess.toLowerCase().trim() === puzzle.subreddit.toLowerCase().trim();
     let streak = 0;
-
+    let score = await redis.zScore(leaderboardKey(postId), username) || 0;
     if (isCorrect) {
-      // Mark as winner
       await markAsWinner(postId, username, today);
-      // Update streak
       streak = await updateStreak(postId, username, today);
-      // Increment leaderboard score
-      await incrementUserScore(postId, username);
+      score = await incrementUserScore(postId, username);
     }
-
-    const response: GuessResponse & { streak?: number } = {
+    res.json({
       type: "guess_result",
       correct: isCorrect,
       answer: isCorrect ? puzzle.subreddit : undefined,
       attempts: attempts,
-      streak: isCorrect ? streak : undefined
-    };
-
-    res.json(response);
+      streak: isCorrect ? streak : undefined,
+      rank: isCorrect ? getDetectiveRank(score) : undefined
+    } as GuessResponse);
   } catch (error) {
-    console.error("Error submitting guess:", error);
-    res.status(500).json({ error: "Failed to submit guess" });
+    res.status(500).json({ error: "Failed" });
   }
 });
 
@@ -407,105 +330,53 @@ router.get("/api/game/leaderboard", async (_req, res): Promise<void> => {
       return;
     }
     const leaderboard = await getTopDetectives(postId);
-    const response: LeaderboardResponse = {
-      type: "leaderboard_data",
-      leaderboard
-    };
-    res.json(response);
+    res.json({ type: "leaderboard_data", leaderboard });
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
-    res.status(500).json({ error: "Failed to fetch leaderboard" });
+    res.status(500).json({ error: "Failed" });
   }
 });
 
-// POST /api/game/share - Share result to Reddit
 router.post("/api/game/share", async (req, res): Promise<void> => {
   try {
     const { postId } = context;
     if (!postId) {
-      return res.status(400).json({ error: "Missing postId in context" });
+      res.status(400).json({ error: "Missing" });
+      return;
     }
-
     const username = await getUsername();
-    if (username === "anonymous") {
-      return res.status(401).json({ error: "Login required" });
+    if (username === "anonymous" || !(await isWinner(postId, username, getTodayDateKey()))) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
-
-    const today = getTodayDateKey();
-    const winner = await isWinner(postId, username, today);
-
-    if (!winner) {
-      return res.status(400).json({ error: "You must solve the puzzle before sharing" });
-    }
-
     const { attempts } = req.body as ShareRequest;
-    if (!attempts || typeof attempts !== "number") {
-      return res.status(400).json({ error: "Invalid attempts count" });
-    }
-
-    // Create a comment on the post
-    const commentText = `I solved today's Snoo-Clues in ${attempts} attempt${attempts !== 1 ? 's' : ''}! 🔍🎉`;
-
-    try {
-      const comment = await reddit.submitComment({
-        id: postId,
-        text: commentText,
-      });
-
-      const response: ShareResponse = {
-        type: "share_result",
-        success: true,
-        commentUrl: `https://reddit.com${comment.permalink}`
-      };
-
-      res.json(response);
-    } catch (commentError) {
-      console.error("Failed to post comment:", commentError);
-      res.status(500).json({ error: "Failed to post comment to Reddit" });
-    }
+    const comment = await reddit.submitComment({
+      id: postId,
+      text: `I solved today's Snoo-Clues in ${attempts} attempt${attempts !== 1 ? 's' : ''}! 🔍🎉`
+    });
+    res.json({ type: "share_result", success: true, commentUrl: `https://reddit.com${comment.permalink}` });
   } catch (err) {
-    console.error("POST /api/game/share error:", err);
-    res.status(500).json({ error: "Failed to share result" });
+    res.status(500).json({ error: "Failed" });
   }
 });
-
-// ##########################################################################
 
 router.post("/internal/on-app-install", async (_req, res): Promise<void> => {
   try {
     const post = await createPost();
-
-    res.json({
-      status: "success",
-      message: `Post created in subreddit ${context.subredditName} with id ${post.id}`,
-    });
+    res.json({ status: "success", message: `Post created: ${post.id}` });
   } catch (error) {
-    console.error(`Error creating post: ${error}`);
-    res.status(400).json({
-      status: "error",
-      message: "Failed to create post",
-    });
+    res.status(400).json({ status: "error" });
   }
 });
 
 router.post("/internal/menu/post-create", async (_req, res): Promise<void> => {
   try {
     const post = await createPost();
-
-    res.json({
-      navigateTo: `https://reddit.com/r/${context.subredditName}/comments/${post.id}`,
-    });
+    res.json({ navigateTo: `https://reddit.com/r/${context.subredditName}/comments/${post.id}` });
   } catch (error) {
-    console.error(`Error creating post: ${error}`);
-    res.status(400).json({
-      status: "error",
-      message: "Failed to create post",
-    });
+    res.status(400).json({ status: "error" });
   }
 });
 
 app.use(router);
-
 const server = createServer(app);
-server.on("error", (err) => console.error(`server error; ${err.stack}`));
 server.listen(getServerPort());
