@@ -6,18 +6,18 @@ export default defineConfig({
     noExternal: true,
   },
   build: {
-    emptyOutDir: false,
-    ssr: "index.ts",
     outDir: "../../dist/server",
+    emptyOutDir: true,
+    ssr: true,
+    lib: {
+      entry: "index.ts",
+      formats: ["cjs"],
+      fileName: () => "index.cjs",
+    },
     target: "node22",
     sourcemap: true,
     rollupOptions: {
       external: [...builtinModules],
-      output: {
-        format: "cjs",
-        entryFileNames: "index.cjs",
-        inlineDynamicImports: true,
-      },
     },
   },
 });

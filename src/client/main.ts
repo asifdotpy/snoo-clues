@@ -394,6 +394,7 @@ class SnooCluesGame {
   private attempts: number = 0;
   private isWinner: boolean = false;
   private hasPlayed: boolean = false;
+  private streak: number = 0;
 
   // DOM Elements
   private clue1Text!: HTMLElement;
@@ -411,7 +412,10 @@ class SnooCluesGame {
   private playedModal!: HTMLElement;
   private answerText!: HTMLElement;
   private winAttempts!: HTMLElement;
-  private playedAttempts!: HTMLElement;
+  private playedAttemptsCount!: HTMLElement;
+  private playedStreakVal!: HTMLElement;
+  private streakValue!: HTMLElement;
+  private winStreakVal!: HTMLElement;
   private shareBtn!: HTMLButtonElement;
   private closeWinModalBtn!: HTMLButtonElement;
   private closePlayedModalBtn!: HTMLButtonElement;
@@ -438,7 +442,10 @@ class SnooCluesGame {
     this.playedModal = document.getElementById("playedModal")!;
     this.answerText = document.getElementById("answerText")!;
     this.winAttempts = document.getElementById("winAttempts")!;
-    this.playedAttempts = document.getElementById("playedAttempts")!;
+    this.playedAttemptsCount = document.getElementById('played-attempts-count')!;
+    this.playedStreakVal = document.getElementById('played-streak-val')!;
+    this.streakValue = document.getElementById('streak-value')!;
+    this.winStreakVal = document.getElementById('win-streak-val')!;
     this.shareBtn = document.getElementById("shareBtn") as HTMLButtonElement;
     this.closeWinModalBtn = document.getElementById("closeWinModal") as HTMLButtonElement;
     this.closePlayedModalBtn = document.getElementById("closePlayedModal") as HTMLButtonElement;
@@ -479,6 +486,7 @@ class SnooCluesGame {
       this.attempts = data.attempts;
       this.hasPlayed = data.hasPlayedToday;
       this.isWinner = data.isWinner;
+      this.streak = data.streak; // Initialize streak
 
       // Display first clue
       this.clue1Text.textContent = this.clues[0];
@@ -487,10 +495,13 @@ class SnooCluesGame {
 
       // Update attempts counter
       this.attemptsCount.textContent = this.attempts.toString();
+      this.streakValue.textContent = this.streak.toString(); // Update streak display
 
       // If already played, show modal
-      if (this.isWinner) {
-        this.playedAttempts.textContent = this.attempts.toString();
+      if (this.hasPlayed) {
+        this.playedAttemptsCount.textContent = this.attempts.toString();
+        this.playedStreakVal.textContent = this.streak.toString();
+        this.answerText.textContent = data.answer || "???"; // Display answer if available
         this.showModal("played");
         this.disableInput();
       }
@@ -543,12 +554,15 @@ class SnooCluesGame {
       // Update attempts
       this.attempts = data.attempts;
       this.attemptsCount.textContent = this.attempts.toString();
+      this.streak = data.streak ?? this.streak; // Update streak if provided
+      this.streakValue.textContent = this.streak.toString(); // Update streak display
 
       if (data.correct) {
         // Win!
         this.isWinner = true;
         this.answerText.textContent = data.answer || guess;
         this.winAttempts.textContent = this.attempts.toString();
+        this.winStreakVal.textContent = this.streak.toString(); // Update win streak display
         this.showFeedback("🎉 Correct! You solved it!", "success");
         this.showModal("win");
         this.disableInput();

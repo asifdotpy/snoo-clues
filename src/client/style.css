@@ -202,6 +202,28 @@ progress[value]::-webkit-progress-value {
   background: rgba(255, 0, 0, 0.2);
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 70px;
+}
+
+.streak-badge {
+  background: #333;
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.streak-badge span {
+  color: #ff4500;
+}
+
 .game-header {
   text-align: left;
   /* Shifted to look like a title */
@@ -445,6 +467,14 @@ progress[value]::-webkit-progress-value {
   background: #eee;
   padding: 10px;
   border: 1px dashed #333;
+}
+
+.win-streak,
+.played-streak {
+  color: #ff4500 !important;
+  font-weight: bold;
+  font-size: 1.1rem !important;
+  margin-top: 5px !important;
 }
 
 .win-attempts {

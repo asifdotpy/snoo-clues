@@ -114,6 +114,49 @@ const DAILY_PUZZLES: DailyPuzzle[] = [
   }
 ];
 
+function streakKey(postId: string, username: string): string {
+  return `streak:${postId}:${username}`;
+}
+
+function lastWinDateKey(postId: string, username: string): string {
+  return `last_win_date:${postId}:${username}`;
+}
+
+async function getUserStreak(postId: string, username: string): Promise<number> {
+  const key = streakKey(postId, username);
+  const value = await redis.get(key);
+  return value ? parseInt(value, 10) : 0;
+}
+
+async function updateStreak(postId: string, username: string, today: string): Promise<number> {
+  const sKey = streakKey(postId, username);
+  const dKey = lastWinDateKey(postId, username);
+
+  const lastWinDate = await redis.get(dKey);
+  let currentStreak = await getUserStreak(postId, username);
+
+  if (lastWinDate) {
+    const yesterday = new Date(new Date(today).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    if (lastWinDate === yesterday) {
+      // Consecutive day!
+      currentStreak += 1;
+    } else if (lastWinDate === today) {
+      // Already won today, don't increment
+    } else {
+      // Streak broken
+      currentStreak = 1;
+    }
+  } else {
+    // First win ever
+    currentStreak = 1;
+  }
+
+  await redis.set(sKey, currentStreak.toString());
+  await redis.set(dKey, today);
+  return currentStreak;
+}
+
 // ##########################################################################
 // # GAME HELPER FUNCTIONS
 // ##########################################################################
@@ -250,13 +293,16 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
     const hasPlayed = await hasPlayedToday(postId, username, today);
     const attempts = await getUserAttempts(postId, username, today);
     const winner = await isWinner(postId, username, today);
+    const streak = await getUserStreak(postId, username);
 
-    const response: GameInitResponse = {
+    const response: GameInitResponse & { streak: number } = {
       type: "game_init",
       clues: puzzle.clues,
       hasPlayedToday: hasPlayed,
       attempts: attempts,
-      isWinner: winner
+      isWinner: winner,
+      streak: streak,
+      answer: winner ? puzzle.subreddit : undefined
     };
 
     res.json(response);
@@ -303,18 +349,22 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     // Normalize and compare (lowercase, trim)
     const normalizedGuess = guess.toLowerCase().trim();
     const normalizedAnswer = puzzle.subreddit.toLowerCase().trim();
-    const isCorrect = normalizedGuess === normalizedAnswer;
+    let isCorrect = normalizedGuess === normalizedAnswer;
+    let streak = 0;
 
     if (isCorrect) {
       // Mark as winner
       await markAsWinner(postId, username, today);
+      // Update streak
+      streak = await updateStreak(postId, username, today);
     }
 
-    const response: GuessResponse = {
+    const response: GuessResponse & { streak?: number } = {
       type: "guess_result",
       correct: isCorrect,
       answer: isCorrect ? puzzle.subreddit : undefined,
-      attempts: attempts
+      attempts: attempts,
+      streak: isCorrect ? streak : undefined
     };
 
     res.json(response);

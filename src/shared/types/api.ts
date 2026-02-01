@@ -17,6 +17,8 @@ export type GameInitResponse = {
   hasPlayedToday: boolean;
   attempts: number;
   isWinner: boolean;
+  streak: number;
+  answer?: string;
 };
 
 export type GuessRequest = {
@@ -26,8 +28,9 @@ export type GuessRequest = {
 export type GuessResponse = {
   type: "guess_result";
   correct: boolean;
-  answer?: string; // Only sent if correct
+  answer?: string | undefined; // Only sent if correct
   attempts: number;
+  streak?: number | undefined;
 };
 
 export type ShareRequest = {
