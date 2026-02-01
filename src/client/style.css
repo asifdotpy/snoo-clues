@@ -139,6 +139,7 @@ progress[value]::-webkit-progress-value {
   justify-content: center;
   align-items: center;
   pointer-events: none;
+  background: transparent !important;
 }
 
 .loading>* {
@@ -477,6 +478,8 @@ progress[value]::-webkit-progress-value {
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
+  background: rgba(0, 0, 0, 0.4);
+  /* Lighter backdrop to see GameMaker world */
 }
 
 .modal.hidden {
