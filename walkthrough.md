@@ -31,6 +31,10 @@ The implementation uses a **hybrid approach**:
 - **Detective Notebook Theme**: Premium aged paper aesthetic with typewriter-style typography.
 - **"Case Closed" Stamp**: A dramatic red stamp animation triggers upon correctly identifying a community.
 - **Cold Case Aesthetic**: Unlimited practice mode features a **light blue notebook** with a **"PRACTICE" watermark** to distinguish it from official daily files.
+- **Seamless Navigation**: Added a **"Back Button" (Change Case Type)** to the header, allowing users to switch between modes without refreshing.
+- **Explicit Mode Indicators**: Color-coded tags (**DAILY CASE** vs **COLD CASE**) in the header for constant orientation.
+- **Animated Feedback**: Guess results now use smooth fade-in/out animations and auto-clear for a non-cluttered workspace.
+- **Recursive Play**: Added "Browse Cold Cases" directly to the 'already played' screen for the daily investigation.
 - **Responsive Design**: Tailored for both Desktop and Reddit Mobile.
 
 ---

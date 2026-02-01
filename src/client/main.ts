@@ -201,6 +201,9 @@ class SnooCluesGame {
   private gameContainer!: HTMLElement;
   private gameSubtitle!: HTMLElement;
   private coldCasesSolvedVal!: HTMLElement;
+  private backToSelectionBtn!: HTMLButtonElement;
+  private currentModeTag!: HTMLElement;
+  private playedToColdBtn!: HTMLButtonElement;
 
   constructor() {
     this.initDOMElements();
@@ -242,6 +245,9 @@ class SnooCluesGame {
     this.gameSubtitle = document.querySelector(".game-subtitle")!;
     this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
     this.closePlayedModalBtn = this.playedModal.querySelector(".close-modal-btn") as HTMLButtonElement;
+    this.backToSelectionBtn = document.getElementById("backToSelection") as HTMLButtonElement;
+    this.currentModeTag = document.getElementById("currentModeTag")!;
+    this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
   }
 
   private attachEventListeners(): void {
@@ -264,6 +270,17 @@ class SnooCluesGame {
       this.closeModal("win");
       this.initGame('unlimited');
     });
+    this.backToSelectionBtn.addEventListener("click", () => this.goBackToSelection());
+    this.playedToColdBtn.addEventListener("click", () => {
+      this.closeModal("played");
+      this.initGame('unlimited');
+    });
+  }
+
+  private goBackToSelection(): void {
+    if (this.isWinner || confirm("Are you sure you want to exit this case? Progress will be lost.")) {
+      this.showSelectionHub();
+    }
   }
 
   private showSelectionHub(): void {
@@ -291,9 +308,13 @@ class SnooCluesGame {
     if (mode === 'unlimited') {
       this.gameContainer.classList.add('cold-case');
       this.gameSubtitle.textContent = "Cold Case Investigation (Practice)";
+      this.currentModeTag.textContent = "COLD CASE";
+      this.currentModeTag.className = "mode-tag unlimited";
     } else {
       this.gameContainer.classList.remove('cold-case');
       this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
+      this.currentModeTag.textContent = "DAILY CASE";
+      this.currentModeTag.className = "mode-tag daily";
     }
 
     try {
@@ -427,7 +448,12 @@ class SnooCluesGame {
 
   private showFeedback(m: string, t: "success" | "error"): void {
     this.feedbackMessage.textContent = m;
-    this.feedbackMessage.className = `feedback-message ${t}`;
+    this.feedbackMessage.className = `feedback-message ${t} active`;
+
+    // Auto-clear after short delay for better UX
+    setTimeout(() => {
+      this.feedbackMessage.classList.remove('active');
+    }, 3000);
   }
 
   private async fetchLeaderboard(): Promise<void> {

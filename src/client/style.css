@@ -756,3 +756,59 @@ progress[value]::-webkit-progress-value {
   background: #357abd;
   transform: translateY(-2px);
 }
+
+/* HEADER UX ENHANCEMENTS */
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px dotted #ccc;
+  padding-bottom: 10px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.back-btn:hover {
+  color: #ff4500;
+}
+
+.mode-tag {
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mode-tag.daily {
+  background: #ff4500;
+  color: white;
+}
+
+.mode-tag.unlimited {
+  background: #4a90e2;
+  color: white;
+}
+
+.feedback-message {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.feedback-message.active {
+  opacity: 1;
+  transform: translateY(0);
+}
