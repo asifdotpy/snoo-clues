@@ -255,7 +255,12 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
       streak: streak,
       coldCasesSolved: coldCases,
       answer: winner ? puzzle.subreddit : undefined,
-      rank: getDetectiveRank(score)
+      rank: getDetectiveRank(score),
+      audioAssets: {
+        rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",
+        victory: "https://www.soundjay.com/human/sounds/applause-01.mp3",
+        wrong: "https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"
+      }
     } as GameInitResponse);
   } catch (err) {
     res.status(500).json({ error: "Failed" });
@@ -287,7 +292,12 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
       isWinner: false,
       streak: streak,
       coldCasesSolved: coldCases,
-      rank: getDetectiveRank(score)
+      rank: getDetectiveRank(score),
+      audioAssets: {
+        rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",
+        victory: "https://www.soundjay.com/human/sounds/applause-01.mp3",
+        wrong: "https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"
+      }
     } as GameInitResponse);
   } catch (err) {
     res.status(500).json({ error: "Failed" });
@@ -358,7 +368,8 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
       attempts: isUnlimited ? 0 : attempts, // Attempts only track for daily
       streak: streak,
       coldCasesSolved: coldCasesSolved,
-      rank: isCorrect ? getDetectiveRank(score) : undefined
+      rank: isCorrect ? getDetectiveRank(score) : undefined,
+      audioTrigger: isCorrect ? 'correct' : 'wrong'
     } as GuessResponse);
   } catch (error) {
     res.status(500).json({ error: "Failed" });

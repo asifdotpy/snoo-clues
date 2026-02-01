@@ -30,8 +30,11 @@ declare global {
     g_pAddAsyncMethod?: any;
     g_pJSExceptionHandler?: any;
     g_pWadLoadCallback?: any;
+    dispatchMascotAction?: (actionType: string) => void;
   }
 }
+
+declare function gmCallback_mascot_react(actionType: string): void;
 
 // Manifest structure
 type RunnerManifest = {
@@ -166,6 +169,7 @@ class SnooCluesGame {
   private coldCasesSolved: number = 0;
   private currentGameMode: 'daily' | 'unlimited' | null = null;
   private targetSubreddit: string = "";
+  private audioAssets?: GameInitResponse['audioAssets'];
 
   // DOM Elements
   private clue1Text!: HTMLElement;
@@ -248,6 +252,32 @@ class SnooCluesGame {
     this.backToSelectionBtn = document.getElementById("backToSelection") as HTMLButtonElement;
     this.currentModeTag = document.getElementById("currentModeTag")!;
     this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
+
+    this.setupHybridBridge();
+  }
+
+  private setupHybridBridge(): void {
+    window.dispatchMascotAction = (actionType: string) => {
+      console.log(`Mascot Action: ${actionType}`);
+      if (typeof gmCallback_mascot_react === 'function') {
+        gmCallback_mascot_react(actionType);
+      } else {
+        console.warn('GameMaker mascot callback not found');
+      }
+    };
+  }
+
+  private playSound(soundType: 'rustle' | 'victory' | 'wrong'): void {
+    const assetUrl = this.audioAssets ? this.audioAssets[soundType] : null;
+    if (!assetUrl) {
+      // Fallback
+      if (soundType === 'rustle') {
+        new Audio("https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3").play().catch(() => { });
+      }
+      return;
+    }
+    const audio = new Audio(assetUrl);
+    audio.play().catch(e => console.log("Audio playback blocked:", e));
   }
 
   private attachEventListeners(): void {
@@ -279,6 +309,7 @@ class SnooCluesGame {
 
   private goBackToSelection(): void {
     if (this.isWinner || confirm("Are you sure you want to exit this case? Progress will be lost.")) {
+      window.dispatchMascotAction?.('switch_mode');
       this.showSelectionHub();
     }
   }
@@ -329,6 +360,7 @@ class SnooCluesGame {
       this.isWinner = data.isWinner;
       this.streak = data.streak;
       this.coldCasesSolved = data.coldCasesSolved;
+      this.audioAssets = data.audioAssets;
 
       // If unlimited, the "answer" is stored in targetSubreddit to check locally or on server
       // But we'll let the server handle validation for security
@@ -366,13 +398,16 @@ class SnooCluesGame {
   }
 
   private revealClue(n: 2 | 3): void {
-    const card = n === 2 ? this.clue2Card : this.clue3Card;
+    const cardObj = n === 2 ? this.clue2Card : this.clue3Card;
     const text = n === 2 ? this.clue2Text : this.clue3Text;
     const btn = n === 2 ? this.revealClue2Btn : this.revealClue3Btn;
-    card.classList.remove("locked");
-    card.classList.add("visible");
+
+    cardObj.classList.remove("locked");
+    cardObj.classList.add("visible");
     text.classList.remove("hidden");
     btn.style.display = "none";
+
+    this.playSound('rustle');
   }
 
   private async submitGuess(): Promise<void> {
@@ -410,6 +445,9 @@ class SnooCluesGame {
         }
 
         this.showModal("win");
+        window.dispatchMascotAction?.('correct');
+        this.playSound('victory');
+
         setTimeout(() => {
           this.caseClosedStamp.classList.remove('hidden');
           this.caseClosedStamp.classList.add('stamped');
@@ -418,6 +456,8 @@ class SnooCluesGame {
         this.fetchLeaderboard();
       } else {
         this.showFeedback("❌ Incorrect", "error");
+        window.dispatchMascotAction?.('wrong');
+        if (data.audioTrigger === 'wrong') this.playSound('wrong');
         this.guessInput.value = "";
         this.guessInput.focus();
         this.submitBtn.disabled = false;

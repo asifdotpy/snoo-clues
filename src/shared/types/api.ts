@@ -21,6 +21,11 @@ export type GameInitResponse = {
   coldCasesSolved: number;
   answer?: string | undefined;
   rank?: string | undefined;
+  audioAssets?: {
+    rustle: string;
+    victory: string;
+    wrong: string;
+  };
 };
 
 export type GuessRequest = {
@@ -35,6 +40,7 @@ export type GuessResponse = {
   streak?: number | undefined;
   coldCasesSolved?: number | undefined;
   rank?: string | undefined;
+  audioTrigger?: 'correct' | 'wrong';
 };
 
 export type ShareRequest = {

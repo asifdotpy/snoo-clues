@@ -36,6 +36,11 @@ The implementation uses a **hybrid approach**:
 - **Animated Feedback**: Guess results now use smooth fade-in/out animations and auto-clear for a non-cluttered workspace.
 - **Recursive Play**: Added "Browse Cold Cases" directly to the 'already played' screen for the daily investigation.
 - **Responsive Design**: Tailored for both Desktop and Reddit Mobile.
+### 🏗️ Hybrid Bridge (The $5k Closer)
+Established a bidirectional communication bridge between the Devvit UI and the GameMaker engine:
+- **Mascot Reaction System**: JS calls `gmCallback_mascot_react(actionType)` to trigger animations for 'correct', 'wrong', and 'switch_mode'.
+- **Visual Integration**: Forced `background: transparent` and adjusted notebook geometry (`max-height: 90vh`) to reveal the GameMaker canvas underneath.
+- **Auditory Immersion**: Implemented server-synced audio triggers for "Paper Rustle" and "Victory Fanfare".
 
 ---
 
@@ -133,10 +138,12 @@ The project is fully version-controlled on GitHub:
 
 🎉 **Snoo-Clues is now polished and ready!**
 
-✅ 10 daily puzzles
+✅ 50+ diverse subreddits (Cold Case files)
+✅ Bidirectional mascot bridge for GameMaker engine
 ✅ Redis-backed streaks & leaderboards
 ✅ Detective Rank system
 ✅ Premium 'Case Closed' animations
-✅ GameMaker eligibility maintained
+✅ Multi-modal UX (Daily vs. Unlimited)
+✅ GameMaker $5k prize eligibility locked in!
 
 Ready for Reddit Hackathon submission! 🚀
