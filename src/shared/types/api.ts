@@ -1,64 +1,65 @@
-export type InitResponse = {
-  type: "init";
-  postId: string;
-  username: string;
-};
-
-// Snoo-Clues Game Types
-export type DailyPuzzle = {
+export interface DailyPuzzle {
   date: string;
   subreddit: string;
   clues: [string, string, string];
-};
+  category: string;
+}
 
-export type GameInitResponse = {
+export interface Choice {
+  name: string;
+  color: string;
+}
+
+export interface GameInitResponse {
   type: "game_init";
   clues: [string, string, string];
   hasPlayedToday: boolean;
   attempts: number;
   isWinner: boolean;
   streak: number;
-  coldCasesSolved: number;
-  answer?: string | undefined;
-  rank?: string | undefined;
+  totalWins: number;
+  choices: Choice[];
+  rank: string;
+  answer?: string;
   audioAssets?: {
     rustle: string;
     victory: string;
     wrong: string;
   };
-};
+}
 
-export type GuessRequest = {
+export interface GuessRequest {
   guess: string;
-};
+}
 
-export type GuessResponse = {
+export interface GuessResponse {
   type: "guess_result";
   correct: boolean;
-  answer?: string | undefined; // Only sent if correct
+  answer?: string;
   attempts: number;
-  streak?: number | undefined;
-  coldCasesSolved?: number | undefined;
-  rank?: string | undefined;
+  streak: number;
+  totalWins: number;
+  rank: string;
   audioTrigger?: 'correct' | 'wrong';
-};
+}
 
-export type ShareRequest = {
+export interface ShareRequest {
   attempts: number;
-};
+  text?: string;
+}
 
-export type ShareResponse = {
+export interface ShareResponse {
   type: "share_result";
   success: boolean;
-  commentUrl?: string | undefined;
-};
+  commentUrl?: string;
+}
 
-export type LeaderboardEntry = {
+export interface LeaderboardEntry {
   username: string;
   score: number;
-};
+}
 
-export type LeaderboardResponse = {
+export interface LeaderboardResponse {
   type: "leaderboard_data";
   leaderboard: LeaderboardEntry[];
-};
+}

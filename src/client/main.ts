@@ -1,9 +1,7 @@
 import {
   GameInitResponse,
   GuessResponse,
-  ShareResponse,
-  LeaderboardEntry,
-  LeaderboardResponse
+  ShareResponse
 } from "../shared/types/api";
 
 declare global {
@@ -36,39 +34,16 @@ declare global {
 
 declare function gmCallback_mascot_react(actionType: string): void;
 
-// Manifest structure
-type RunnerManifest = {
-  manifestFiles: string[];
-  manifestFilesMD5: string[];
-  mainJS?: string;
-  unx?: string;
-  index?: string;
-  runner?: { version?: string; yyc?: boolean };
-};
+// ##########################################################################
+// # GAMEMAKER LOADER
+// ##########################################################################
 
 class GameLoader {
-  private statusElement: HTMLElement;
-  private progressElement: HTMLProgressElement;
-  private spinnerElement: HTMLElement;
   private canvasElement: HTMLCanvasElement;
-  private loadingElement: HTMLElement;
-  private startingHeight?: number;
-  private startingWidth?: number;
-  private startingAspect?: number;
 
   constructor() {
-    this.statusElement = document.getElementById("status") as HTMLElement;
-    this.progressElement = document.getElementById("progress") as HTMLProgressElement;
-    this.spinnerElement = document.getElementById("spinner") as HTMLElement;
     this.canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
-    this.loadingElement = document.getElementById("loading") as HTMLElement;
-
-    this.canvasElement.addEventListener("click", () => {
-      this.canvasElement.focus();
-    });
-
     this.setupModule();
-    this.setupResizeObserver();
     this.loadGame();
   }
 
@@ -76,527 +51,234 @@ class GameLoader {
     window.Module = {
       preRun: [],
       postRun: [],
-      print: (text: string) => {
-        console.log(text);
-        if (text === "Entering main loop.") {
-          this.ensureAspectRatio();
-        }
-      },
-      printErr: (text: string) => {
-        console.error(text);
-      },
+      print: (text: string) => console.log(text),
+      printErr: (text: string) => console.error(text),
       canvas: this.canvasElement,
-      setStatus: (text: string) => {
-        if (!window.Module.setStatus.last) {
-          window.Module.setStatus.last = { time: Date.now(), text: "" };
-        }
-        if (text === window.Module.setStatus.last.text) return;
-
-        const m = text.match(/([^(]+)\((\d+(?:\.\d+)?)\/(\d+)\)/);
-        const now = Date.now();
-        if (m && now - window.Module.setStatus.last.time < 30) return;
-
-        window.Module.setStatus.last.time = now;
-        window.Module.setStatus.last.text = text;
-
-        if (m) {
-          const val = parseInt(m[2]) * 100;
-          const max = parseInt(m[3]) * 100;
-          this.progressElement.value = val;
-          this.progressElement.max = max;
-          this.progressElement.hidden = false;
-          this.spinnerElement.hidden = false;
-        } else {
-          this.progressElement.value = 0;
-          this.progressElement.max = 0;
-          this.progressElement.hidden = true;
-          if (!text) this.spinnerElement.hidden = true;
-        }
-        this.statusElement.innerHTML = text;
-      }
+      setStatus: (text: string) => console.log(`[GameMaker] ${text}`)
     };
-    window.Module.setStatus("Downloading...");
-  }
-
-  private ensureAspectRatio() {
-    if (this.startingAspect) {
-      this.statusElement.hidden = true;
-      this.progressElement.hidden = true;
-      this.spinnerElement.hidden = true;
-      this.loadingElement.style.display = "none";
-    }
-  }
-
-  private setupResizeObserver() {
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        if (!this.startingWidth) {
-          this.startingWidth = width;
-          this.startingHeight = height;
-          this.startingAspect = width / height;
-        }
-      }
-    });
-    observer.observe(this.canvasElement);
   }
 
   private async loadGame() {
-    try {
-      if (window.manifestFiles && window.manifestFilesMD5) {
-        const manifest: RunnerManifest = {
-          manifestFiles: window.manifestFiles().split(","),
-          manifestFilesMD5: window.manifestFilesMD5(),
-        };
-        console.log("Loading game with manifest:", manifest);
-      }
-    } catch (e) {
-      console.error("Failed to load manifest:", e);
-    }
+    // GameMaker assets are loaded via the script tag in index.html
+    console.log("GameMaker engine initialized.");
   }
 }
 
 // ##########################################################################
-// # SNOO-CLUES GAME CONTROLLER
+// # SNOO-CLUES GAME CONTROLLER (STABLE BUILD)
 // ##########################################################################
 
 class SnooCluesGame {
+  private currentMode: 'daily' | 'unlimited' = 'daily';
   private clues: [string, string, string] = ["", "", ""];
   private attempts: number = 0;
   private isWinner: boolean = false;
-  private hasPlayed: boolean = false;
   private streak: number = 0;
-  private coldCasesSolved: number = 0;
-  private currentGameMode: 'daily' | 'unlimited' | null = null;
-  private targetSubreddit: string = "";
-  private audioAssets?: GameInitResponse['audioAssets'];
+  private totalWins: number = 0;
+  private rank: string = "Snoo Rookie";
 
   // DOM Elements
-  private clue1Text!: HTMLElement;
-  private clue2Text!: HTMLElement;
-  private clue3Text!: HTMLElement;
-  private clue2Card!: HTMLElement;
-  private clue3Card!: HTMLElement;
-  private revealClue2Btn!: HTMLButtonElement;
-  private revealClue3Btn!: HTMLButtonElement;
-  private guessInput!: HTMLInputElement;
-  private submitBtn!: HTMLButtonElement;
-  private attemptsCount!: HTMLElement;
-  private feedbackMessage!: HTMLElement;
-  private winModal!: HTMLElement;
-  private playedModal!: HTMLElement;
-  private answerText!: HTMLElement;
-  private winAttempts!: HTMLElement;
-  private playedAttemptsCount!: HTMLElement;
-  private playedStreakVal!: HTMLElement;
-  private streakValue!: HTMLElement;
-  private winStreakVal!: HTMLElement;
-  private rankValue!: HTMLElement;
-  private winRankName!: HTMLElement;
-  private caseClosedStamp!: HTMLElement;
-  private leaderboardList!: HTMLElement;
+  private streakValRef!: HTMLElement;
+  private rankValRef!: HTMLElement;
+  private clueTexts: [HTMLElement, HTMLElement, HTMLElement] = [null!, null!, null!];
+  private clueCards: [HTMLElement, HTMLElement, HTMLElement] = [null!, null!, null!];
+  private optionsGrid!: HTMLElement;
+  private statusMsg!: HTMLElement;
+  private modal!: HTMLElement;
+  private mAttempts!: HTMLElement;
+  private mStreak!: HTMLElement;
   private shareBtn!: HTMLButtonElement;
-  private closeWinModalBtn!: HTMLButtonElement;
-  private closePlayedModalBtn!: HTMLButtonElement;
-  private selectionModal!: HTMLElement;
-  private startDailyBtn!: HTMLButtonElement;
-  private startColdBtn!: HTMLButtonElement;
-  private keepTrainingBtn!: HTMLButtonElement;
-  private gameContainer!: HTMLElement;
-  private gameSubtitle!: HTMLElement;
-  private coldCasesSolvedVal!: HTMLElement;
-  private backToSelectionBtn!: HTMLButtonElement;
-  private currentModeTag!: HTMLElement;
-  private playedToColdBtn!: HTMLButtonElement;
-
-  // Briefing Elements
-  private briefingMemo!: HTMLElement;
-  private briefingText!: HTMLElement;
-  private dismissBriefingBtn!: HTMLButtonElement;
-  private handbookBtn!: HTMLButtonElement;
-
-  private briefingTips: string[] = [
-    "Recruit! Remember: Subreddit names are like nicknames for communities. No spaces allowed!",
-    "Sleuth Tip: Clue #1 is a snippet from the sub's 'About' page. It's the purest description of the community.",
-    "Did you know? Reddit has over 100,000 active communities. Snoo-Clues helps you find the hidden gems!",
-    "Mobile Tip: You can swipe through the clue cards to see the full investigation file.",
-    "Expert Advice: Clues often mention 'Snoos' or 'Redditors' - use these synonyms to identify the vibe.",
-    "Archive Note: If you solve a case in one try, you earn the 'Master Investigator' title faster!",
-    "Case Study: Some subreddits have 'NSFW' rules. We only investigate SFW communities here, Chief.",
-    "Pro Tip: If you're stuck, look for clues about hobbies, locations, or specific interests like 'gaming' or 'cooking'.",
-    "History Lesson: Snoo is the official mascot of Reddit. He's been helping investigators since 2005!",
-    "Global Search: Keep an eye out for clues mentioning international cities or languages to narrow down geography subs.",
-    "Wholesome Alert: If the clue mentions kittens or heartwarming stories, prioritize 'wholesome' or 'aww' themed subs."
-  ];
+  private modeDailyBtn!: HTMLElement;
+  private modeUnlimitedBtn!: HTMLElement;
 
   constructor() {
     this.initDOMElements();
     this.attachEventListeners();
-    this.showSelectionHub();
-    this.fetchLeaderboard();
-    this.checkDailyBriefing();
-  }
-
-  private initDOMElements(): void {
-    this.clue1Text = document.getElementById("clue1Text")!;
-    this.clue2Text = document.getElementById("clue2Text")!;
-    this.clue3Text = document.getElementById("clue3Text")!;
-    this.clue2Card = document.getElementById("clue2Card")!;
-    this.clue3Card = document.getElementById("clue3Card")!;
-    this.revealClue2Btn = document.getElementById("revealClue2") as HTMLButtonElement;
-    this.revealClue3Btn = document.getElementById("revealClue3") as HTMLButtonElement;
-    this.guessInput = document.getElementById("guessInput") as HTMLInputElement;
-    this.submitBtn = document.getElementById("submitBtn") as HTMLButtonElement;
-    this.attemptsCount = document.getElementById("attemptsCount")!;
-    this.feedbackMessage = document.getElementById("feedbackMessage")!;
-    this.winModal = document.getElementById("winModal")!;
-    this.playedModal = document.getElementById("playedModal")!;
-    this.answerText = document.getElementById("answerText")!;
-    this.winAttempts = document.getElementById("win-attempts-count")!;
-    this.playedAttemptsCount = document.getElementById('played-attempts-count')!;
-    this.playedStreakVal = document.getElementById('played-streak-val')!;
-    this.streakValue = document.getElementById('streak-value')!;
-    this.winStreakVal = document.getElementById('win-streak-val')!;
-    this.rankValue = document.getElementById('rank-value')!;
-    this.winRankName = document.getElementById('win-rank-name')!;
-    this.caseClosedStamp = document.getElementById('case-closed-stamp')!;
-    this.leaderboardList = document.getElementById('leaderboardList')!;
-    this.shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
-    this.selectionModal = document.getElementById("selectionModal")!;
-    this.startDailyBtn = document.getElementById("startDailyBtn") as HTMLButtonElement;
-    this.startColdBtn = document.getElementById("startColdBtn") as HTMLButtonElement;
-    this.keepTrainingBtn = document.getElementById("keep-training-btn") as HTMLButtonElement;
-    this.gameContainer = document.querySelector(".game-container")!;
-    this.gameSubtitle = document.querySelector(".game-subtitle")!;
-    this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
-    this.closePlayedModalBtn = this.playedModal.querySelector(".close-modal-btn") as HTMLButtonElement;
-    this.backToSelectionBtn = document.getElementById("backToSelection") as HTMLButtonElement;
-    this.currentModeTag = document.getElementById("currentModeTag")!;
-    this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
-
-    this.briefingMemo = document.getElementById("briefingMemo")!;
-    this.briefingText = document.getElementById("briefingText")!;
-    this.dismissBriefingBtn = document.getElementById("dismissBriefing") as HTMLButtonElement;
-    this.handbookBtn = document.getElementById("handbookBtn") as HTMLButtonElement;
-
     this.setupHybridBridge();
+    this.initGame('daily');
   }
 
-  private setupHybridBridge(): void {
+  private initDOMElements() {
+    this.streakValRef = document.getElementById("streak-val")!;
+    this.rankValRef = document.getElementById("rank-val")!;
+    this.clueTexts = [
+      document.getElementById("clue1-text")!,
+      document.getElementById("clue2-text")!,
+      document.getElementById("clue3-text")!
+    ];
+    this.clueCards = [
+      document.getElementById("clue-1")!,
+      document.getElementById("clue-2")!,
+      document.getElementById("clue-3")!
+    ];
+    this.optionsGrid = document.getElementById("options-grid")!;
+    this.statusMsg = document.getElementById("status-msg")!;
+    this.modal = document.getElementById("result-modal")!;
+    this.mAttempts = document.getElementById("m-attempts")!;
+    this.mStreak = document.getElementById("m-streak")!;
+    this.shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
+    this.modeDailyBtn = document.getElementById("mode-daily")!;
+    this.modeUnlimitedBtn = document.getElementById("mode-unlimited")!;
+  }
+
+  private setupHybridBridge() {
     window.dispatchMascotAction = (actionType: string) => {
       console.log(`Mascot Action: ${actionType}`);
       if (typeof gmCallback_mascot_react === 'function') {
         gmCallback_mascot_react(actionType);
-      } else {
-        console.warn('GameMaker mascot callback not found');
       }
     };
   }
 
-  private playSound(soundType: 'rustle' | 'victory' | 'wrong'): void {
-    const assetUrl = this.audioAssets ? this.audioAssets[soundType] : null;
-    if (!assetUrl) {
-      // Fallback
-      if (soundType === 'rustle') {
-        new Audio("https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3").play().catch(() => { });
-      }
-      return;
-    }
-    const audio = new Audio(assetUrl);
-    audio.play().catch(e => console.log("Audio playback blocked:", e));
-  }
+  private attachEventListeners() {
+    document.querySelectorAll(".reveal-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const n = parseInt((e.target as HTMLElement).dataset.clue || "1");
+        this.revealClue(n);
+      });
+    });
 
-  private attachEventListeners(): void {
-    this.revealClue2Btn.addEventListener("click", () => this.revealClue(2));
-    this.revealClue3Btn.addEventListener("click", () => this.revealClue(3));
-    this.submitBtn.addEventListener("click", () => this.submitGuess());
-    this.guessInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.submitGuess();
-    });
-    this.guessInput.addEventListener("input", () => {
-      this.guessInput.value = this.guessInput.value.toLowerCase();
-    });
+    this.modeDailyBtn.addEventListener("click", () => this.initGame('daily'));
+    this.modeUnlimitedBtn.addEventListener("click", () => this.initGame('unlimited'));
     this.shareBtn.addEventListener("click", () => this.shareResult());
-    this.closeWinModalBtn.addEventListener("click", () => this.closeModal("win"));
-    this.closePlayedModalBtn.addEventListener("click", () => this.closeModal("played"));
-
-    this.startDailyBtn.addEventListener("click", () => this.initGame('daily'));
-    this.startColdBtn.addEventListener("click", () => this.initGame('unlimited'));
-    this.keepTrainingBtn.addEventListener("click", () => {
-      this.closeModal("win");
-      this.initGame('unlimited');
+    document.getElementById("close-modal")?.addEventListener("click", () => {
+      this.modal.classList.add("hidden");
+      if (this.currentMode === 'unlimited') this.initGame('unlimited');
     });
-
-    // Use event delegation for the back button to ensure it's always responsive
-    document.addEventListener("click", (e) => {
-      const target = e.target as HTMLElement;
-      if (target && (target.id === "backToSelection" || target.closest("#backToSelection"))) {
-        this.goBackToSelection();
-      }
-    });
-
-    this.playedToColdBtn.addEventListener("click", () => {
-      this.closeModal("played");
-      this.initGame('unlimited');
-    });
-
-    this.dismissBriefingBtn.addEventListener("click", () => this.hideBriefing());
-    this.handbookBtn.addEventListener("click", () => this.showBriefing(true));
   }
 
-  private checkDailyBriefing(): void {
-    const today = new Date().toISOString().split('T')[0];
-    const lastSeen = localStorage.getItem('last_briefing_date');
-
-    if (lastSeen !== today) {
-      setTimeout(() => this.showBriefing(), 1500);
-    }
-  }
-
-  private showBriefing(force: boolean = false): void {
-    const tipIndex = Math.floor(Math.random() * this.briefingTips.length);
-    this.briefingText.textContent = this.briefingTips[tipIndex];
-    this.briefingMemo.classList.add("visible");
-    this.briefingMemo.classList.remove("hidden");
-    this.playSound('rustle');
-    window.dispatchMascotAction?.('switch_mode'); // Simple animation trigger
-
-    if (!force) {
-      const today = new Date().toISOString().split('T')[0];
-      localStorage.setItem('last_briefing_date', today);
-    }
-  }
-
-  private hideBriefing(): void {
-    this.briefingMemo.classList.remove("visible");
-    this.briefingMemo.classList.add("hidden");
-    this.playSound('rustle');
-  }
-
-  private goBackToSelection(): void {
-    console.log("[Navigation] Returning to Hub");
-    if (this.isWinner || confirm("Are you sure you want to exit this case? Progress will be lost.")) {
-      this.currentGameMode = null;
-      window.dispatchMascotAction?.('switch_mode');
-      this.showSelectionHub();
-    }
-  }
-
-  private showSelectionHub(): void {
-    this.selectionModal.classList.remove("hidden");
-  }
-
-  private hideSelectionHub(): void {
-    this.selectionModal.classList.add("hidden");
-  }
-
-  private async initGame(mode: 'daily' | 'unlimited'): Promise<void> {
-    this.currentGameMode = mode;
-    this.hideSelectionHub();
-
-    // Reset UI state for new game
+  private async initGame(mode: 'daily' | 'unlimited') {
+    this.currentMode = mode;
     this.isWinner = false;
-    this.submitBtn.disabled = false;
-    this.guessInput.disabled = false;
-    this.guessInput.value = "";
-    this.caseClosedStamp.classList.add('hidden');
-    this.caseClosedStamp.classList.remove('stamped');
-    this.feedbackMessage.textContent = "";
-
-    // Toggle aesthetics
-    if (mode === 'unlimited') {
-      this.gameContainer.classList.add('cold-case');
-      this.gameSubtitle.textContent = "Cold Case Investigation (Practice)";
-      this.currentModeTag.textContent = "COLD CASE";
-      this.currentModeTag.className = "mode-tag unlimited";
-    } else {
-      this.gameContainer.classList.remove('cold-case');
-      this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
-      this.currentModeTag.textContent = "DAILY CASE";
-      this.currentModeTag.className = "mode-tag daily";
-    }
+    this.attempts = 0;
+    this.updateModeUI();
+    this.statusMsg.textContent = `Establishing link to ${mode === 'daily' ? 'Daily Signal' : 'Cold Case Archives'}...`;
 
     try {
       const endpoint = mode === 'daily' ? "/api/game/init" : "/api/game/random";
       const response = await fetch(endpoint);
-      if (!response.ok) throw new Error("Init failed");
-
       const data = (await response.json()) as GameInitResponse;
+
       this.clues = data.clues;
-      this.attempts = data.attempts;
-      this.hasPlayed = data.hasPlayedToday;
-      this.isWinner = data.isWinner;
       this.streak = data.streak;
-      this.coldCasesSolved = data.coldCasesSolved;
-      this.audioAssets = data.audioAssets;
+      this.totalWins = data.totalWins || 0;
+      this.rank = data.rank || "Snoo Rookie";
+      this.attempts = data.attempts;
 
-      // If unlimited, the "answer" is stored in targetSubreddit to check locally or on server
-      // But we'll let the server handle validation for security
-      // The random endpoint doesn't send the answer, only clues.
+      this.renderUI(data);
 
-      this.updateGameUI();
-
-      if (this.hasPlayed && mode === 'daily') {
-        this.playedAttemptsCount.textContent = this.attempts.toString();
-        this.playedStreakVal.textContent = this.streak.toString();
-        const playedAnswer = document.getElementById('played-answer');
-        if (playedAnswer) playedAnswer.textContent = `r/${data.answer || "???"}`;
-        this.showModal("played");
-        this.disableInput();
+      if (data.isWinner && mode === 'daily') {
+        this.isWinner = true;
+        this.statusMsg.textContent = "Daily Signal Already Solved.";
+        this.showWinModal(data.attempts);
+      } else {
+        this.statusMsg.textContent = "Transmission stabilized. Identify the source.";
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      this.statusMsg.textContent = "System offline. Reconnecting...";
     }
   }
 
-  private updateGameUI(): void {
-    this.clue1Text.textContent = this.clues[0];
-    this.clue2Text.textContent = this.clues[1];
-    this.clue3Text.textContent = this.clues[2];
-    this.attemptsCount.textContent = this.attempts.toString();
-    this.streakValue.textContent = this.streak.toString();
+  private updateModeUI() {
+    this.modeDailyBtn.classList.toggle("active", this.currentMode === 'daily');
+    this.modeUnlimitedBtn.classList.toggle("active", this.currentMode === 'unlimited');
+  }
 
-    // Reset cards
-    [this.clue2Card, this.clue3Card].forEach(c => {
-      c.classList.add("locked");
-      c.classList.remove("visible");
+  private renderUI(data: GameInitResponse) {
+    this.streakValRef.textContent = this.streak.toString();
+    this.rankValRef.textContent = this.rank;
+
+    // Reset Clues
+    this.clueTexts[0].textContent = this.clues[0];
+    this.clueTexts[1].textContent = this.clues[1];
+    this.clueTexts[2].textContent = this.clues[2];
+
+    this.clueCards[1].classList.add("locked");
+    this.clueCards[2].classList.add("locked");
+    this.clueTexts[1].classList.add("hidden");
+    this.clueTexts[2].classList.add("hidden");
+    this.clueCards[1].querySelector(".reveal-btn")?.classList.remove("hidden");
+    this.clueCards[2].querySelector(".reveal-btn")?.classList.remove("hidden");
+
+    // Render Options
+    this.optionsGrid.innerHTML = "";
+    data.choices.forEach(choice => {
+      const btn = document.createElement("button");
+      btn.className = "choice-btn";
+      btn.textContent = `r/${choice.name}`;
+      btn.addEventListener("click", () => this.submitGuess(choice.name));
+      this.optionsGrid.appendChild(btn);
     });
-    [this.clue2Text, this.clue3Text].forEach(t => t.classList.add("hidden"));
-    [this.revealClue2Btn, this.revealClue3Btn].forEach(b => b.style.display = "block");
   }
 
-  private revealClue(n: 2 | 3): void {
-    const cardObj = n === 2 ? this.clue2Card : this.clue3Card;
-    const text = n === 2 ? this.clue2Text : this.clue3Text;
-    const btn = n === 2 ? this.revealClue2Btn : this.revealClue3Btn;
-
-    cardObj.classList.remove("locked");
-    cardObj.classList.add("visible");
-    text.classList.remove("hidden");
-    btn.style.display = "none";
-
-    this.playSound('rustle');
+  private revealClue(n: number) {
+    const idx = n - 1;
+    this.clueCards[idx].classList.remove("locked");
+    this.clueTexts[idx].classList.remove("hidden");
+    this.clueCards[idx].querySelector(".reveal-btn")?.classList.add("hidden");
+    window.dispatchMascotAction?.('reveal');
   }
 
-  private async submitGuess(): Promise<void> {
-    const guess = this.guessInput.value.trim();
-    if (!guess) return;
-    this.submitBtn.disabled = true;
-    this.guessInput.disabled = true;
+  private async submitGuess(guess: string) {
+    if (this.isWinner && this.currentMode === 'daily') return;
 
     try {
+      this.statusMsg.textContent = "Verifying frequency sync...";
       const response = await fetch("/api/game/guess", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           guess,
-          mode: this.currentGameMode
+          mode: this.currentMode,
+          targetSubreddit: this.currentMode === 'unlimited' ? this.clues[0] : undefined // Simple way to track target in random
         }),
       });
       const data = (await response.json()) as GuessResponse;
-      this.attempts = data.attempts;
-      this.attemptsCount.textContent = this.attempts.toString();
-      this.streak = data.streak ?? this.streak;
-      this.streakValue.textContent = this.streak.toString();
-      this.coldCasesSolved = data.coldCasesSolved ?? this.coldCasesSolved;
 
       if (data.correct) {
         this.isWinner = true;
-        this.answerText.textContent = `r/${data.answer ?? guess}`;
-        this.winAttempts.textContent = this.attempts.toString();
-        this.winStreakVal.textContent = this.streak.toString();
-
-        // Update rank if returned
-        if (data.rank) {
-          this.rankValue.textContent = data.rank;
-          this.winRankName.textContent = data.rank.split(' ')[0] ?? "Detective";
-        }
-
-        this.showModal("win");
+        this.streak = data.streak;
+        this.rank = data.rank || this.rank;
+        this.streakValRef.textContent = this.streak.toString();
+        this.rankValRef.textContent = this.rank;
+        this.showWinModal(data.attempts);
         window.dispatchMascotAction?.('correct');
-        this.playSound('victory');
-
-        setTimeout(() => {
-          this.caseClosedStamp.classList.remove('hidden');
-          this.caseClosedStamp.classList.add('stamped');
-        }, 500);
-        this.disableInput();
-        this.fetchLeaderboard();
       } else {
-        this.showFeedback("❌ Incorrect", "error");
+        this.statusMsg.textContent = "Sync Error: Interference detected.";
         window.dispatchMascotAction?.('wrong');
-        if (data.audioTrigger === 'wrong') this.playSound('wrong');
-        this.guessInput.value = "";
-        this.guessInput.focus();
-        this.submitBtn.disabled = false;
-        this.guessInput.disabled = false;
+        const btn = Array.from(this.optionsGrid.children).find(b => b.textContent?.includes(guess)) as HTMLElement;
+        if (btn) btn.style.background = "#333";
       }
-    } catch (error) {
-      console.error(error);
-      this.submitBtn.disabled = false;
-      this.guessInput.disabled = false;
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  private async shareResult(): Promise<void> {
+  private showWinModal(attempts: number) {
+    this.mAttempts.textContent = attempts.toString();
+    this.mStreak.textContent = this.streak.toString();
+    this.modal.classList.remove("hidden");
+    this.shareBtn.textContent = "Share To Reddit";
+  }
+
+  private async shareResult() {
     try {
+      this.shareBtn.textContent = "Broadcasting...";
+      const text = `I solved the Snoo-Clue in ${this.attempts} attempt${this.attempts !== 1 ? 's' : ''}! 🔍 Streak: ${this.streak}. Rank: ${this.rank}.`;
+
       const response = await fetch("/api/game/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attempts: this.attempts }),
+        body: JSON.stringify({ attempts: this.attempts, text }), // Added custom text for server handling
       });
-      const data = (await response.json()) as ShareResponse;
-      if (data.success) {
+
+      if (response.ok) {
         this.shareBtn.textContent = "✅ Shared!";
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      this.shareBtn.textContent = "❌ Failed";
     }
-  }
-
-  private showFeedback(m: string, t: "success" | "error"): void {
-    this.feedbackMessage.textContent = m;
-    this.feedbackMessage.className = `feedback-message ${t} active`;
-
-    // Auto-clear after short delay for better UX
-    setTimeout(() => {
-      this.feedbackMessage.classList.remove('active');
-    }, 3000);
-  }
-
-  private async fetchLeaderboard(): Promise<void> {
-    try {
-      const response = await fetch("/api/game/leaderboard");
-      const data = (await response.json()) as LeaderboardResponse;
-      this.renderLeaderboard(data.leaderboard);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  private renderLeaderboard(entries: LeaderboardEntry[]): void {
-    this.leaderboardList.innerHTML = entries
-      .map((e, i) => `
-        <div class="leaderboard-item">
-          <span class="leaderboard-rank">#${i + 1}</span>
-          <span class="leaderboard-name">${e.username}</span>
-          <span class="leaderboard-score">${e.score} pts</span>
-        </div>
-      `)
-      .join("");
-  }
-
-  private showModal(t: "win" | "played"): void {
-    (t === "win" ? this.winModal : this.playedModal).classList.remove("hidden");
-  }
-
-  private closeModal(t: "win" | "played"): void {
-    (t === "win" ? this.winModal : this.playedModal).classList.add("hidden");
-  }
-
-  private disableInput(): void {
-    this.guessInput.disabled = true;
-    this.submitBtn.disabled = true;
   }
 }
 
