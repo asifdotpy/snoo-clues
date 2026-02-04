@@ -8,48 +8,36 @@ A daily subreddit guessing game built for Reddit using Devvit and GameMaker.
 
 ## 🎮 About
 
-Snoo-Clues is a daily puzzle game where players guess a subreddit based on three progressive clues. Built as a **hybrid Devvit + GameMaker application** for the Reddit Hackathon while maintaining GameMaker Prize eligibility.
+Snoo-Clues is a daily puzzle game where players guess a subreddit based on three progressive clues. Built as a **hybrid Devvit + GameMaker application**, it combines the power of a game engine with the seamless integration of Reddit's Devvit platform.
 
 ### How to Play
 
-1. **Read Clue #1** - Always visible
-2. **Reveal Clues #2 and #3** - Click "Show Clue" buttons as needed
-3. **Guess the Subreddit** - Enter your answer (lowercase auto-applied)
-4. **Win!** - Share your result to Reddit
+1. **Read Clue #1** - Always visible on your detective notebook.
+2. **Reveal Clues #2 and #3** - Click "Show Clue" cards as needed to uncover more hints.
+3. **Guess the Subreddit** - Enter your answer (case-insensitive).
+4. **Win!** - Once solved, your case is stamped "CLOSED".
+5. **Share** - Post your results to the Reddit thread to show off your sleuthing skills.
 
 ## ✨ Features
 
-- 🎯 **Daily Puzzles** - New subreddit to guess each day
-- 🔐 **Redis State Tracking** - Remembers if you've played today
-- 📊 **Attempt Counter** - Tracks how many guesses you make
-- 🎉 **Share to Reddit** - Post your victory as a comment
-- 📱 **Fully Responsive** - Works on mobile and desktop
-- 🎨 **Premium UI** - Reddit-themed glassmorphism design
-- 🏆 **GameMaker Compatible** - Maintains prize eligibility
-
-## 🏗️ Architecture
-
-### Hybrid Design
-
-The app uses a **dual-layer architecture**:
-- **GameMaker Engine** (Background) - Canvas-based WASM runtime
-- **Game Overlay** (Foreground) - HTML/CSS/JS puzzle interface
-
-Both systems coexist without conflict, preserving GameMaker eligibility while providing custom game mechanics.
-
-### Tech Stack
-
-- **Backend**: Devvit (Express.js + Redis)
-- **Frontend**: TypeScript + Vanilla JS
-- **Styling**: CSS3 with Glassmorphism
-- **Build**: Vite 6.2.4
-- **Game Engine**: GameMaker WASM
+- 🎯 **Daily Cases** - A new hand-picked subreddit to guess every day.
+- ❄️ **Cold Case Mode** - Unlimited practice mode with over 50 different subreddits.
+- 🔥 **Daily Streaks** - Track your consecutive daily wins. Don't let the flame go out!
+- 🏆 **Global Leaderboard** - See how you rank against other detectives in the community.
+- ⚖️ **Detective Ranks** - Earn titles based on your total successful investigations:
+  - **Rookie Sleuth** (0-1 Wins)
+  - **Private Eye** (2-5 Wins)
+  - **Senior Detective** (6-10 Wins)
+  - **Inspector** (11-20 Wins)
+  - **Master Investigator** (21+ Wins)
+- 🎨 **Premium UI** - A "Detective Notebook" aesthetic with typewriter effects and glassmorphism.
+- 🏗️ **Hybrid Engine** - Uses GameMaker for background animations and mascot reactions, layered with a responsive HTML/TS interface.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- **Node.js 22+** (Recommended)
 - [Devvit CLI](https://developers.reddit.com/docs/get-started)
 - Reddit Developer account
 
@@ -71,20 +59,27 @@ Both systems coexist without conflict, preserving GameMaker eligibility while pr
    npm run build
    ```
 
-4. **Run local playtest**
-   ```bash
-   npm run dev
-   ```
+### Development & Testing
 
-   Opens: `https://www.reddit.com/r/snoo_clues_dev/?playtest=snoo-clues`
+**Run local playtest:**
+```bash
+npm run dev
+```
+This will start the development server and provide a playtest URL for your test subreddit.
+
+**Run tests:**
+```bash
+npx vitest run
+```
+Executes the suite of unit tests for the client-side logic.
 
 ### Deployment
 
 ```bash
-# Build and upload to Reddit
+# Upload to Reddit
 npm run deploy
 
-# Publish to production
+# Publish to production (requires review)
 npm run launch
 ```
 
@@ -93,94 +88,18 @@ npm run launch
 ```
 snoo-clues/
 ├── src/
-│   ├── client/          # Frontend (GameMaker + Overlay)
-│   │   ├── main.ts      # GameLoader + SnooCluesGame
-│   │   ├── index.html   # Canvas + Overlay UI
-│   │   ├── style.css    # Game styling
-│   │   └── public/      # GameMaker runtime files
-│   ├── server/          # Backend (Devvit)
-│   │   └── index.ts     # Puzzles + Redis + Endpoints
-│   └── shared/
-│       └── types/       # TypeScript types
-├── dist/                # Build output (gitignored)
+│   ├── client/          # Frontend (HTML/TS + GameMaker Bridge)
+│   ├── server/          # Backend (Devvit + Express + Redis)
+│   └── shared/          # Shared types and constants
+├── dist/                # Build output
+├── docs/                # Documentation and screenshots
 └── devvit.json          # Devvit configuration
 ```
-
-## 🎯 API Endpoints
-
-### `GET /api/game/init`
-Returns today's clues and user status
-```json
-{
-  "type": "game_init",
-  "clues": ["Clue 1", "Clue 2", "Clue 3"],
-  "hasPlayedToday": false,
-  "attempts": 0,
-  "isWinner": false
-}
-```
-
-### `POST /api/game/guess`
-Validates a guess against today's answer
-```json
-{
-  "type": "guess_result",
-  "correct": true,
-  "answer": "aww",
-  "attempts": 3
-}
-```
-
-### `POST /api/game/share`
-Posts celebration comment to Reddit thread
-
-## 🧩 Daily Puzzles
-
-Puzzles are defined in `src/server/index.ts`:
-
-```typescript
-const DAILY_PUZZLES = [
-  {
-    date: "2026-02-01",
-    subreddit: "aww",
-    clues: [
-      "This subreddit is dedicated to things that make you go 'awww!'",
-      "Cute animals, babies, and heartwarming moments",
-      "🐶🐱👶 One of the most wholesome places on Reddit"
-    ]
-  },
-  // ... more puzzles
-];
-```
-
-## 🐛 Known Issues
-
-- [#1 Build Warnings](https://github.com/asifdotpy/snoo-clues/issues/1) - Vite outDir and protobufjs eval warnings (low priority)
 
 ## 📝 License
 
 This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-- Add more daily puzzles
-- Improve UI/UX
-- Fix bugs
-- Add features
-
-## 🏆 Hackathon Info
-
-Built for the Reddit Hackathon with dual goals:
-1. Create an engaging daily puzzle game for Reddit users
-2. Maintain GameMaker Prize eligibility through hybrid architecture
-
-## 📞 Support
-
-- Create an [issue](https://github.com/asifdotpy/snoo-clues/issues) for bugs
-- Check the [Devvit documentation](https://developers.reddit.com/docs)
-- Review the [GameMaker template guide](docs/HowToBuild.md)
-
 ---
 
-Made with ❤️ for Reddit by [@asifdotpy](https://github.com/asifdotpy)
+Made with ❤️ for the Reddit Hackathon by [@asifdotpy](https://github.com/asifdotpy)
