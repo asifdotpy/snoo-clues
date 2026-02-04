@@ -176,11 +176,9 @@ class SnooCluesGame {
       this.clue2Card.classList.contains("visible") ||
       this.clue3Card.classList.contains("visible");
 
-    if (this.isWinner || !hasProgress || confirm("Are you sure you want to exit this case? Progress will be lost.")) {
-      this.currentGameMode = null;
-      dispatchMascotAction('switch_mode');
-      this.showSelectionHub();
-    }
+    this.currentGameMode = null;
+    dispatchMascotAction('switch_mode');
+    this.showSelectionHub();
   }
 
   private showSelectionHub(): void {
