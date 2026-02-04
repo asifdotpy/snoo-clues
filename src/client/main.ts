@@ -55,6 +55,7 @@ class SnooCluesGame {
   private shareBtn!: HTMLButtonElement;
   private closeWinModalBtn!: HTMLButtonElement;
   private closePlayedModalBtn!: HTMLButtonElement;
+  private closeSelectionBtn!: HTMLButtonElement;
   private selectionModal!: HTMLElement;
   private gameOverlay!: HTMLElement;
   private startDailyBtn!: HTMLButtonElement;
@@ -106,8 +107,19 @@ class SnooCluesGame {
     this.gameSubtitle = document.querySelector(".game-subtitle")!;
     this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
     this.closePlayedModalBtn = this.playedModal.querySelector(".close-modal-btn") as HTMLButtonElement;
+    this.closeSelectionBtn = document.getElementById("closeSelectionModal") as HTMLButtonElement;
     this.currentModeTag = document.getElementById("currentModeTag")!;
     this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
+
+    // Handle Case Selection modal close button
+    if (this.closeSelectionBtn) {
+      this.closeSelectionBtn.addEventListener("click", () => {
+        // Only close if a game is already initialized
+        if (this.currentGameMode) {
+          this.hideSelectionHub();
+        }
+      });
+    }
 
     // Setup Hybrid Bridge for mascot communication
     setupHybridBridge();
@@ -168,14 +180,34 @@ class SnooCluesGame {
       this.clue2Card.classList.contains("visible") ||
       this.clue3Card.classList.contains("visible");
 
-    this.currentGameMode = null;
+    if (hasProgress && !this.isWinner) {
+      const confirmed = confirm(
+        "You have progress in this case. Changing modes will reset your progress. Continue?"
+      );
+      if (!confirmed) return;
+      this.currentGameMode = null;
+    }
+
     dispatchMascotAction('switch_mode');
     this.showSelectionHub();
   }
 
   private showSelectionHub(): void {
     this.selectionModal.classList.remove("hidden");
-    this.gameOverlay.classList.add("hidden");
+
+    // Keep game visible underneath if a game is active
+    if (!this.currentGameMode) {
+      this.gameOverlay.classList.add("hidden");
+    }
+
+    // Only show close button if there is a game to return to
+    if (this.closeSelectionBtn) {
+      if (this.currentGameMode) {
+        this.closeSelectionBtn.classList.remove("hidden");
+      } else {
+        this.closeSelectionBtn.classList.add("hidden");
+      }
+    }
   }
 
   private hideSelectionHub(): void {
