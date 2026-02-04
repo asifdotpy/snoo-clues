@@ -65,7 +65,7 @@ export default class GameLoader {
                 }
                 if (text === window.Module.setStatus.last.text) return;
 
-                const m = text.match(/([^(]+)\((\d+(?:\.\d+)?)\/(\ d+)\)/);
+                const m = text.match(/([^(]+)\((\d+(?:\.\d+)?)\/(\d+)\)/);
                 const now = Date.now();
                 if (m && now - window.Module.setStatus.last.time < 30) return;
 
@@ -95,11 +95,11 @@ export default class GameLoader {
         if (this.startingAspect) {
             // "System Thinking" - give user time to see the presentation
             setTimeout(() => {
-                this.loadingElement.style.transition = "opacity 1s ease";
-                this.loadingElement.style.opacity = "0";
+                this.loadingElement.classList.add("hidden");
+                // Cleanup display after transition
                 setTimeout(() => {
                     this.loadingElement.style.display = "none";
-                }, 1000);
+                }, 500);
             }, 800);
         }
     }
@@ -127,6 +127,15 @@ export default class GameLoader {
                 };
                 console.log("Loading game with manifest:", manifest);
             }
+
+            // Safety fallback: ensure loading screen hides eventually
+            setTimeout(() => {
+                if (this.loadingElement.style.display !== "none") {
+                    console.log("[GameLoader] Safety fallback triggered hiding loading screen.");
+                    this.loadingElement.classList.add("hidden");
+                    setTimeout(() => { this.loadingElement.style.display = "none"; }, 500);
+                }
+            }, 5000);
         } catch (e) {
             console.error("Failed to load manifest:", e);
         }

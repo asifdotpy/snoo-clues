@@ -41,33 +41,6 @@ textarea.emscripten {
     width: 80%;
 }
 
-#status {
-    display: inline-block;
-    vertical-align: top;
-    margin-top: 20px;
-    margin-left: 20px;
-    font-weight: bold;
-    color: rgb(40, 40, 40);
-}
-
-#progress {
-    height: 20px;
-    width: 300px;
-}
-
-.spinner {
-    height: 50px;
-    width: 50px;
-    margin: 0px auto;
-    animation: rotation 0.8s linear infinite;
-    border-left: 10px solid rgb(0, 150, 240);
-    border-right: 10px solid rgb(0, 150, 240);
-    border-bottom: 10px solid rgb(0, 150, 240);
-    border-top: 10px solid rgb(100, 0, 200);
-    border-radius: 100%;
-    background-color: rgb(200, 100, 250);
-}
-
 @keyframes rotation {
     from {
         transform: rotate(0deg);
@@ -112,6 +85,7 @@ canvas.emscripten {
     image-rendering: crisp-edges;
     background: transparent !important;
 }
+
 .hidden {
     display: none !important;
 }
