@@ -9,7 +9,7 @@
     width: 100vw;
     height: 100vh;
     overflow-y: auto;
-    z-index: 5;
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;

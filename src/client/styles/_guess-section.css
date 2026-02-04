@@ -44,6 +44,8 @@
     border-right: 2px solid #333;
     display: flex;
     align-items: center;
+    color: #333;
+    font-size: 1rem;
 }
 
 .guess-input {
