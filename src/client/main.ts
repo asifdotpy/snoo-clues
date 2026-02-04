@@ -11,10 +11,7 @@ import { GameAPI } from "./api/GameAPI";
 
 import type {
   GameInitResponse,
-  GuessResponse,
   LeaderboardEntry,
-  ShareResponse,
-  LeaderboardResponse,
 } from "../shared/types/api";
 
 // ##########################################################################
@@ -65,8 +62,6 @@ class SnooCluesGame {
   private keepTrainingBtn!: HTMLButtonElement;
   private gameContainer!: HTMLElement;
   private gameSubtitle!: HTMLElement;
-  private coldCasesSolvedVal!: HTMLElement;
-  private backToSelectionBtn!: HTMLButtonElement;
   private currentModeTag!: HTMLElement;
   private playedToColdBtn!: HTMLButtonElement;
 
@@ -102,7 +97,7 @@ class SnooCluesGame {
     this.caseClosedStamp = document.getElementById('case-closed-stamp')!;
     this.leaderboardList = document.getElementById('leaderboardList')!;
     this.shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
-    this.selectionModal = document.getElementById("caseSelectionModal")!;
+    this.selectionModal = document.getElementById("selectionModal")!;
     this.startDailyBtn = document.getElementById("startDailyBtn") as HTMLButtonElement;
     this.startColdBtn = document.getElementById("startColdBtn") as HTMLButtonElement;
     this.keepTrainingBtn = document.getElementById("keep-training-btn") as HTMLButtonElement;
@@ -111,7 +106,6 @@ class SnooCluesGame {
     this.gameSubtitle = document.querySelector(".game-subtitle")!;
     this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
     this.closePlayedModalBtn = this.playedModal.querySelector(".close-modal-btn") as HTMLButtonElement;
-    this.backToSelectionBtn = document.getElementById("backToSelection") as HTMLButtonElement;
     this.currentModeTag = document.getElementById("currentModeTag")!;
     this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
 
@@ -283,7 +277,7 @@ class SnooCluesGame {
     btn.style.display = "none";
 
     this.playSound('rustle');
-    typewriter(text, this.clues[n - 1]);
+    typewriter(text, this.clues[n - 1] as string);
     vibrate(20);
   }
 

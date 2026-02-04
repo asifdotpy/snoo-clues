@@ -93,10 +93,14 @@ export default class GameLoader {
 
     private ensureAspectRatio() {
         if (this.startingAspect) {
-            this.statusElement.style.display = 'none';
-            this.progressElement.style.display = 'none';
-            this.spinnerElement.style.display = 'none';
-            this.loadingElement.style.display = "none";
+            // "System Thinking" - give user time to see the presentation
+            setTimeout(() => {
+                this.loadingElement.style.transition = "opacity 1s ease";
+                this.loadingElement.style.opacity = "0";
+                setTimeout(() => {
+                    this.loadingElement.style.display = "none";
+                }, 1000);
+            }, 800);
         }
     }
 
