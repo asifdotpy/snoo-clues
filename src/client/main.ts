@@ -111,14 +111,6 @@ class SnooCluesGame {
 
     // Setup Hybrid Bridge for mascot communication
     setupHybridBridge();
-
-    // Handle Case Selection modal close button
-    const closeSelectionBtn = document.getElementById("closeSelectionModal");
-    if (closeSelectionBtn) {
-      closeSelectionBtn.addEventListener("click", () => {
-        this.selectionModal.classList.add("hidden");
-      });
-    }
   }
 
 

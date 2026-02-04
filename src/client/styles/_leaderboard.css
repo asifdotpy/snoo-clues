@@ -1,15 +1,15 @@
 /* ========================================
-   LEADERBOARD
+   LEADERBOARD SECTION
    ======================================== */
 
-.leaderboard {
+.leaderboard-section {
     background: linear-gradient(to bottom, #fdf5e6, #fff);
     padding: 20px;
     border: 2px dashed #333;
     margin-top: 30px;
 }
 
-.leaderboard h3 {
+.leaderboard-section h3 {
     font-size: 1.4rem;
     color: #333;
     text-transform: uppercase;
@@ -26,48 +26,59 @@
     margin: 0;
 }
 
-.leaderboard-list li {
+.leaderboard-item {
     padding: 12px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     border-bottom: 1px solid #ddd;
     transition: background 0.2s;
+    background: #fff;
 }
 
-.leaderboard-list li:hover {
+.leaderboard-item:hover {
     background: #fff9e6;
 }
 
-.leaderboard-list li:first-child {
+/* Ranking highlights from original design */
+.leaderboard-item:nth-child(1) {
     background: gold;
     font-weight: bold;
     border: 2px solid #ff4500;
 }
 
-.leaderboard-list li:nth-child(2) {
+.leaderboard-item:nth-child(2) {
     background: silver;
     font-weight: bold;
 }
 
-.leaderboard-list li:nth-child(3) {
+.leaderboard-item:nth-child(3) {
     background: #cd7f32;
     font-weight: bold;
     color: #fff;
 }
 
-.leaderboard-list .rank {
+.leaderboard-rank {
     font-weight: bold;
-    color: #666;
+    color: #444; /* Darker than original #666 */
     min-width: 30px;
 }
 
-.leaderboard-list .username {
+.leaderboard-name {
     flex-grow: 1;
     margin: 0 10px;
     color: #333;
 }
 
-.leaderboard-list .score {
+.leaderboard-score {
     font-weight: bold;
     color: #ff4500;
+}
+
+.leaderboard-item.loading {
+    justify-content: center;
+    color: #444;
+    font-style: italic;
+    background: transparent;
+    border-bottom: none;
 }

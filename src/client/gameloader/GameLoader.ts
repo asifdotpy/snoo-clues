@@ -88,7 +88,7 @@ export default class GameLoader {
                 this.statusElement.innerHTML = text;
             }
         };
-        window.Module.setStatus("Downloading...");
+        window.Module.setStatus("Initializing Game...");
     }
 
     private ensureAspectRatio() {
