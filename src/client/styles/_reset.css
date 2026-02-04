@@ -112,3 +112,6 @@ canvas.emscripten {
     image-rendering: crisp-edges;
     background: transparent !important;
 }
+.hidden {
+    display: none !important;
+}

@@ -1,20 +1,36 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { typewriter } from '../utils/effects';
 
 describe('typewriter utility', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it('reveals text character by character', async () => {
         const element = document.createElement('div');
         const text = 'Snoo';
 
-        // Use a faster speed for testing
-        const promise = typewriter(element, text, 1);
+        // Start promise
+        const promise = typewriter(element, text, 10);
 
-        // It should start empty
-        expect(element.textContent).toBe('');
+        // Initial state: first character added synchronously
+        expect(element.textContent).toBe('S');
+
+        // Advance time
+        await vi.advanceTimersByTimeAsync(10);
+        expect(element.textContent).toBe('Sn');
+
+        await vi.advanceTimersByTimeAsync(10);
+        expect(element.textContent).toBe('Sno');
+
+        await vi.advanceTimersByTimeAsync(10);
+        expect(element.textContent).toBe('Snoo');
 
         await promise;
-
-        // It should eventually complete
         expect(element.textContent).toBe('Snoo');
     });
 
