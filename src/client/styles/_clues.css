@@ -17,7 +17,8 @@
 }
 
 .clue-card.locked {
-    display: none;
+    background: #f5f5f5;
+    opacity: 0.8;
 }
 
 .clue-card.visible {
@@ -42,8 +43,7 @@
 }
 
 .clue-text.hidden {
-    opacity: 0.1;
-    letter-spacing: 10px;
+    display: none;
 }
 
 .clue-card::before {

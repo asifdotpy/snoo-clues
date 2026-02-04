@@ -59,6 +59,7 @@ class SnooCluesGame {
   private closeWinModalBtn!: HTMLButtonElement;
   private closePlayedModalBtn!: HTMLButtonElement;
   private selectionModal!: HTMLElement;
+  private gameOverlay!: HTMLElement;
   private startDailyBtn!: HTMLButtonElement;
   private startColdBtn!: HTMLButtonElement;
   private keepTrainingBtn!: HTMLButtonElement;
@@ -101,10 +102,11 @@ class SnooCluesGame {
     this.caseClosedStamp = document.getElementById('case-closed-stamp')!;
     this.leaderboardList = document.getElementById('leaderboardList')!;
     this.shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
-    this.selectionModal = document.getElementById("selectionModal")!;
+    this.selectionModal = document.getElementById("caseSelectionModal")!;
     this.startDailyBtn = document.getElementById("startDailyBtn") as HTMLButtonElement;
     this.startColdBtn = document.getElementById("startColdBtn") as HTMLButtonElement;
     this.keepTrainingBtn = document.getElementById("keep-training-btn") as HTMLButtonElement;
+    this.gameOverlay = document.getElementById("gameOverlay")!;
     this.gameContainer = document.querySelector(".game-container")!;
     this.gameSubtitle = document.querySelector(".game-subtitle")!;
     this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
@@ -189,10 +191,12 @@ class SnooCluesGame {
 
   private showSelectionHub(): void {
     this.selectionModal.classList.remove("hidden");
+    this.gameOverlay.classList.add("hidden");
   }
 
   private hideSelectionHub(): void {
     this.selectionModal.classList.add("hidden");
+    this.gameOverlay.classList.remove("hidden");
   }
 
 
