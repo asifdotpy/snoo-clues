@@ -1,0 +1,94 @@
+/* ========================================
+   DETECTIVE NOTEBOOK GAME CONTAINER
+   ======================================== */
+
+.game-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent !important;
+}
+
+.game-container {
+    position: relative;
+    z-index: 10;
+    width: 94%;
+    max-width: 420px;
+    margin: auto;
+    background: #fdf5e6;
+    padding: 25px 20px 40px 45px;
+    border-radius: 2px 15px 15px 2px;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.6), inset 2px 0 5px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
+    text-align: left;
+    height: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.game-container::before {
+    content: "";
+    position: absolute;
+    left: 35px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 0, 0, 0.3);
+    border-left: 1px solid rgba(255, 0, 0, 0.1);
+}
+
+.game-container.cold-case {
+    background: #f0f8ff;
+    box-shadow: 5px 5px 20px rgba(0, 100, 255, 0.4), inset 2px 0 5px rgba(0, 100, 200, 0.15);
+}
+
+.game-container.cold-case::before {
+    background: rgba(0, 100, 255, 0.25);
+    border-left: 1px solid rgba(0, 100, 255, 0.15);
+}
+
+.game-header {
+    margin-bottom: 20px;
+}
+
+.game-header h1 {
+    font-size: 2.2rem;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.game-subtitle {
+    font-size: 0.95rem;
+    font-weight: normal;
+    color: #888;
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+.mode-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.mode-tag.daily {
+    background: #ff4500;
+    color: white;
+}
+
+.mode-tag.unlimited {
+    background: #0066cc;
+    color: white;
+}

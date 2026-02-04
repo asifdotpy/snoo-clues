@@ -1,0 +1,124 @@
+/* ========================================
+   MODALS (Win/Played/Selection)
+   ======================================== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #fdf5e6;
+    padding: 40px;
+    border-radius: 4px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    border: 2px solid #333;
+    box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.3);
+    font-family: 'Courier New', Courier, monospace;
+    position: relative;
+}
+
+.modal-content.win {
+    border-color: #ff4500;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s, transform 0.2s;
+    padding: 5px 10px;
+    font-family: Arial, sans-serif;
+}
+
+.modal-close-btn:hover {
+    color: #ff4500;
+    transform: scale(1.1);
+}
+
+.modal-content h2 {
+    color: #333;
+    font-size: 2.2rem;
+    margin: 0 0 15px 0;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.modal-content p {
+    color: #666;
+    font-size: 1rem;
+    margin: 10px 0 25px;
+}
+
+.modal-content .stats-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.modal-content .stat-box {
+    background: #333;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 4px;
+    flex: 1;
+    max-width: 150px;
+}
+
+.modal-content .stat-box .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff4500;
+}
+
+.modal-content .stat-box .stat-label {
+    font-size: 0.8rem;
+    margin-top: 5px;
+    color: #ccc;
+}
+
+.modal-btn {
+    background: #ff4500;
+    color: white;
+    border: 2px solid #ff4500;
+    padding: 12px 30px;
+    margin: 10px 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.modal-btn.secondary {
+    background: #333;
+    border-color: #333;
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+}

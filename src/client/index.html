@@ -21,6 +21,7 @@
 
   <div class="modal hidden" id="selectionModal">
     <div class="modal-content selection-hub">
+      <button class="modal-close-btn" id="closeSelectionModal">&times;</button>
       <h2>Case Selection</h2>
       <p>Choose your investigation mode:</p>
       <div class="selection-options">
@@ -134,19 +135,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Daily Briefing Memo -->
-  <div id="briefingMemo" class="briefing-memo hidden">
-    <div class="memo-clip"></div>
-    <div class="memo-content">
-      <h3>DAILY BRIEFING</h3>
-      <p id="briefingText">Loading briefing...</p>
-      <button id="dismissBriefing" class="memo-btn">UNDERSTOOD, CHIEF</button>
-    </div>
-  </div>
-
-  <!-- Handbook Button -->
-  <button id="handbookBtn" class="handbook-pill" title="Investigation Handbook">?</button>
 
   <script type="module" src="main.ts" defer></script>
 </body>

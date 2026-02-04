@@ -1,0 +1,114 @@
+/* ========================================
+   BASE RESET & GLOBAL STYLES
+   ======================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    font-family: 'Courier New', Courier, monospace;
+    background: #1a1a1a;
+    color: #fff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+html {
+    --shell-background: #1a1a1a;
+}
+
+.emscripten {
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+textarea.emscripten {
+    width: 80%;
+}
+
+#status {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 20px;
+    margin-left: 20px;
+    font-weight: bold;
+    color: rgb(40, 40, 40);
+}
+
+#progress {
+    height: 20px;
+    width: 300px;
+}
+
+.spinner {
+    height: 50px;
+    width: 50px;
+    margin: 0px auto;
+    animation: rotation 0.8s linear infinite;
+    border-left: 10px solid rgb(0, 150, 240);
+    border-right: 10px solid rgb(0, 150, 240);
+    border-bottom: 10px solid rgb(0, 150, 240);
+    border-top: 10px solid rgb(100, 0, 200);
+    border-radius: 100%;
+    background-color: rgb(200, 100, 250);
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#output {
+    width: 100%;
+    height: 200px;
+    margin: 0 auto;
+    margin-top: 10px;
+    border-left: 0px;
+    border-right: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    display: block;
+    background-color: black;
+    color: white;
+    font-family: 'Lucida Console', Monaco, monospace;
+    outline: none;
+}
+
+canvas.emscripten {
+    border: 0px none;
+    background-color: black;
+}
+
+.game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: transparent !important;
+}
