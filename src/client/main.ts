@@ -185,6 +185,7 @@ class SnooCluesGame {
         "You have progress in this case. Changing modes will reset your progress. Continue?"
       );
       if (!confirmed) return;
+      this.currentGameMode = null;
     }
 
     dispatchMascotAction('switch_mode');
