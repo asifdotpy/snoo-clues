@@ -42,6 +42,7 @@ class SnooCluesGame {
   private feedbackMessage!: HTMLElement;
   private winModal!: HTMLElement;
   private playedModal!: HTMLElement;
+  private confirmModal!: HTMLElement;
   private answerText!: HTMLElement;
   private winAttempts!: HTMLElement;
   private playedAttemptsCount!: HTMLElement;
@@ -55,6 +56,8 @@ class SnooCluesGame {
   private shareBtn!: HTMLButtonElement;
   private closeWinModalBtn!: HTMLButtonElement;
   private closePlayedModalBtn!: HTMLButtonElement;
+  private confirmYesBtn!: HTMLButtonElement;
+  private confirmNoBtn!: HTMLButtonElement;
   private closeSelectionBtn!: HTMLButtonElement;
   private selectionModal!: HTMLElement;
   private gameOverlay!: HTMLElement;
@@ -87,6 +90,7 @@ class SnooCluesGame {
     this.feedbackMessage = document.getElementById("feedbackMessage")!;
     this.winModal = document.getElementById("winModal")!;
     this.playedModal = document.getElementById("playedModal")!;
+    this.confirmModal = document.getElementById("confirmModal")!;
     this.answerText = document.getElementById("answerText")!;
     this.winAttempts = document.getElementById("win-attempts-count")!;
     this.playedAttemptsCount = document.getElementById('played-attempts-count')!;
@@ -107,6 +111,8 @@ class SnooCluesGame {
     this.gameSubtitle = document.querySelector(".game-subtitle")!;
     this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
     this.closePlayedModalBtn = this.playedModal.querySelector(".close-modal-btn") as HTMLButtonElement;
+    this.confirmYesBtn = document.getElementById("confirm-yes-btn") as HTMLButtonElement;
+    this.confirmNoBtn = document.getElementById("confirm-no-btn") as HTMLButtonElement;
     this.closeSelectionBtn = document.getElementById("closeSelectionModal") as HTMLButtonElement;
     this.currentModeTag = document.getElementById("currentModeTag")!;
     this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
@@ -154,6 +160,15 @@ class SnooCluesGame {
     this.closeWinModalBtn.addEventListener("click", () => this.closeModal("win"));
     this.closePlayedModalBtn.addEventListener("click", () => this.closeModal("played"));
 
+    this.confirmYesBtn.addEventListener("click", () => {
+      this.closeModal("confirm");
+      this.executeBackToSelection();
+    });
+
+    this.confirmNoBtn.addEventListener("click", () => {
+      this.closeModal("confirm");
+    });
+
     this.startDailyBtn.addEventListener("click", () => this.initGame('daily'));
     this.startColdBtn.addEventListener("click", () => this.initGame('unlimited'));
     this.keepTrainingBtn.addEventListener("click", () => {
@@ -181,13 +196,15 @@ class SnooCluesGame {
       this.clue3Card.classList.contains("visible");
 
     if (hasProgress && !this.isWinner) {
-      const confirmed = confirm(
-        "You have progress in this case. Changing modes will reset your progress. Continue?"
-      );
-      if (!confirmed) return;
-      this.currentGameMode = null;
+      this.showModal("confirm");
+      return;
     }
 
+    this.executeBackToSelection();
+  }
+
+  private executeBackToSelection(): void {
+    this.currentGameMode = null;
     dispatchMascotAction('switch_mode');
     this.showSelectionHub();
   }
@@ -397,12 +414,22 @@ class SnooCluesGame {
       .join("");
   }
 
-  private showModal(t: "win" | "played"): void {
-    (t === "win" ? this.winModal : this.playedModal).classList.remove("hidden");
+  private showModal(t: "win" | "played" | "confirm"): void {
+    const modalMap = {
+      win: this.winModal,
+      played: this.playedModal,
+      confirm: this.confirmModal
+    };
+    modalMap[t].classList.remove("hidden");
   }
 
-  private closeModal(t: "win" | "played"): void {
-    (t === "win" ? this.winModal : this.playedModal).classList.add("hidden");
+  private closeModal(t: "win" | "played" | "confirm"): void {
+    const modalMap = {
+      win: this.winModal,
+      played: this.playedModal,
+      confirm: this.confirmModal
+    };
+    modalMap[t].classList.add("hidden");
   }
 
   private disableInput(): void {
