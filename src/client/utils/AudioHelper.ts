@@ -36,9 +36,11 @@ export class AudioManager {
       const ctor = (globalThis as any).Audio;
       if (!ctor) return;
       this.music = new ctor(src);
-      this.music.loop = true;
-      this.music.preload = 'auto';
-      this.music.muted = this.muted;
+      if (this.music) {
+        this.music.loop = true;
+        this.music.preload = 'auto';
+        this.music.muted = this.muted;
+      }
     } catch (e) {
       // noop
     }
