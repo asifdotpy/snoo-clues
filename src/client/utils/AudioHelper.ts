@@ -20,7 +20,9 @@ export class AudioManager {
 
   registerSound(name: string, src: string): void {
     try {
-      const a = new Audio(src);
+      const ctor = (globalThis as any).Audio;
+      if (!ctor) return;
+      const a = new ctor(src);
       a.preload = 'auto';
       a.muted = this.muted;
       this.sounds.set(name, a);
@@ -31,7 +33,9 @@ export class AudioManager {
 
   registerMusic(src: string): void {
     try {
-      this.music = new Audio(src);
+      const ctor = (globalThis as any).Audio;
+      if (!ctor) return;
+      this.music = new ctor(src);
       this.music.loop = true;
       this.music.preload = 'auto';
       this.music.muted = this.muted;
