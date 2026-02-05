@@ -86,15 +86,21 @@ class SnooCluesGame {
     // Initialize settings UI (gear button + mute toggle)
     setupSettingsUI();
     
-    // Register audio assets from public/audio directory
-    // These will be played based on game events
-    Audio.registerMusic('/audio/background-music.mp3');
-    Audio.registerSound('hit', '/audio/hit.mp3');
-    Audio.registerSound('wrong', '/audio/wrong.mp3');
+    // Register synth sounds using Web Audio API (no external files needed)
+    // Hit: 800Hz for 150ms (bright chime for correct guess)
+    Audio.registerSynth('hit', 800, 150);
+    
+    // Wrong: 300Hz for 200ms (low beep for incorrect guess)
+    Audio.registerSynth('wrong', 300, 200);
+    
+    // Optional: Register background music from free CDN
+    // Using Freepd.com CC0 music (if available)
+    // For now, skipping music to avoid broken links
+    // To add: Audio.registerMusic('https://cdn.freepd.com/your-track.mp3');
     
     // Restore muted setting from localStorage
     const isMuted = Audio.isMuted();
-    console.log(`[Audio] Initialized. Muted: ${isMuted}`);
+    console.log(`[Audio] Initialized. Synth sounds ready. Muted: ${isMuted}`);
   }
 
   private initDOMElements(): void {

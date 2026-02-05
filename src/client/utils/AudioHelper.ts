@@ -1,13 +1,16 @@
 /**
- * Simple AudioManager to scaffold sound/music control and persistence.
- * - Registers named sound effects and one music track
+ * Simple AudioManager with Web Audio API synthesis.
+ * - Uses Web Audio API to generate simple game sounds (no external files needed)
+ * - Supports HTML Audio elements for background music from CDN
  * - Persists mute state to localStorage under `snoo_audio_muted`
  */
 export class AudioManager {
   private sounds: Map<string, HTMLAudioElement> = new Map();
+  private synths: Map<string, { freq: number; duration: number }> = new Map();
   private music?: HTMLAudioElement;
   private mutedKey = 'snoo_audio_muted';
   private muted = false;
+  private audioContext?: AudioContext;
 
   constructor() {
     try {
@@ -16,6 +19,26 @@ export class AudioManager {
     } catch (e) {
       this.muted = false;
     }
+    
+    // Initialize Web Audio Context lazily (browsers require user gesture for audioContext.resume())
+    try {
+      const ctx = (globalThis as any).AudioContext || (globalThis as any).webkitAudioContext;
+      if (ctx) {
+        this.audioContext = new ctx();
+      }
+    } catch (e) {
+      // noop - Web Audio not supported
+    }
+  }
+
+  /**
+   * Register a generated synth sound with frequency and duration
+   * @param name - Sound identifier
+   * @param freq - Frequency in Hz (e.g., 800 for A5)
+   * @param duration - Duration in milliseconds
+   */
+  registerSynth(name: string, freq: number, duration: number): void {
+    this.synths.set(name, { freq, duration });
   }
 
   registerSound(name: string, src: string): void {
@@ -27,7 +50,7 @@ export class AudioManager {
       a.muted = this.muted;
       this.sounds.set(name, a);
     } catch (e) {
-      // noop - environments without Audio will skip
+      // noop
     }
   }
 
@@ -46,8 +69,20 @@ export class AudioManager {
     }
   }
 
+  /**
+   * Play a synthetic tone or loaded sound
+   */
   playSound(name: string): void {
     if (this.muted) return;
+
+    // Try synth first
+    const synth = this.synths.get(name);
+    if (synth) {
+      this.playSynth(synth.freq, synth.duration);
+      return;
+    }
+
+    // Fall back to HTML Audio
     const s = this.sounds.get(name);
     if (!s) return;
     try {
@@ -58,10 +93,50 @@ export class AudioManager {
     }
   }
 
+  /**
+   * Play a simple sine wave tone using Web Audio API
+   */
+  private playSynth(frequency: number, duration: number): void {
+    if (!this.audioContext) return;
+
+    try {
+      const ctx = this.audioContext;
+      const now = ctx.currentTime;
+      const endTime = now + duration / 1000;
+
+      // Resume audio context if suspended (required by browsers on user gesture)
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      // Create oscillator
+      const osc = ctx.createOscillator();
+      osc.frequency.value = frequency;
+      osc.type = 'sine';
+
+      // Create gain node for volume envelope
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, endTime);
+
+      // Connect and play
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(endTime);
+    } catch (e) {
+      // noop - Web Audio synthesis failed
+    }
+  }
+
   playMusic(): void {
     if (this.muted) return;
     if (!this.music) return;
     try {
+      // Resume audio context if needed
+      if (this.audioContext && this.audioContext.state === 'suspended') {
+        this.audioContext.resume().catch(() => {});
+      }
       void this.music.play();
     } catch (e) {}
   }
