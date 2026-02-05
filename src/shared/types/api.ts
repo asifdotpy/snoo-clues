@@ -53,6 +53,11 @@ export type ShareResponse = {
   commentUrl?: string | undefined;
 };
 
+export type AbandonResponse = {
+  success: boolean;
+  streak: number;
+};
+
 export type LeaderboardEntry = {
   username: string;
   score: number;
