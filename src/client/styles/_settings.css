@@ -1,0 +1,105 @@
+/* Settings UI Styles */
+
+#snoo-settings-root {
+  position: fixed;
+  right: 12px;
+  top: 12px;
+  z-index: 9999;
+  font-family: inherit;
+}
+
+#snoo-settings-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #ff4500;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#snoo-settings-btn:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#snoo-settings-btn:active {
+  transform: scale(0.95);
+}
+
+#snoo-settings-panel {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(40, 40, 60, 0.95) 100%);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #ff4500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  min-width: 140px;
+  animation: slideIn 0.2s ease;
+}
+
+#snoo-settings-panel[style*="display: none"] {
+  display: none !important;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#snoo-mute-btn {
+  background: linear-gradient(135deg, #ff4500 0%, #ff6a28 100%);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  width: 100%;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+#snoo-mute-btn:hover {
+  background: linear-gradient(135deg, #ff6a28 0%, #ff8c42 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#snoo-mute-btn:active {
+  transform: translateY(0);
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  #snoo-settings-root {
+    right: 8px;
+    top: 8px;
+  }
+
+  #snoo-settings-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  #snoo-settings-panel {
+    top: 52px;
+  }
+}

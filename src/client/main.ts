@@ -9,6 +9,8 @@ import { setupHybridBridge, dispatchMascotAction } from "./bridge/HybridBridge";
 import { typewriter, vibrate } from "./utils/effects";
 import { GameAPI } from "./api/GameAPI";
 import { normalizeSubredditName } from "../shared/utils/normalization";
+import setupSettingsUI from "./ui/Settings";
+import { Audio } from "./utils/AudioHelper";
 
 import type {
   GameInitResponse,
@@ -77,6 +79,22 @@ class SnooCluesGame {
     this.resetGameUI();
     this.showSelectionHub();
     this.fetchLeaderboard();
+    this.setupAudioAndSettings();
+  }
+
+  private setupAudioAndSettings(): void {
+    // Initialize settings UI (gear button + mute toggle)
+    setupSettingsUI();
+    
+    // Register audio assets from public/audio directory
+    // These will be played based on game events
+    Audio.registerMusic('/audio/background-music.mp3');
+    Audio.registerSound('hit', '/audio/hit.mp3');
+    Audio.registerSound('wrong', '/audio/wrong.mp3');
+    
+    // Restore muted setting from localStorage
+    const isMuted = Audio.isMuted();
+    console.log(`[Audio] Initialized. Muted: ${isMuted}`);
   }
 
   private initDOMElements(): void {
@@ -134,16 +152,14 @@ class SnooCluesGame {
 
 
   private playSound(soundType: 'rustle' | 'victory' | 'wrong'): void {
-    const assetUrl = this.audioAssets ? this.audioAssets[soundType] : null;
-    if (!assetUrl) {
-      // Fallback
-      if (soundType === 'rustle') {
-        new Audio("https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3").play().catch(() => { });
-      }
-      return;
+    // Use the new AudioManager instead of direct Audio construction
+    if (soundType === 'victory') {
+      Audio.playSound('hit');
+    } else if (soundType === 'wrong') {
+      Audio.playSound('wrong');
+    } else if (soundType === 'rustle') {
+      Audio.playSound('hit'); // Use 'hit' sound as fallback for rustle
     }
-    const audio = new Audio(assetUrl);
-    audio.play().catch(e => console.log("Audio playback blocked:", e));
   }
 
   private attachEventListeners(): void {
