@@ -8,7 +8,8 @@ import type {
     GameInitResponse,
     GuessResponse,
     ShareResponse,
-    LeaderboardResponse
+    LeaderboardResponse,
+    AbandonResponse
 } from "../../shared/types/api";
 
 export class GameAPI {
@@ -69,6 +70,22 @@ export class GameAPI {
 
         if (!response.ok) {
             throw new Error("Failed to fetch leaderboard");
+        }
+
+        return response.json();
+    }
+
+    /**
+     * Abandon current game and reset streak
+     */
+    static async abandonGame(): Promise<AbandonResponse> {
+        const response = await fetch("/api/game/abandon", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to abandon game");
         }
 
         return response.json();

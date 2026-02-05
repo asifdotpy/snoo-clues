@@ -390,6 +390,30 @@ router.get("/api/game/leaderboard", async (_req, res): Promise<void> => {
   }
 });
 
+router.post("/api/game/abandon", async (_req, res): Promise<void> => {
+  try {
+    const { postId } = context;
+    if (!postId) {
+      res.status(400).json({ error: "Missing postId" });
+      return;
+    }
+    const username = await getUsername();
+    if (username === "anonymous") {
+      res.status(401).json({ error: "Login required" });
+      return;
+    }
+
+    const sKey = streakKey(postId, username);
+    const dKey = lastWinDateKey(postId, username);
+    await redis.set(sKey, "0");
+    await redis.del(dKey);
+
+    res.json({ success: true, streak: 0 });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to abandon game" });
+  }
+});
+
 router.post("/api/game/share", async (req, res): Promise<void> => {
   try {
     const { postId } = context;

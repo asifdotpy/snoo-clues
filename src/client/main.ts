@@ -72,6 +72,7 @@ class SnooCluesGame {
   constructor() {
     this.initDOMElements();
     this.attachEventListeners();
+    this.resetGameUI();
     this.showSelectionHub();
     this.fetchLeaderboard();
   }
@@ -120,10 +121,7 @@ class SnooCluesGame {
     // Handle Case Selection modal close button
     if (this.closeSelectionBtn) {
       this.closeSelectionBtn.addEventListener("click", () => {
-        // Only close if a game is already initialized
-        if (this.currentGameMode) {
-          this.hideSelectionHub();
-        }
+        this.hideSelectionHub();
       });
     }
 
@@ -162,7 +160,7 @@ class SnooCluesGame {
 
     this.confirmYesBtn.addEventListener("click", () => {
       this.closeModal("confirm");
-      this.executeBackToSelection();
+      this.executeBackToSelection(true);
     });
 
     this.confirmNoBtn.addEventListener("click", () => {
@@ -203,27 +201,29 @@ class SnooCluesGame {
     this.executeBackToSelection();
   }
 
-  private executeBackToSelection(): void {
-    this.currentGameMode = null;
-    dispatchMascotAction('switch_mode');
+  private executeBackToSelection(isAbandon: boolean = false): void {
+    if (isAbandon) {
+      GameAPI.abandonGame().catch(console.error);
+      this.streak = 0;
+      this.streakValue.textContent = "0";
+      dispatchMascotAction('mascot_disappointed');
+    } else {
+      dispatchMascotAction('switch_mode');
+    }
+
+    this.resetGameUI();
     this.showSelectionHub();
   }
 
   private showSelectionHub(): void {
     this.selectionModal.classList.remove("hidden");
 
-    // Keep game visible underneath if a game is active
-    if (!this.currentGameMode) {
-      this.gameOverlay.classList.add("hidden");
-    }
+    // Always keep game visible underneath for the "Empty Desk" feel
+    this.gameOverlay.classList.remove("hidden");
 
-    // Only show close button if there is a game to return to
+    // Always show close button
     if (this.closeSelectionBtn) {
-      if (this.currentGameMode) {
-        this.closeSelectionBtn.classList.remove("hidden");
-      } else {
-        this.closeSelectionBtn.classList.add("hidden");
-      }
+      this.closeSelectionBtn.classList.remove("hidden");
     }
   }
 
@@ -235,17 +235,9 @@ class SnooCluesGame {
 
 
   private async initGame(mode: 'daily' | 'unlimited'): Promise<void> {
+    this.resetGameUI();
     this.currentGameMode = mode;
     this.hideSelectionHub();
-
-    // Reset UI state for new game
-    this.isWinner = false;
-    this.submitBtn.disabled = false;
-    this.guessInput.disabled = false;
-    this.guessInput.value = "";
-    this.caseClosedStamp.classList.add('hidden');
-    this.caseClosedStamp.classList.remove('stamped');
-    this.feedbackMessage.textContent = "";
 
     // Toggle aesthetics
     if (mode === 'unlimited') {
@@ -430,6 +422,41 @@ class SnooCluesGame {
       confirm: this.confirmModal
     };
     modalMap[t].classList.add("hidden");
+  }
+
+  private resetGameUI(): void {
+    this.currentGameMode = null;
+    this.clues = ["", "", ""];
+    this.attempts = 0;
+    this.isWinner = false;
+    this.hasPlayed = false;
+
+    this.clue1Text.textContent = "NO ACTIVE CASE";
+    this.clue2Text.textContent = "???";
+    this.clue3Text.textContent = "???";
+
+    [this.clue2Card, this.clue3Card].forEach(c => {
+      c.classList.add("locked");
+      c.classList.remove("visible");
+    });
+    [this.clue2Text, this.clue3Text].forEach(t => t.classList.add("hidden"));
+    [this.revealClue2Btn, this.revealClue3Btn].forEach(b => b.style.display = "block");
+
+    this.attemptsCount.textContent = "0";
+    this.feedbackMessage.textContent = "";
+    this.feedbackMessage.className = "feedback-message";
+
+    this.caseClosedStamp.classList.add('hidden');
+    this.caseClosedStamp.classList.remove('stamped');
+
+    this.guessInput.value = "";
+    this.guessInput.disabled = false;
+    this.submitBtn.disabled = false;
+
+    this.gameContainer.classList.remove('cold-case');
+    this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
+    this.currentModeTag.textContent = "DAILY CASE";
+    this.currentModeTag.className = "mode-tag daily";
   }
 
   private disableInput(): void {
