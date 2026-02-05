@@ -104,18 +104,27 @@
   <!-- Win Modal -->
   <div class="modal hidden" id="winModal">
     <div class="modal-content win">
+      <button class="modal-close-btn win-close-x">&times;</button>
       <div class="stamp-container">
         <div id="case-closed-stamp" class="case-closed-stamp hidden">CASE CLOSED</div>
       </div>
       <h2>Case Solved!</h2>
       <p>Excellent work, <span id="win-rank-name">Detective</span>. You've identified the community:</p>
       <p id="correct-answer" class="answer-reveal">r/...</p>
-      <p class="win-attempts">Solved in <span id="win-attempts-count">0</span> attempt(s)</p>
-      <p class="win-streak">Current Streak: <span id="win-streak-val">0</span> days! 🔥</p>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-value" id="win-attempts-count">0</div>
+          <div class="stat-label">Attempts</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="win-streak-val">0</div>
+          <div class="stat-label">Streak</div>
+        </div>
+      </div>
       <div class="modal-actions">
-        <button id="share-btn" class="share-btn">📢 Share to Reddit</button>
-        <button id="keep-training-btn" class="training-btn">🔥 KEEP TRAINING: Open a Cold Case</button>
-        <button class="close-modal-btn">Close</button>
+        <button id="share-btn" class="modal-btn share-btn">📢 Share to Reddit</button>
+        <button id="keep-training-btn" class="modal-btn training-btn">🔥 KEEP TRAINING: Open a Cold Case</button>
+        <button class="modal-btn secondary close-modal-btn">Close</button>
       </div>
     </div>
   </div>
@@ -123,15 +132,24 @@
   <!-- Already Played Modal -->
   <div class="modal hidden" id="playedModal">
     <div class="modal-content">
+      <button class="modal-close-btn played-close-x">&times;</button>
       <h2>Already Solved</h2>
       <p>This case is already closed for today. You correctly identified:</p>
       <p id="played-answer" class="answer-reveal">r/...</p>
-      <p class="played-stats">Final Score: <span id="played-attempts-count">0</span> attempt(s)</p>
-      <p class="played-streak">Current Streak: <span id="played-streak-val">0</span> days! 🔥</p>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-value" id="played-attempts-count">0</div>
+          <div class="stat-label">Attempts</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="played-streak-val">0</div>
+          <div class="stat-label">Streak</div>
+        </div>
+      </div>
       <p class="next-puzzle">Return tomorrow for a new investigation.</p>
       <div class="modal-actions">
-        <button class="close-modal-btn">View Clues</button>
-        <button id="playedToColdBtn" class="training-btn">Browse Cold Cases</button>
+        <button class="modal-btn secondary close-modal-btn">View Clues</button>
+        <button id="playedToColdBtn" class="modal-btn training-btn">Browse Cold Cases</button>
       </div>
     </div>
   </div>

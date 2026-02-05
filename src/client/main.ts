@@ -160,6 +160,13 @@ class SnooCluesGame {
     this.closeWinModalBtn.addEventListener("click", () => this.closeModal("win"));
     this.closePlayedModalBtn.addEventListener("click", () => this.closeModal("played"));
 
+    // Attach listeners to "X" buttons
+    const winCloseX = this.winModal.querySelector(".win-close-x");
+    if (winCloseX) winCloseX.addEventListener("click", () => this.closeModal("win"));
+
+    const playedCloseX = this.playedModal.querySelector(".played-close-x");
+    if (playedCloseX) playedCloseX.addEventListener("click", () => this.closeModal("played"));
+
     this.confirmYesBtn.addEventListener("click", () => {
       this.closeModal("confirm");
       this.executeBackToSelection(true);
@@ -172,8 +179,11 @@ class SnooCluesGame {
     this.startDailyBtn.addEventListener("click", () => this.initGame('daily'));
     this.startColdBtn.addEventListener("click", () => this.initGame('unlimited'));
     this.keepTrainingBtn.addEventListener("click", () => {
+      const wasUnlimited = this.currentGameMode === 'unlimited';
       this.closeModal("win");
-      this.initGame('unlimited');
+      if (!wasUnlimited) {
+        this.initGame('unlimited');
+      }
     });
     // Connect Change Case Type button
     const backBtn = document.getElementById("backToSelection");
@@ -344,7 +354,7 @@ class SnooCluesGame {
         this.correctAnswer.textContent = `r/${data.answer ?? guess}`;
         this.winAttempts.textContent = this.attempts.toString();
         this.winStreakVal.textContent = this.streak.toString();
-        this.winRankName.textContent = this.rank.split(' ')[0] ?? "Detective";
+        this.winRankName.textContent = this.rank;
 
         this.showModal("win");
         dispatchMascotAction('victory');
@@ -443,11 +453,18 @@ class SnooCluesGame {
       confirm: this.confirmModal
     };
     modalMap[t].classList.add("hidden");
+
+    // Automatically load new cold case when closing win modal in unlimited mode
+    if (t === 'win' && this.currentGameMode === 'unlimited') {
+      console.log("[Logic] Unlimited mode: Automatically starting next case");
+      this.initGame('unlimited');
+    }
   }
 
   private resetGameUI(): void {
     console.log("[UI] Performing comprehensive state reset");
     this.currentGameMode = null;
+    this.shareBtn.textContent = "📢 Share to Reddit";
     this.clues = ["", "", ""];
     this.attempts = 0;
     this.isWinner = false;
