@@ -109,7 +109,7 @@ describe('Abandon Flow and Modal Behavior', () => {
         // Confirm modal should show
         const confirmModal = document.getElementById('confirmModal');
         expect(confirmModal).not.toHaveClass('hidden');
-        expect(confirmModal?.textContent).toContain('Abandoning this case will end your current streak');
+        expect(confirmModal?.textContent).toContain('Abandoning this case will forfeit your current investigation and reset your streak to 0. Retreat?');
 
         // Click Yes, Abandon
         const confirmYesBtn = document.getElementById('confirm-yes-btn');

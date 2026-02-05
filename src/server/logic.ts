@@ -1,10 +1,23 @@
-import { Choice, DailyPuzzle } from "../shared/types/api";
+import { DailyPuzzle } from "../shared/types/api";
+
+export type Choice = {
+    name: string;
+    color: string;
+};
+
+/**
+ * Normalizes a subreddit name by removing r/ or /r/ prefixes,
+ * trimming whitespace, and converting to lowercase.
+ */
+export function normalizeSubredditName(name: string): string {
+    return name
+        .trim()
+        .toLowerCase()
+        .replace(/^(\/?r\/)/, "");
+}
 
 /**
  * Calculates the new streak based on the last win date and the current date.
- * If the last win was yesterday, the streak increments.
- * If the last win was today, the streak remains the same.
- * Otherwise, the streak resets to 1.
  */
 export function calculateNewStreak(lastWinDate: string | null, today: string, currentStreak: number): number {
     if (!lastWinDate) return 1;
@@ -16,7 +29,6 @@ export function calculateNewStreak(lastWinDate: string | null, today: string, cu
 
 /**
  * Retrieves the puzzle for a specific date from the provided list.
- * Fallback to the first puzzle if no match is found.
  */
 export function getPuzzleByDate(date: string, puzzles: DailyPuzzle[]): DailyPuzzle {
     const puzzle = puzzles.find(p => p.date === date);
@@ -24,20 +36,20 @@ export function getPuzzleByDate(date: string, puzzles: DailyPuzzle[]): DailyPuzz
 }
 
 /**
- * Generates 4 choices: the correct answer and 3 random distractors from different categories.
+ * Generates 4 choices: the correct answer and 3 random distractors.
+ * Note: Category-based distractor logic preserved for potential rank-based difficulty.
  */
-export function getMultipleChoices(correctSub: string, allPuzzles: Omit<DailyPuzzle, 'date'>[]): Choice[] {
+export function getMultipleChoices(correctSub: string, allPuzzles: any[]): Choice[] {
     const correctPuzzle = allPuzzles.find(p => p.subreddit === correctSub);
     if (!correctPuzzle) return [];
 
     const choices: Choice[] = [
-        { name: correctSub, color: "#FF4500" } // Reddit Orange
+        { name: correctSub, color: "#FF4500" }
     ];
 
     const usedCategories = new Set([correctPuzzle.category]);
     const shuffled = [...allPuzzles].sort(() => Math.random() - 0.5);
 
-    // Try to get 3 distractors from different categories
     for (const p of shuffled) {
         if (choices.length >= 4) break;
         if (p.subreddit !== correctSub && !usedCategories.has(p.category)) {
@@ -46,7 +58,6 @@ export function getMultipleChoices(correctSub: string, allPuzzles: Omit<DailyPuz
         }
     }
 
-    // Fallback: Fill the rest with random subreddits if not enough categories
     if (choices.length < 4) {
         for (const p of shuffled) {
             if (choices.length >= 4) break;
@@ -60,12 +71,12 @@ export function getMultipleChoices(correctSub: string, allPuzzles: Omit<DailyPuz
 }
 
 /**
- * Returns the Detective Rank based on total wins.
+ * Returns the Detective Rank based on score (wins).
  */
-export function getDetectiveRank(totalWins: number): string {
-    if (totalWins <= 1) return "Snoo Rookie";
-    if (totalWins <= 5) return "Private Eye";
-    if (totalWins <= 10) return "Lead Investigator";
-    if (totalWins <= 20) return "Chief of Detectives";
-    return "Snoo-Clues Legend";
+export function getDetectiveRank(score: number): string {
+    if (score <= 1) return "Rookie Sleuth";
+    if (score <= 5) return "Private Eye";
+    if (score <= 10) return "Senior Detective";
+    if (score <= 20) return "Inspector";
+    return "Master Investigator";
 }
