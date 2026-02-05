@@ -5,16 +5,7 @@ export type Choice = {
     color: string;
 };
 
-/**
- * Normalizes a subreddit name by removing r/ or /r/ prefixes,
- * trimming whitespace, and converting to lowercase.
- */
-export function normalizeSubredditName(name: string): string {
-    return name
-        .trim()
-        .toLowerCase()
-        .replace(/^(\/?r\/)/, "");
-}
+export { normalizeSubredditName } from "../shared/utils/normalization.js";
 
 /**
  * Calculates the new streak based on the last win date and the current date.

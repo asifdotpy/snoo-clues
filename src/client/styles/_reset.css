@@ -2,6 +2,18 @@
    BASE RESET & GLOBAL STYLES
    ======================================== */
 
+:root {
+    /* Z-Index Hierarchy */
+    --z-base: 1;
+    --z-clue: 10;
+    --z-overlay: 100;
+    --z-dropdown: 200;
+    --z-modal-backdrop: 999;
+    --z-modal: 1000;
+    --z-loading: 2000;
+    --z-alert: 3000;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
