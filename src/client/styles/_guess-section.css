@@ -38,14 +38,18 @@
 }
 
 .r-prefix {
-    background: #eee;
-    padding: 10px;
-    font-weight: bold;
+    background: #eaedef !important;
+    padding: 10px 12px;
+    font-weight: 900;
     border-right: 2px solid #333;
     display: flex;
     align-items: center;
-    color: #333;
-    font-size: 1rem;
+    justify-content: center;
+    color: #ff4500 !important;
+    font-size: 1.1rem;
+    min-width: 45px;
+    position: relative;
+    z-index: 2;
 }
 
 .guess-input {

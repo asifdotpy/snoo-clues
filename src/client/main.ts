@@ -175,13 +175,12 @@ class SnooCluesGame {
       this.closeModal("win");
       this.initGame('unlimited');
     });
-    // Use event delegation for the back button to ensure it's always responsive
-    document.addEventListener("click", (e) => {
-      const target = e.target as HTMLElement;
-      if (target && (target.id === "backToSelection" || target.closest("#backToSelection"))) {
-        this.goBackToSelection();
-      }
-    });
+    // Connect Change Case Type button
+    const backBtn = document.getElementById("backToSelection");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => this.goBackToSelection());
+    }
+
     this.playedToColdBtn.addEventListener("click", () => {
       this.closeModal("played");
       this.initGame('unlimited');
