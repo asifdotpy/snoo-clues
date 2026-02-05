@@ -172,8 +172,11 @@ class SnooCluesGame {
     this.startDailyBtn.addEventListener("click", () => this.initGame('daily'));
     this.startColdBtn.addEventListener("click", () => this.initGame('unlimited'));
     this.keepTrainingBtn.addEventListener("click", () => {
+      const wasUnlimited = this.currentGameMode === 'unlimited';
       this.closeModal("win");
-      this.initGame('unlimited');
+      if (!wasUnlimited) {
+        this.initGame('unlimited');
+      }
     });
     // Connect Change Case Type button
     const backBtn = document.getElementById("backToSelection");
@@ -443,6 +446,12 @@ class SnooCluesGame {
       confirm: this.confirmModal
     };
     modalMap[t].classList.add("hidden");
+
+    // Automatically load new cold case when closing win modal in unlimited mode
+    if (t === 'win' && this.currentGameMode === 'unlimited') {
+      console.log("[Logic] Unlimited mode: Automatically starting next case");
+      this.initGame('unlimited');
+    }
   }
 
   private resetGameUI(): void {
