@@ -308,6 +308,7 @@ class SnooCluesGame {
     btn.style.display = "none";
 
     this.playSound('rustle');
+    dispatchMascotAction('reveal');
     typewriter(text, this.clues[n - 1] as string);
     vibrate(20);
   }
@@ -430,6 +431,7 @@ class SnooCluesGame {
     this.attempts = 0;
     this.isWinner = false;
     this.hasPlayed = false;
+    this.audioAssets = undefined;
 
     this.clue1Text.textContent = "NO ACTIVE CASE";
     this.clue2Text.textContent = "???";
@@ -445,6 +447,7 @@ class SnooCluesGame {
     this.attemptsCount.textContent = "0";
     this.feedbackMessage.textContent = "";
     this.feedbackMessage.className = "feedback-message";
+    this.feedbackMessage.classList.remove('active');
 
     this.caseClosedStamp.classList.add('hidden');
     this.caseClosedStamp.classList.remove('stamped');
@@ -457,6 +460,9 @@ class SnooCluesGame {
     this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
     this.currentModeTag.textContent = "DAILY CASE";
     this.currentModeTag.className = "mode-tag daily";
+
+    // Reset rank display to initial state
+    this.rankValue.textContent = "Rookie Sleuth";
   }
 
   private disableInput(): void {

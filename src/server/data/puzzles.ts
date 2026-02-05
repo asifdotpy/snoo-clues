@@ -1,6 +1,8 @@
 import { DailyPuzzle } from "../../shared/types/api";
 
-export const ALL_PUZZLES: Omit<DailyPuzzle, 'date'>[] = [
+export type Puzzle = Omit<DailyPuzzle, 'date'> & { category: string };
+
+export const ALL_PUZZLES: Puzzle[] = [
     { subreddit: "aww", clues: ["Dedicated to things that make you go 'awww!'", "Cute animals, babies, and heartwarming moments", "🐶🐱👶 Wholesome places on Reddit"], category: "wholesome" },
     { subreddit: "askreddit", clues: ["Curiosity meets community through interrogation", "Source of 'what is your secret' stories", "❓ Largest Q&A forum"], category: "q_and_a" },
     { subreddit: "gaming", clues: ["Digital battlefield for pixels and passion", "Controllers, keyboards, and frame rates", "🎮 Primary hub for electronic entertainment"], category: "gaming" },
@@ -40,5 +42,12 @@ export const ALL_PUZZLES: Omit<DailyPuzzle, 'date'>[] = [
     { subreddit: "parenting", clues: ["Support group for the sleep-deprived", "Raising humans from diapers to dorms", "🍼 The hardest job in the world"], category: "lifestyle" },
     { subreddit: "photography", clues: ["The lens-crafters community", "Exposure, composition, and gear", "📸 Mastering the frozen moment"], category: "visual" },
     { subreddit: "writing", clues: ["The workshop for aspiring authors", "Plot, character, and grammar", "📝 Crafting the written word"], category: "entertainment" },
-    { subreddit: "psychology", clues: ["Mapping the human mind", "Behavioral studies and mental health", "🧠 Why we do what we do"], category: "science" }
+    { subreddit: "psychology", clues: ["Mapping the human mind", "Behavioral studies and mental health", "🧠 Why we do what we do"], category: "science" },
+    { subreddit: "tifu", clues: ["Chronicles of daily disasters", "Confessions of mistakes made today", "🤦 TIFU by posting this..."], category: "humor" },
+    { subreddit: "stayawake", clues: ["Original horror stories that feel real", "Don't read these in the dark", "👁️ Fiction that encourages you to stay awake"], category: "horror" },
+    { subreddit: "personalfinance", clues: ["Budgeting and investment sanctuary", "401ks, debt, and saving strategies", "💰 Mastering your money"], category: "lifestyle" },
+    { subreddit: "futurology", clues: ["Speculation on what lies ahead", "Post-scarcity, longevity, and automation", "🤖 Thinking about tomorrow"], category: "technology" },
+    { subreddit: "nottheonion", clues: ["Real news that sounds like satire", "Truth is stranger than fiction", "🧅 Reality mimicking parody"], category: "news" },
+    { subreddit: "lifehacks", clues: ["Shortcuts for a better existence", "Efficiency tips for daily tasks", "💡 Smarter ways to live"], category: "lifestyle" },
+    { subreddit: "relationships", clues: ["Advice for the heart and social circle", "Navigating human connections", "❤️ Problem solving for people"], category: "lifestyle" }
 ];
