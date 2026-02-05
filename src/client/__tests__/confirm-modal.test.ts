@@ -116,7 +116,7 @@ describe('Abandon Flow and Modal Behavior', () => {
         fireEvent.click(confirmYesBtn!);
 
         // Check streak reset in UI
-        expect(document.getElementById('streak-value')?.textContent).toBe('0');
+        await waitFor(() => expect(document.getElementById('streak-value')?.textContent).toBe('0'));
 
         // Check UI reset to Empty Desk
         expect(document.getElementById('clue1Text')?.textContent).toBe('NO ACTIVE CASE');

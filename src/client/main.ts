@@ -8,6 +8,7 @@ import GameLoader from "./gameloader/GameLoader";
 import { setupHybridBridge, dispatchMascotAction } from "./bridge/HybridBridge";
 import { typewriter, vibrate } from "./utils/effects";
 import { GameAPI } from "./api/GameAPI";
+import { normalizeSubredditName } from "../shared/utils/normalization";
 
 import type {
   GameInitResponse,
@@ -24,6 +25,7 @@ class SnooCluesGame {
   private isWinner: boolean = false;
   private hasPlayed: boolean = false;
   private streak: number = 0;
+  private rank: string = "Rookie Sleuth";
   private coldCasesSolved: number = 0;
   private currentGameMode: 'daily' | 'unlimited' | null = null;
   private audioAssets?: GameInitResponse['audioAssets'];
@@ -43,7 +45,7 @@ class SnooCluesGame {
   private winModal!: HTMLElement;
   private playedModal!: HTMLElement;
   private confirmModal!: HTMLElement;
-  private answerText!: HTMLElement;
+  private correctAnswer!: HTMLElement;
   private winAttempts!: HTMLElement;
   private playedAttemptsCount!: HTMLElement;
   private playedStreakVal!: HTMLElement;
@@ -92,7 +94,7 @@ class SnooCluesGame {
     this.winModal = document.getElementById("winModal")!;
     this.playedModal = document.getElementById("playedModal")!;
     this.confirmModal = document.getElementById("confirmModal")!;
-    this.answerText = document.getElementById("answerText")!;
+    this.correctAnswer = document.getElementById("correct-answer")!;
     this.winAttempts = document.getElementById("win-attempts-count")!;
     this.playedAttemptsCount = document.getElementById('played-attempts-count')!;
     this.playedStreakVal = document.getElementById('played-streak-val')!;
@@ -201,9 +203,13 @@ class SnooCluesGame {
     this.executeBackToSelection();
   }
 
-  private executeBackToSelection(isAbandon: boolean = false): void {
+  private async executeBackToSelection(isAbandon: boolean = false): Promise<void> {
     if (isAbandon) {
-      GameAPI.abandonGame().catch(console.error);
+      try {
+        await GameAPI.abandonGame();
+      } catch (error) {
+        console.error("Failed to abandon game:", error);
+      }
       this.streak = 0;
       this.streakValue.textContent = "0";
       dispatchMascotAction('mascot_disappointed');
@@ -259,6 +265,7 @@ class SnooCluesGame {
       this.hasPlayed = data.hasPlayedToday;
       this.isWinner = data.isWinner;
       this.streak = data.streak;
+      this.rank = data.rank || "Rookie Sleuth";
       this.coldCasesSolved = data.coldCasesSolved;
       this.audioAssets = data.audioAssets;
 
@@ -276,8 +283,12 @@ class SnooCluesGame {
         this.showModal("played");
         this.disableInput();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      const message = error.name === 'AbortError'
+        ? "Request timed out. Please try again."
+        : "Unable to load investigation. Please check your connection and try again.";
+      this.showFeedback(message, "error");
     }
   }
 
@@ -287,8 +298,8 @@ class SnooCluesGame {
     this.clue3Text.textContent = this.clues[2];
     this.attemptsCount.textContent = this.attempts.toString();
     this.streakValue.textContent = this.streak.toString();
+    this.rankValue.textContent = this.rank;
 
-    // Reset cards
     [this.clue2Card, this.clue3Card].forEach(c => {
       c.classList.add("locked");
       c.classList.remove("visible");
@@ -314,7 +325,7 @@ class SnooCluesGame {
   }
 
   private async submitGuess(): Promise<void> {
-    const guess = this.guessInput.value.trim();
+    const guess = normalizeSubredditName(this.guessInput.value);
     if (!guess) return;
     this.submitBtn.disabled = true;
     this.guessInput.disabled = true;
@@ -325,22 +336,19 @@ class SnooCluesGame {
       this.attemptsCount.textContent = this.attempts.toString();
       this.streak = data.streak ?? this.streak;
       this.streakValue.textContent = this.streak.toString();
+      this.rank = data.rank ?? this.rank;
+      this.rankValue.textContent = this.rank;
       this.coldCasesSolved = data.coldCasesSolved ?? this.coldCasesSolved;
 
       if (data.correct) {
         this.isWinner = true;
-        this.answerText.textContent = `r/${data.answer ?? guess}`;
+        this.correctAnswer.textContent = `r/${data.answer ?? guess}`;
         this.winAttempts.textContent = this.attempts.toString();
         this.winStreakVal.textContent = this.streak.toString();
-
-        // Update rank if returned
-        if (data.rank) {
-          this.rankValue.textContent = data.rank;
-          this.winRankName.textContent = data.rank.split(' ')[0] ?? "Detective";
-        }
+        this.winRankName.textContent = this.rank.split(' ')[0] ?? "Detective";
 
         this.showModal("win");
-        dispatchMascotAction('correct');
+        dispatchMascotAction('victory');
         this.playSound('victory');
 
         setTimeout(() => {
@@ -358,8 +366,12 @@ class SnooCluesGame {
         this.submitBtn.disabled = false;
         this.guessInput.disabled = false;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      const message = error.name === 'AbortError'
+        ? "Submission timed out. Please try again."
+        : "Unable to submit guess. Please check your connection and try again.";
+      this.showFeedback(message, "error");
       this.submitBtn.disabled = false;
       this.guessInput.disabled = false;
     }
@@ -373,6 +385,10 @@ class SnooCluesGame {
       }
     } catch (error) {
       console.error(error);
+      this.showFeedback(
+        "Failed to share result to Reddit. Please try again.",
+        "error"
+      );
     }
   }
 
@@ -391,7 +407,12 @@ class SnooCluesGame {
       const data = await GameAPI.fetchLeaderboard();
       this.renderLeaderboard(data.leaderboard);
     } catch (error) {
-      console.error(error);
+      console.error("Leaderboard fetch failed:", error);
+      this.leaderboardList.innerHTML = `
+        <div class="leaderboard-item error">
+          Failed to load rankings.
+        </div>
+      `;
     }
   }
 
@@ -426,6 +447,7 @@ class SnooCluesGame {
   }
 
   private resetGameUI(): void {
+    console.log("[UI] Performing comprehensive state reset");
     this.currentGameMode = null;
     this.clues = ["", "", ""];
     this.attempts = 0;
@@ -433,6 +455,7 @@ class SnooCluesGame {
     this.hasPlayed = false;
     this.audioAssets = undefined;
 
+    // 1. Clue Reset
     this.clue1Text.textContent = "NO ACTIVE CASE";
     this.clue2Text.textContent = "???";
     this.clue3Text.textContent = "???";
@@ -444,25 +467,44 @@ class SnooCluesGame {
     [this.clue2Text, this.clue3Text].forEach(t => t.classList.add("hidden"));
     [this.revealClue2Btn, this.revealClue3Btn].forEach(b => b.style.display = "block");
 
-    this.attemptsCount.textContent = "0";
+    // 2. Input & Feedback Reset
+    this.guessInput.value = "";
+    this.guessInput.disabled = false;
+    this.submitBtn.disabled = false;
     this.feedbackMessage.textContent = "";
     this.feedbackMessage.className = "feedback-message";
     this.feedbackMessage.classList.remove('active');
 
+    // 3. Counter Reset
+    this.attemptsCount.textContent = "0";
+    this.streakValue.textContent = "0";
+    this.rank = "Rookie Sleuth";
+    this.rankValue.textContent = this.rank;
+
+    // 4. Modal Content Reset
     this.caseClosedStamp.classList.add('hidden');
     this.caseClosedStamp.classList.remove('stamped');
+    this.correctAnswer.textContent = "r/...";
+    this.winAttempts.textContent = "0";
+    this.winStreakVal.textContent = "0";
+    this.playedAttemptsCount.textContent = "0";
+    this.playedStreakVal.textContent = "0";
+    const playedAnswer = document.getElementById('played-answer');
+    if (playedAnswer) playedAnswer.textContent = "r/...";
 
-    this.guessInput.value = "";
-    this.guessInput.disabled = false;
-    this.submitBtn.disabled = false;
-
+    // 5. Global Aesthetic Reset
     this.gameContainer.classList.remove('cold-case');
     this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
     this.currentModeTag.textContent = "DAILY CASE";
     this.currentModeTag.className = "mode-tag daily";
 
-    // Reset rank display to initial state
-    this.rankValue.textContent = "Rookie Sleuth";
+    // 6. Close all modals
+    this.closeModal("win");
+    this.closeModal("played");
+    this.closeModal("confirm");
+
+    // 7. Mascot Reset
+    dispatchMascotAction('idle');
   }
 
   private disableInput(): void {

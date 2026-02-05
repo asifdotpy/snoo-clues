@@ -14,7 +14,7 @@ describe('GameAPI', () => {
         });
 
         const result = await GameAPI.initGame('daily');
-        expect(fetch).toHaveBeenCalledWith('/api/game/init');
+        expect(fetch).toHaveBeenCalledWith('/api/game/init', expect.objectContaining({ timeout: 5000 }));
         expect(result).toEqual(mockData);
     });
 
@@ -26,7 +26,7 @@ describe('GameAPI', () => {
         });
 
         const result = await GameAPI.initGame('unlimited');
-        expect(fetch).toHaveBeenCalledWith('/api/game/random');
+        expect(fetch).toHaveBeenCalledWith('/api/game/random', expect.objectContaining({ timeout: 5000 }));
         expect(result).toEqual(mockData);
     });
 
@@ -39,7 +39,8 @@ describe('GameAPI', () => {
         await GameAPI.submitGuess('test', 'daily');
         expect(fetch).toHaveBeenCalledWith('/api/game/guess', expect.objectContaining({
             method: 'POST',
-            body: JSON.stringify({ guess: 'test', mode: 'daily' })
+            body: JSON.stringify({ guess: 'test', mode: 'daily' }),
+            timeout: 5000
         }));
     });
 

@@ -9,7 +9,7 @@
     width: 100vw;
     height: 100vh;
     overflow-y: auto;
-    z-index: 100;
+    z-index: var(--z-overlay);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,7 +18,7 @@
 
 .game-container {
     position: relative;
-    z-index: 10;
+    z-index: var(--z-clue);
     width: 94%;
     max-width: 420px;
     margin: auto;

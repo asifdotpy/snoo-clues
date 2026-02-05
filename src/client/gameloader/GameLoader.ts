@@ -129,15 +129,24 @@ export default class GameLoader {
             }
 
             // Safety fallback: ensure loading screen hides eventually
+            // Increased to 10 seconds per audit requirements
             setTimeout(() => {
                 if (this.loadingElement.style.display !== "none") {
-                    console.log("[GameLoader] Safety fallback triggered hiding loading screen.");
-                    this.loadingElement.classList.add("hidden");
-                    setTimeout(() => { this.loadingElement.style.display = "none"; }, 500);
+                    console.log("[GameLoader] Timeout: Game engine failed to signal completion.");
+                    this.statusElement.innerHTML = "Engine loading slowly... <button onclick=\"location.reload()\" style=\"color: #ff4500; background: none; border: 1px solid #ff4500; padding: 2px 5px; cursor: pointer; font-family: inherit;\">Retry?</button>";
+
+                    // Allow another 5 seconds before forcing hide
+                    setTimeout(() => {
+                        if (this.loadingElement.style.display !== "none") {
+                            this.loadingElement.classList.add("hidden");
+                            setTimeout(() => { this.loadingElement.style.display = "none"; }, 500);
+                        }
+                    }, 5000);
                 }
-            }, 5000);
+            }, 10000);
         } catch (e) {
             console.error("Failed to load manifest:", e);
+            this.statusElement.innerHTML = "Error loading game engine.";
         }
     }
 }
