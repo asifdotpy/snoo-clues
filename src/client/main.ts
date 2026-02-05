@@ -160,6 +160,13 @@ class SnooCluesGame {
     this.closeWinModalBtn.addEventListener("click", () => this.closeModal("win"));
     this.closePlayedModalBtn.addEventListener("click", () => this.closeModal("played"));
 
+    // Attach listeners to "X" buttons
+    const winCloseX = this.winModal.querySelector(".win-close-x");
+    if (winCloseX) winCloseX.addEventListener("click", () => this.closeModal("win"));
+
+    const playedCloseX = this.playedModal.querySelector(".played-close-x");
+    if (playedCloseX) playedCloseX.addEventListener("click", () => this.closeModal("played"));
+
     this.confirmYesBtn.addEventListener("click", () => {
       this.closeModal("confirm");
       this.executeBackToSelection(true);
@@ -347,7 +354,7 @@ class SnooCluesGame {
         this.correctAnswer.textContent = `r/${data.answer ?? guess}`;
         this.winAttempts.textContent = this.attempts.toString();
         this.winStreakVal.textContent = this.streak.toString();
-        this.winRankName.textContent = this.rank.split(' ')[0] ?? "Detective";
+        this.winRankName.textContent = this.rank;
 
         this.showModal("win");
         dispatchMascotAction('victory');
@@ -457,6 +464,7 @@ class SnooCluesGame {
   private resetGameUI(): void {
     console.log("[UI] Performing comprehensive state reset");
     this.currentGameMode = null;
+    this.shareBtn.textContent = "📢 Share to Reddit";
     this.clues = ["", "", ""];
     this.attempts = 0;
     this.isWinner = false;
