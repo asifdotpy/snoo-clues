@@ -13,7 +13,7 @@ export interface SoundConfig {
 
 export const AUDIO_CONFIG = {
     bgm: {
-        url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+        url: 'https://assets.mixkit.co/active_storage/music/20-smooth-cool-jazz.mp3',
         // Music typically doesn't have a synth fallback, but we keep the structure consistent
     },
     sfx: {
