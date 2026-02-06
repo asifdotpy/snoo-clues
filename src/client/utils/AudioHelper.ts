@@ -33,6 +33,23 @@ export class AudioManager {
     } catch (e) {
       // noop - Web Audio not supported
     }
+
+    // Add global listener to resume AudioContext on first interaction
+    if (typeof document !== 'undefined') {
+      const resume = () => {
+        if (this.audioContext?.state === 'suspended') {
+          this.audioContext.resume();
+        }
+        // Also try to play music if it should be playing
+        if (!this.muted && this.music && this.music.paused && this.music.autoplay) {
+          this.music.play().catch(() => {});
+        }
+        document.removeEventListener('click', resume);
+        document.removeEventListener('keydown', resume);
+      };
+      document.addEventListener('click', resume);
+      document.addEventListener('keydown', resume);
+    }
   }
 
   /**

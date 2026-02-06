@@ -26,12 +26,14 @@ export function setupSettingsUI(): void {
 
   muteBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    Audio.playSound('click');
     Audio.toggleMuted();
     updateMuteLabel();
   });
 
   settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    Audio.playSound('click');
     const isHidden = settingsPanel.classList.contains('hidden');
 
     // Toggle panel

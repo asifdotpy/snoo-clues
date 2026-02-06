@@ -17,6 +17,10 @@ export const AUDIO_CONFIG = {
         // Music typically doesn't have a synth fallback, but we keep the structure consistent
     },
     sfx: {
+        click: {
+            url: 'https://www.soundjay.com/buttons/button-16.mp3',
+            synthFallback: { freq: 1000, duration: 50 }
+        },
         hit: {
             url: 'https://www.soundjay.com/buttons/button-3.mp3',
             synthFallback: { freq: 800, duration: 150 }
@@ -26,7 +30,7 @@ export const AUDIO_CONFIG = {
             synthFallback: { freq: 300, duration: 200 }
         },
         reveal: {
-            url: 'https://www.soundjay.com/buttons/button-09.mp3',
+            url: 'https://www.soundjay.com/buttons/button-20.mp3',
             synthFallback: { freq: 600, duration: 100 }
         },
         victory: {
