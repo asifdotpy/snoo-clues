@@ -6,6 +6,7 @@
 /* Import modular partials - MUST come first per CSS spec */
 @import './styles/_reset.css';
 @import './styles/_gameloader.css';
+@import './styles/_loading-screen.css';
 @import './styles/_game-container.css';
 @import './styles/_clues.css';
 @import './styles/_guess-section.css';

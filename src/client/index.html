@@ -14,9 +14,17 @@
   <canvas class="game-canvas" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1">
   </canvas>
   <div class="loading" id="loading">
-    <div class="spinner" id="spinner"></div>
-    <div class="status" id="status">Initializing Game...</div>
-    <progress value="0" max="100" id="progress" hidden="1"></progress>
+    <div class="splash-container">
+      <img src="img/splash.png" alt="Snoo-Clues Splash" class="splash-image" />
+    </div>
+    <div class="loading-content">
+      <div class="spinner" id="spinner"></div>
+      <div class="status" id="status">Initializing Game...</div>
+      <progress value="0" max="100" id="progress" hidden="1"></progress>
+      <button id="start-investigation-btn" class="start-investigation-btn hidden">
+        START INVESTIGATION
+      </button>
+    </div>
   </div>
 
   <div class="modal hidden" id="selectionModal">
@@ -49,6 +57,7 @@
               <button id="settings-btn" class="settings-btn" title="Settings">⚙️</button>
               <div id="settings-panel" class="settings-panel hidden">
                 <button id="mute-btn" class="mute-btn">🔊 Sound On</button>
+                <button id="music-mute-btn" class="mute-btn">🎵 Music On</button>
               </div>
             </div>
           </div>

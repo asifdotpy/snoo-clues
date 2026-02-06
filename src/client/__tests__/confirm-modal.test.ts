@@ -6,7 +6,10 @@ import path from 'path';
 // Mock the bridge module BEFORE importing main
 vi.mock('../bridge/HybridBridge', () => ({
     setupHybridBridge: vi.fn(),
-    dispatchMascotAction: vi.fn()
+    dispatchMascotAction: vi.fn(),
+    syncAudioState: vi.fn(),
+    triggerGameMakerBGM: vi.fn(),
+    pauseGameMakerBGM: vi.fn()
 }));
 
 import { dispatchMascotAction } from '../bridge/HybridBridge';
