@@ -21,11 +21,11 @@ export function setupSettingsUI(): void {
 
   const updateMuteLabel = () => {
     const isMuted = Audio.isMuted();
-    muteBtn.textContent = isMuted ? '🔇 Muted' : '🔊 Sound On';
+    muteBtn.textContent = isMuted ? '🔇 Master Mute: On' : '🔊 Master Mute: Off';
     muteBtn.classList.toggle('muted', isMuted);
 
     const isMusicMuted = Audio.isMusicMuted();
-    musicMuteBtn.textContent = isMusicMuted ? '🔇 Music Off' : '🎵 Music On';
+    musicMuteBtn.textContent = isMusicMuted ? '🔇 Background Music: Off' : '🎵 Background Music: On';
     musicMuteBtn.classList.toggle('muted', isMusicMuted);
   };
 
