@@ -11,6 +11,7 @@ import { GameAPI } from "./api/GameAPI";
 import { normalizeSubredditName } from "../shared/utils/normalization";
 import setupSettingsUI from "./ui/Settings";
 import { Audio } from "./utils/AudioHelper";
+import { AUDIO_CONFIG } from "./config/AudioAssets";
 
 import type {
   GameInitResponse,
@@ -83,24 +84,23 @@ class SnooCluesGame {
   }
 
   private setupAudioAndSettings(): void {
-    // Initialize settings UI (gear button + mute toggle)
+    // Initialize settings UI (integrated into header)
     setupSettingsUI();
     
-    // Register synth sounds using Web Audio API (no external files needed)
-    // Hit: 800Hz for 150ms (bright chime for correct guess)
-    Audio.registerSynth('hit', 800, 150);
+    // Register Background Music
+    Audio.registerMusic(AUDIO_CONFIG.bgm.url);
     
-    // Wrong: 300Hz for 200ms (low beep for incorrect guess)
-    Audio.registerSynth('wrong', 300, 200);
+    // Register Sound Effects and their Synth Fallbacks
+    Object.entries(AUDIO_CONFIG.sfx).forEach(([name, config]) => {
+      // Register the high-quality sound
+      Audio.registerSound(name, config.url);
+
+      // Register the zero-latency synth fallback
+      Audio.registerSynth(name, config.synthFallback.freq, config.synthFallback.duration);
+    });
     
-    // Optional: Register background music from free CDN
-    // Using Freepd.com CC0 music (if available)
-    // For now, skipping music to avoid broken links
-    // To add: Audio.registerMusic('https://cdn.freepd.com/your-track.mp3');
-    
-    // Restore muted setting from localStorage
     const isMuted = Audio.isMuted();
-    console.log(`[Audio] Initialized. Synth sounds ready. Muted: ${isMuted}`);
+    console.log(`[Audio] Modular system initialized. Muted: ${isMuted}`);
   }
 
   private initDOMElements(): void {
@@ -147,6 +147,7 @@ class SnooCluesGame {
     // Handle Case Selection modal close button
     if (this.closeSelectionBtn) {
       this.closeSelectionBtn.addEventListener("click", () => {
+        this.playSound('click');
         this.hideSelectionHub();
       });
     }
@@ -157,50 +158,93 @@ class SnooCluesGame {
 
 
 
-  private playSound(soundType: 'rustle' | 'victory' | 'wrong'): void {
-    // Use the new AudioManager instead of direct Audio construction
-    if (soundType === 'victory') {
-      Audio.playSound('hit');
-    } else if (soundType === 'wrong') {
-      Audio.playSound('wrong');
-    } else if (soundType === 'rustle') {
-      Audio.playSound('hit'); // Use 'hit' sound as fallback for rustle
+  private playSound(soundType: 'rustle' | 'victory' | 'wrong' | 'hit' | 'click'): void {
+    switch (soundType) {
+      case 'victory':
+        Audio.playSound('victory');
+        break;
+      case 'wrong':
+        Audio.playSound('wrong');
+        break;
+      case 'rustle':
+        Audio.playSound('reveal');
+        break;
+      case 'hit':
+        Audio.playSound('hit');
+        break;
+      case 'click':
+        Audio.playSound('click');
+        break;
     }
   }
 
   private attachEventListeners(): void {
     this.revealClue2Btn.addEventListener("click", () => this.revealClue(2));
     this.revealClue3Btn.addEventListener("click", () => this.revealClue(3));
-    this.submitBtn.addEventListener("click", () => this.submitGuess());
+    this.submitBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.submitGuess();
+    });
     this.guessInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.submitGuess();
+      if (e.key === "Enter") {
+        this.playSound('click');
+        this.submitGuess();
+      }
     });
     this.guessInput.addEventListener("input", () => {
       this.guessInput.value = this.guessInput.value.toLowerCase();
     });
-    this.shareBtn.addEventListener("click", () => this.shareResult());
-    this.closeWinModalBtn.addEventListener("click", () => this.closeModal("win"));
-    this.closePlayedModalBtn.addEventListener("click", () => this.closeModal("played"));
+    this.shareBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.shareResult();
+    });
+    this.closeWinModalBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.closeModal("win");
+    });
+    this.closePlayedModalBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.closeModal("played");
+    });
 
     // Attach listeners to "X" buttons
     const winCloseX = this.winModal.querySelector(".win-close-x");
-    if (winCloseX) winCloseX.addEventListener("click", () => this.closeModal("win"));
+    if (winCloseX) {
+      winCloseX.addEventListener("click", () => {
+        this.playSound('click');
+        this.closeModal("win");
+      });
+    }
 
     const playedCloseX = this.playedModal.querySelector(".played-close-x");
-    if (playedCloseX) playedCloseX.addEventListener("click", () => this.closeModal("played"));
+    if (playedCloseX) {
+      playedCloseX.addEventListener("click", () => {
+        this.playSound('click');
+        this.closeModal("played");
+      });
+    }
 
     this.confirmYesBtn.addEventListener("click", () => {
+      this.playSound('click');
       this.closeModal("confirm");
       this.executeBackToSelection(true);
     });
 
     this.confirmNoBtn.addEventListener("click", () => {
+      this.playSound('click');
       this.closeModal("confirm");
     });
 
-    this.startDailyBtn.addEventListener("click", () => this.initGame('daily'));
-    this.startColdBtn.addEventListener("click", () => this.initGame('unlimited'));
+    this.startDailyBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.initGame('daily');
+    });
+    this.startColdBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.initGame('unlimited');
+    });
     this.keepTrainingBtn.addEventListener("click", () => {
+      this.playSound('click');
       const wasUnlimited = this.currentGameMode === 'unlimited';
       this.closeModal("win");
       if (!wasUnlimited) {
@@ -210,10 +254,14 @@ class SnooCluesGame {
     // Connect Change Case Type button
     const backBtn = document.getElementById("backToSelection");
     if (backBtn) {
-      backBtn.addEventListener("click", () => this.goBackToSelection());
+      backBtn.addEventListener("click", () => {
+        this.playSound('click');
+        this.goBackToSelection();
+      });
     }
 
     this.playedToColdBtn.addEventListener("click", () => {
+      this.playSound('click');
       this.closeModal("played");
       this.initGame('unlimited');
     });
@@ -248,6 +296,9 @@ class SnooCluesGame {
       dispatchMascotAction('switch_mode');
     }
 
+    // Stop music when returning to hub
+    Audio.pauseMusic();
+
     this.resetGameUI();
     this.showSelectionHub();
   }
@@ -275,6 +326,9 @@ class SnooCluesGame {
     this.resetGameUI();
     this.currentGameMode = mode;
     this.hideSelectionHub();
+
+    // Start background music
+    Audio.playMusic();
 
     // Toggle aesthetics
     if (mode === 'unlimited') {

@@ -135,6 +135,12 @@
   z-index: 10;
 }
 
+.header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .back-btn {
   background: none;
   border: none;

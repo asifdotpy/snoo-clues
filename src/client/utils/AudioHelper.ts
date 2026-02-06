@@ -4,8 +4,12 @@
  * - Supports HTML Audio elements for background music from CDN
  * - Persists mute state to localStorage under `snoo_audio_muted`
  */
+
+import { syncAudioState } from '../bridge/HybridBridge';
+
 export class AudioManager {
   private sounds: Map<string, HTMLAudioElement> = new Map();
+  private failedSounds: Set<string> = new Set();
   private synths: Map<string, { freq: number; duration: number }> = new Map();
   private music?: HTMLAudioElement;
   private mutedKey = 'snoo_audio_muted';
@@ -29,6 +33,23 @@ export class AudioManager {
     } catch (e) {
       // noop - Web Audio not supported
     }
+
+    // Add global listener to resume AudioContext on first interaction
+    if (typeof document !== 'undefined') {
+      const resume = () => {
+        if (this.audioContext?.state === 'suspended') {
+          this.audioContext.resume();
+        }
+        // Also try to play music if it should be playing
+        if (!this.muted && this.music && this.music.paused && this.music.autoplay) {
+          this.music.play().catch(() => {});
+        }
+        document.removeEventListener('click', resume);
+        document.removeEventListener('keydown', resume);
+      };
+      document.addEventListener('click', resume);
+      document.addEventListener('keydown', resume);
+    }
   }
 
   /**
@@ -48,9 +69,16 @@ export class AudioManager {
       const a = new ctor(src);
       a.preload = 'auto';
       a.muted = this.muted;
+
+      // Handle loading errors
+      a.onerror = () => {
+        console.warn(`[Audio] Failed to load sound: ${name} from ${src}. Falling back to synth.`);
+        this.failedSounds.add(name);
+      };
+
       this.sounds.set(name, a);
     } catch (e) {
-      // noop
+      console.error(`[Audio] Error registering sound ${name}:`, e);
     }
   }
 
@@ -63,33 +91,52 @@ export class AudioManager {
         this.music.loop = true;
         this.music.preload = 'auto';
         this.music.muted = this.muted;
+        this.music.onerror = () => {
+          console.warn(`[Audio] Background music failed to load from ${src}`);
+          this.music = undefined;
+        };
       }
     } catch (e) {
-      // noop
+      console.error('[Audio] Error registering music:', e);
     }
   }
 
   /**
-   * Play a synthetic tone or loaded sound
+   * Play a loaded sound or fallback to synthetic tone
    */
   playSound(name: string): void {
     if (this.muted) return;
 
-    // Try synth first
+    // 1. Try playing the HTML Audio element if it hasn't failed
+    const s = this.sounds.get(name);
+    if (s && !this.failedSounds.has(name)) {
+      try {
+        s.currentTime = 0;
+        const playPromise = s.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // If play fails (e.g. 404 discovered during play), fall back to synth
+            this.failedSounds.add(name);
+            this.playSynthFromMap(name);
+          });
+        }
+        return;
+      } catch (e) {
+        this.failedSounds.add(name);
+      }
+    }
+
+    // 2. If sound element missing or failed, use synth fallback
+    this.playSynthFromMap(name);
+  }
+
+  /**
+   * Internal helper to play synth by name from the synths map
+   */
+  private playSynthFromMap(name: string): void {
     const synth = this.synths.get(name);
     if (synth) {
       this.playSynth(synth.freq, synth.duration);
-      return;
-    }
-
-    // Fall back to HTML Audio
-    const s = this.sounds.get(name);
-    if (!s) return;
-    try {
-      s.currentTime = 0;
-      void s.play();
-    } catch (e) {
-      // ignore play errors
     }
   }
 
@@ -151,14 +198,30 @@ export class AudioManager {
     this.muted = v;
     try {
       this.sounds.forEach(s => (s.muted = v));
-      if (this.music) this.music.muted = v;
+      if (this.music) {
+        this.music.muted = v;
+        // If we are unmuting and music was intended to be playing, ensure it is
+        // Note: Browsers handle the 'muted' attribute on the element,
+        // so we don't strictly need to pause/play here unless we want to stop loading.
+      }
       localStorage.setItem(this.mutedKey, String(v));
-    } catch (e) {}
-    if (v) this.pauseMusic(); else this.playMusic();
+    } catch (e) {
+      console.warn('[Audio] Failed to persist mute state:', e);
+    }
+
+    // Synchronize with GameMaker mascot system
+    syncAudioState(v);
   }
 
   toggleMuted(): void {
     this.setMuted(!this.muted);
+  }
+
+  /**
+   * Synchronize the current state with external systems (like GameMaker)
+   */
+  sync(): void {
+    syncAudioState(this.muted);
   }
 
   isMuted(): boolean {

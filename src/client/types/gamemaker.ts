@@ -39,4 +39,10 @@ declare global {
  */
 declare function gmCallback_mascot_react(actionType: string): void;
 
+/**
+ * GameMaker callback function to set the audio state (muted/unmuted)
+ * This allows the TS layer to control sounds played within the GameMaker WASM
+ */
+declare function gmCallback_set_audio_state(isMuted: boolean): void;
+
 export { };
