@@ -83,24 +83,25 @@ class SnooCluesGame {
   }
 
   private setupAudioAndSettings(): void {
-    // Initialize settings UI (gear button + mute toggle)
+    // Initialize settings UI (integrated into header)
     setupSettingsUI();
     
-    // Register synth sounds using Web Audio API (no external files needed)
-    // Hit: 800Hz for 150ms (bright chime for correct guess)
-    Audio.registerSynth('hit', 800, 150);
+    // 1. Register synth sounds (Web Audio API fallback - zero latency)
+    Audio.registerSynth('hit-synth', 800, 150);
+    Audio.registerSynth('wrong-synth', 300, 200);
     
-    // Wrong: 300Hz for 200ms (low beep for incorrect guess)
-    Audio.registerSynth('wrong', 300, 200);
+    // 2. Register high-quality audio from CDN (Community Edition/CC0)
+    // Background Music: Mysterious Detective Theme
+    Audio.registerMusic('https://cdn.pixabay.com/audio/2022/03/15/audio_73147814a0.mp3');
     
-    // Optional: Register background music from free CDN
-    // Using Freepd.com CC0 music (if available)
-    // For now, skipping music to avoid broken links
-    // To add: Audio.registerMusic('https://cdn.freepd.com/your-track.mp3');
+    // Sound Effects
+    Audio.registerSound('hit', 'https://www.soundjay.com/buttons/sounds/button-3.mp3');
+    Audio.registerSound('wrong', 'https://www.soundjay.com/buttons/sounds/button-10.mp3');
+    Audio.registerSound('reveal', 'https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3');
+    Audio.registerSound('victory', 'https://www.soundjay.com/misc/sounds/bell-ringing-01.mp3');
     
-    // Restore muted setting from localStorage
     const isMuted = Audio.isMuted();
-    console.log(`[Audio] Initialized. Synth sounds ready. Muted: ${isMuted}`);
+    console.log(`[Audio] System initialized. Muted: ${isMuted}`);
   }
 
   private initDOMElements(): void {
@@ -157,14 +158,20 @@ class SnooCluesGame {
 
 
 
-  private playSound(soundType: 'rustle' | 'victory' | 'wrong'): void {
-    // Use the new AudioManager instead of direct Audio construction
-    if (soundType === 'victory') {
-      Audio.playSound('hit');
-    } else if (soundType === 'wrong') {
-      Audio.playSound('wrong');
-    } else if (soundType === 'rustle') {
-      Audio.playSound('hit'); // Use 'hit' sound as fallback for rustle
+  private playSound(soundType: 'rustle' | 'victory' | 'wrong' | 'hit'): void {
+    switch (soundType) {
+      case 'victory':
+        Audio.playSound('victory');
+        break;
+      case 'wrong':
+        Audio.playSound('wrong');
+        break;
+      case 'rustle':
+        Audio.playSound('reveal');
+        break;
+      case 'hit':
+        Audio.playSound('hit');
+        break;
     }
   }
 
@@ -248,6 +255,9 @@ class SnooCluesGame {
       dispatchMascotAction('switch_mode');
     }
 
+    // Stop music when returning to hub
+    Audio.pauseMusic();
+
     this.resetGameUI();
     this.showSelectionHub();
   }
@@ -275,6 +285,9 @@ class SnooCluesGame {
     this.resetGameUI();
     this.currentGameMode = mode;
     this.hideSelectionHub();
+
+    // Start background music
+    Audio.playMusic();
 
     // Toggle aesthetics
     if (mode === 'unlimited') {

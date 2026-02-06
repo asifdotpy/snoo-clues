@@ -32,3 +32,19 @@ export function dispatchMascotAction(actionType: string): void {
         window.dispatchMascotAction(actionType);
     }
 }
+
+/**
+ * Synchronize the audio state (muted/unmuted) with GameMaker
+ * @param isMuted - Whether the audio should be muted
+ */
+export function syncAudioState(isMuted: boolean): void {
+    console.log(`[Hybrid Bridge] Sync Audio State: ${isMuted ? 'MUTED' : 'UNMUTED'}`);
+
+    if (typeof gmCallback_set_audio_state === 'function') {
+        gmCallback_set_audio_state(isMuted);
+    } else {
+        // Fallback: some GameMaker versions might use dispatchMascotAction for everything
+        dispatchMascotAction(isMuted ? 'mute' : 'unmute');
+        console.warn('[Hybrid Bridge] gmCallback_set_audio_state not found, fell back to mascot action');
+    }
+}

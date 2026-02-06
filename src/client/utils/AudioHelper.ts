@@ -4,6 +4,9 @@
  * - Supports HTML Audio elements for background music from CDN
  * - Persists mute state to localStorage under `snoo_audio_muted`
  */
+
+import { syncAudioState } from '../bridge/HybridBridge';
+
 export class AudioManager {
   private sounds: Map<string, HTMLAudioElement> = new Map();
   private synths: Map<string, { freq: number; duration: number }> = new Map();
@@ -151,14 +154,30 @@ export class AudioManager {
     this.muted = v;
     try {
       this.sounds.forEach(s => (s.muted = v));
-      if (this.music) this.music.muted = v;
+      if (this.music) {
+        this.music.muted = v;
+        // If we are unmuting and music was intended to be playing, ensure it is
+        // Note: Browsers handle the 'muted' attribute on the element,
+        // so we don't strictly need to pause/play here unless we want to stop loading.
+      }
       localStorage.setItem(this.mutedKey, String(v));
-    } catch (e) {}
-    if (v) this.pauseMusic(); else this.playMusic();
+    } catch (e) {
+      console.warn('[Audio] Failed to persist mute state:', e);
+    }
+
+    // Synchronize with GameMaker mascot system
+    syncAudioState(v);
   }
 
   toggleMuted(): void {
     this.setMuted(!this.muted);
+  }
+
+  /**
+   * Synchronize the current state with external systems (like GameMaker)
+   */
+  sync(): void {
+    syncAudioState(this.muted);
   }
 
   isMuted(): boolean {

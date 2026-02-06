@@ -1,63 +1,62 @@
 import { Audio } from '../utils/AudioHelper';
 
 /**
- * Minimal settings UI scaffolding.
- * - Adds a floating gear button that toggles a small panel with a mute control.
- * - Does not assume any specific CSS; keep markup and IDs stable for styling.
+ * Settings UI Handler
+ * - Connects to existing DOM elements for settings and mute control.
+ * - Manages the visibility of the settings panel.
+ * - Syncs the UI state with the AudioManager.
  */
 export function setupSettingsUI(): void {
   if (typeof document === 'undefined') return;
 
-  const existing = document.getElementById('snoo-settings-root');
-  if (existing) return;
+  const settingsBtn = document.getElementById('settings-btn') as HTMLButtonElement;
+  const settingsPanel = document.getElementById('settings-panel');
+  const muteBtn = document.getElementById('mute-btn') as HTMLButtonElement;
 
-  const root = document.createElement('div');
-  root.id = 'snoo-settings-root';
-  root.style.position = 'fixed';
-  root.style.right = '12px';
-  root.style.top = '12px';
-  root.style.zIndex = '9999';
-
-  const btn = document.createElement('button');
-  btn.id = 'snoo-settings-btn';
-  btn.title = 'Settings';
-  btn.textContent = '⚙️';
-  btn.style.fontSize = '18px';
-  btn.style.padding = '6px';
-
-  const panel = document.createElement('div');
-  panel.id = 'snoo-settings-panel';
-  panel.style.display = 'none';
-  panel.style.marginTop = '8px';
-  panel.style.background = 'rgba(0,0,0,0.7)';
-  panel.style.color = 'white';
-  panel.style.padding = '8px';
-  panel.style.borderRadius = '6px';
-
-  const muteBtn = document.createElement('button');
-  muteBtn.id = 'snoo-mute-btn';
-  muteBtn.style.padding = '6px';
-
-  function updateMuteLabel() {
-    muteBtn.textContent = Audio.isMuted() ? '🔇 Muted' : '🔊 Sound On';
+  if (!settingsBtn || !settingsPanel || !muteBtn) {
+    console.warn('[Settings] Required DOM elements for settings not found');
+    return;
   }
 
-  muteBtn.addEventListener('click', () => {
+  const updateMuteLabel = () => {
+    const isMuted = Audio.isMuted();
+    muteBtn.textContent = isMuted ? '🔇 Muted' : '🔊 Sound On';
+    muteBtn.classList.toggle('muted', isMuted);
+  };
+
+  muteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     Audio.toggleMuted();
     updateMuteLabel();
   });
 
-  updateMuteLabel();
-  panel.appendChild(muteBtn);
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = settingsPanel.classList.contains('hidden');
 
-  btn.addEventListener('click', () => {
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    updateMuteLabel();
+    // Toggle panel
+    if (isHidden) {
+      settingsPanel.classList.remove('hidden');
+      updateMuteLabel();
+    } else {
+      settingsPanel.classList.add('hidden');
+    }
   });
 
-  root.appendChild(btn);
-  root.appendChild(panel);
-  document.body.appendChild(root);
+  // Close panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!settingsPanel.classList.contains('hidden') &&
+        !settingsPanel.contains(e.target as Node) &&
+        e.target !== settingsBtn) {
+      settingsPanel.classList.add('hidden');
+    }
+  });
+
+  // Initial UI sync
+  updateMuteLabel();
+
+  // Sync Audio context and GameMaker state on first interaction
+  Audio.sync();
 }
 
 export default setupSettingsUI;
