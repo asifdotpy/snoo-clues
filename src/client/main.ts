@@ -11,6 +11,7 @@ import { GameAPI } from "./api/GameAPI";
 import { normalizeSubredditName } from "../shared/utils/normalization";
 import setupSettingsUI from "./ui/Settings";
 import { Audio } from "./utils/AudioHelper";
+import { AUDIO_CONFIG } from "./config/AudioAssets";
 
 import type {
   GameInitResponse,
@@ -86,22 +87,20 @@ class SnooCluesGame {
     // Initialize settings UI (integrated into header)
     setupSettingsUI();
     
-    // 1. Register synth sounds (Web Audio API fallback - zero latency)
-    Audio.registerSynth('hit-synth', 800, 150);
-    Audio.registerSynth('wrong-synth', 300, 200);
+    // Register Background Music
+    Audio.registerMusic(AUDIO_CONFIG.bgm.url);
     
-    // 2. Register high-quality audio from CDN (Community Edition/CC0)
-    // Background Music: Mysterious Detective Theme
-    Audio.registerMusic('https://cdn.pixabay.com/audio/2022/03/15/audio_73147814a0.mp3');
-    
-    // Sound Effects
-    Audio.registerSound('hit', 'https://www.soundjay.com/buttons/sounds/button-3.mp3');
-    Audio.registerSound('wrong', 'https://www.soundjay.com/buttons/sounds/button-10.mp3');
-    Audio.registerSound('reveal', 'https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3');
-    Audio.registerSound('victory', 'https://www.soundjay.com/misc/sounds/bell-ringing-01.mp3');
+    // Register Sound Effects and their Synth Fallbacks
+    Object.entries(AUDIO_CONFIG.sfx).forEach(([name, config]) => {
+      // Register the high-quality sound
+      Audio.registerSound(name, config.url);
+
+      // Register the zero-latency synth fallback
+      Audio.registerSynth(name, config.synthFallback.freq, config.synthFallback.duration);
+    });
     
     const isMuted = Audio.isMuted();
-    console.log(`[Audio] System initialized. Muted: ${isMuted}`);
+    console.log(`[Audio] Modular system initialized. Muted: ${isMuted}`);
   }
 
   private initDOMElements(): void {
