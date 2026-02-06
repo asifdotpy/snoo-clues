@@ -6,6 +6,7 @@
  */
 
 import '../types/gamemaker';
+import { Audio } from '../utils/AudioHelper';
 
 /**
  * Manifest structure for GameMaker runner
@@ -25,6 +26,7 @@ export default class GameLoader {
     private spinnerElement: HTMLElement;
     private canvasElement: HTMLCanvasElement;
     private loadingElement: HTMLElement;
+    private startButton: HTMLButtonElement;
     private startingHeight?: number;
     private startingWidth?: number;
     private startingAspect?: number;
@@ -35,6 +37,7 @@ export default class GameLoader {
         this.spinnerElement = document.getElementById("spinner") as HTMLElement;
         this.canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
         this.loadingElement = document.getElementById("loading") as HTMLElement;
+        this.startButton = document.getElementById("start-investigation-btn") as HTMLButtonElement;
 
         this.canvasElement.addEventListener("click", () => {
             this.canvasElement.focus();
@@ -42,7 +45,20 @@ export default class GameLoader {
 
         this.setupModule();
         this.setupResizeObserver();
+        this.setupStartButton();
         this.loadGame();
+    }
+
+    private setupStartButton() {
+        this.startButton.addEventListener("click", () => {
+            console.log("[GameLoader] Start Investigation clicked");
+            Audio.playMusic();
+
+            this.loadingElement.classList.add("hidden");
+            setTimeout(() => {
+                this.loadingElement.style.display = "none";
+            }, 500);
+        });
     }
 
     private setupModule() {
@@ -73,19 +89,22 @@ export default class GameLoader {
                 window.Module.setStatus.last.text = text;
 
                 if (m) {
-                    const val = parseInt(m[2]) * 100;
-                    const max = parseInt(m[3]) * 100;
-                    this.progressElement.value = val;
-                    this.progressElement.max = max;
+                    const val = parseInt(m[2]);
+                    const max = parseInt(m[3]);
+                    const percent = Math.round((val / max) * 100);
+
+                    this.progressElement.value = val * 100;
+                    this.progressElement.max = max * 100;
                     this.progressElement.hidden = false;
                     this.spinnerElement.hidden = false;
+                    this.statusElement.innerHTML = `Loading: ${percent}%`;
                 } else {
                     this.progressElement.value = 0;
                     this.progressElement.max = 0;
                     this.progressElement.hidden = true;
                     if (!text) this.spinnerElement.hidden = true;
+                    this.statusElement.innerHTML = text;
                 }
-                this.statusElement.innerHTML = text;
             }
         };
         window.Module.setStatus("Initializing Game...");
@@ -93,14 +112,11 @@ export default class GameLoader {
 
     private ensureAspectRatio() {
         if (this.startingAspect) {
-            // "System Thinking" - give user time to see the presentation
-            setTimeout(() => {
-                this.loadingElement.classList.add("hidden");
-                // Cleanup display after transition
-                setTimeout(() => {
-                    this.loadingElement.style.display = "none";
-                }, 500);
-            }, 800);
+            console.log("[GameLoader] Engine ready, showing start button");
+            this.statusElement.innerHTML = "Case Files Ready.";
+            this.spinnerElement.hidden = true;
+            this.progressElement.hidden = true;
+            this.startButton.classList.remove("hidden");
         }
     }
 
@@ -128,18 +144,17 @@ export default class GameLoader {
                 console.log("Loading game with manifest:", manifest);
             }
 
-            // Safety fallback: ensure loading screen hides eventually
+            // Safety fallback: ensure loading screen shows start button eventually
             // Increased to 10 seconds per audit requirements
             setTimeout(() => {
-                if (this.loadingElement.style.display !== "none") {
+                if (this.startButton.classList.contains("hidden") && this.loadingElement.style.display !== "none") {
                     console.log("[GameLoader] Timeout: Game engine failed to signal completion.");
                     this.statusElement.innerHTML = "Engine loading slowly... <button onclick=\"location.reload()\" style=\"color: #ff4500; background: none; border: 1px solid #ff4500; padding: 2px 5px; cursor: pointer; font-family: inherit;\">Retry?</button>";
 
-                    // Allow another 5 seconds before forcing hide
+                    // Allow another 5 seconds before showing button anyway
                     setTimeout(() => {
-                        if (this.loadingElement.style.display !== "none") {
-                            this.loadingElement.classList.add("hidden");
-                            setTimeout(() => { this.loadingElement.style.display = "none"; }, 500);
+                        if (this.startButton.classList.contains("hidden") && this.loadingElement.style.display !== "none") {
+                             this.ensureAspectRatio();
                         }
                     }, 5000);
                 }

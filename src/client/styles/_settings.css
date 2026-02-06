@@ -43,6 +43,9 @@
   min-width: 160px;
   z-index: var(--z-modal);
   animation: slideIn 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .settings-panel.hidden {

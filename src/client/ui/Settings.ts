@@ -12,8 +12,9 @@ export function setupSettingsUI(): void {
   const settingsBtn = document.getElementById('settings-btn') as HTMLButtonElement;
   const settingsPanel = document.getElementById('settings-panel');
   const muteBtn = document.getElementById('mute-btn') as HTMLButtonElement;
+  const musicMuteBtn = document.getElementById('music-mute-btn') as HTMLButtonElement;
 
-  if (!settingsBtn || !settingsPanel || !muteBtn) {
+  if (!settingsBtn || !settingsPanel || !muteBtn || !musicMuteBtn) {
     console.warn('[Settings] Required DOM elements for settings not found');
     return;
   }
@@ -22,12 +23,23 @@ export function setupSettingsUI(): void {
     const isMuted = Audio.isMuted();
     muteBtn.textContent = isMuted ? '🔇 Muted' : '🔊 Sound On';
     muteBtn.classList.toggle('muted', isMuted);
+
+    const isMusicMuted = Audio.isMusicMuted();
+    musicMuteBtn.textContent = isMusicMuted ? '🔇 Music Off' : '🎵 Music On';
+    musicMuteBtn.classList.toggle('muted', isMusicMuted);
   };
 
   muteBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     Audio.playSound('click');
     Audio.toggleMuted();
+    updateMuteLabel();
+  });
+
+  musicMuteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    Audio.playSound('click');
+    Audio.toggleMusicMuted();
     updateMuteLabel();
   });
 

@@ -13,15 +13,20 @@ export class AudioManager {
   private synths: Map<string, { freq: number; duration: number }> = new Map();
   private music?: HTMLAudioElement;
   private mutedKey = 'snoo_audio_muted';
+  private musicMutedKey = 'snoo_music_muted';
   private muted = false;
+  private musicMuted = false;
   private audioContext?: AudioContext;
 
   constructor() {
     try {
       const saved = localStorage.getItem(this.mutedKey);
       this.muted = saved === 'true';
+      const savedMusic = localStorage.getItem(this.musicMutedKey);
+      this.musicMuted = savedMusic === 'true';
     } catch (e) {
       this.muted = false;
+      this.musicMuted = false;
     }
     
     // Initialize Web Audio Context lazily (browsers require user gesture for audioContext.resume())
@@ -97,7 +102,7 @@ export class AudioManager {
       if (this.music) {
         this.music.loop = true;
         this.music.preload = 'auto';
-        this.music.muted = this.muted;
+        this.music.muted = this.muted || this.musicMuted;
         this.music.volume = 0.5; // Set reasonable default volume
         this.music.crossOrigin = 'anonymous'; // ← Critical for CORS
         console.log(`[Audio] Music registered from: ${src}`);
@@ -192,8 +197,8 @@ export class AudioManager {
   }
 
   playMusic(): void {
-    if (this.muted) {
-      console.log('[Audio] Music playback skipped - audio is muted');
+    if (this.muted || this.musicMuted) {
+      console.log('[Audio] Music playback skipped - audio or music is muted');
       return;
     }
     if (!this.music) {
@@ -246,10 +251,7 @@ export class AudioManager {
     try {
       this.sounds.forEach(s => (s.muted = v));
       if (this.music) {
-        this.music.muted = v;
-        // If we are unmuting and music was intended to be playing, ensure it is
-        // Note: Browsers handle the 'muted' attribute on the element,
-        // so we don't strictly need to pause/play here unless we want to stop loading.
+        this.music.muted = this.muted || this.musicMuted;
       }
       localStorage.setItem(this.mutedKey, String(v));
     } catch (e) {
@@ -264,6 +266,27 @@ export class AudioManager {
     this.setMuted(!this.muted);
   }
 
+  setMusicMuted(v: boolean): void {
+    this.musicMuted = v;
+    try {
+      if (this.music) {
+        this.music.muted = this.muted || this.musicMuted;
+
+        // If unmuting music, try to play it
+        if (!this.music.muted && this.music.paused) {
+          this.playMusic();
+        }
+      }
+      localStorage.setItem(this.musicMutedKey, String(v));
+    } catch (e) {
+      console.warn('[Audio] Failed to persist music mute state:', e);
+    }
+  }
+
+  toggleMusicMuted(): void {
+    this.setMusicMuted(!this.musicMuted);
+  }
+
   /**
    * Synchronize the current state with external systems (like GameMaker)
    */
@@ -273,6 +296,10 @@ export class AudioManager {
 
   isMuted(): boolean {
     return this.muted;
+  }
+
+  isMusicMuted(): boolean {
+    return this.musicMuted;
   }
 
   async preloadAll(): Promise<void> {

@@ -296,9 +296,6 @@ class SnooCluesGame {
       dispatchMascotAction('switch_mode');
     }
 
-    // Stop music when returning to hub
-    Audio.pauseMusic();
-
     this.resetGameUI();
     this.showSelectionHub();
   }
