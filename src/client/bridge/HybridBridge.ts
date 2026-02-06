@@ -48,3 +48,29 @@ export function syncAudioState(isMuted: boolean): void {
         console.warn('[Hybrid Bridge] gmCallback_set_audio_state not found, fell back to mascot action');
     }
 }
+
+/**
+ * Trigger background music playback in GameMaker (if available)
+ */
+export function triggerGameMakerBGM(): void {
+    console.log('[Hybrid Bridge] Trigger BGM');
+    
+    if (typeof gmCallback_play_bgm === 'function') {
+        gmCallback_play_bgm();
+    } else {
+        console.warn('[Hybrid Bridge] gmCallback_play_bgm not found - BGM will play from HTML5 audio only');
+    }
+}
+
+/**
+ * Trigger background music pause in GameMaker (if available)
+ */
+export function pauseGameMakerBGM(): void {
+    console.log('[Hybrid Bridge] Pause BGM');
+    
+    if (typeof gmCallback_pause_bgm === 'function') {
+        gmCallback_pause_bgm();
+    } else {
+        console.warn('[Hybrid Bridge] gmCallback_pause_bgm not found');
+    }
+}

@@ -45,4 +45,16 @@ declare function gmCallback_mascot_react(actionType: string): void;
  */
 declare function gmCallback_set_audio_state(isMuted: boolean): void;
 
+/**
+ * GameMaker callback function to play background music
+ * Allows the TS layer to trigger BGM playback in GameMaker
+ */
+declare function gmCallback_play_bgm(): void;
+
+/**
+ * GameMaker callback function to pause background music
+ * Allows the TS layer to stop BGM in GameMaker
+ */
+declare function gmCallback_pause_bgm(): void;
+
 export { };

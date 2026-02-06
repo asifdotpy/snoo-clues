@@ -5,7 +5,7 @@
  * - Persists mute state to localStorage under `snoo_audio_muted`
  */
 
-import { syncAudioState } from '../bridge/HybridBridge';
+import { syncAudioState, triggerGameMakerBGM, pauseGameMakerBGM } from '../bridge/HybridBridge';
 
 export class AudioManager {
   private sounds: Map<string, HTMLAudioElement> = new Map();
@@ -38,17 +38,20 @@ export class AudioManager {
     if (typeof document !== 'undefined') {
       const resume = () => {
         if (this.audioContext?.state === 'suspended') {
-          this.audioContext.resume();
+          this.audioContext.resume().catch(() => {});
         }
         // Also try to play music if it should be playing
-        if (!this.muted && this.music && this.music.paused && this.music.autoplay) {
-          this.music.play().catch(() => {});
+        if (!this.muted && this.music && this.music.paused) {
+          console.log('[Audio] Resuming music after user interaction');
+          this.music.play().catch((err) => {
+            console.warn('[Audio] Failed to resume music on user interaction:', err);
+          });
         }
-        document.removeEventListener('click', resume);
-        document.removeEventListener('keydown', resume);
+        // Note: We keep listeners active to handle music resume
       };
-      document.addEventListener('click', resume);
-      document.addEventListener('keydown', resume);
+      document.addEventListener('click', resume, true);
+      document.addEventListener('keydown', resume, true);
+      document.addEventListener('touchstart', resume, true);
     }
   }
 
@@ -85,15 +88,25 @@ export class AudioManager {
   registerMusic(src: string): void {
     try {
       const ctor = (globalThis as any).Audio;
-      if (!ctor) return;
+      if (!ctor) {
+        console.warn('[Audio] Audio constructor not available');
+        return;
+      }
       this.music = new ctor(src);
       if (this.music) {
         this.music.loop = true;
         this.music.preload = 'auto';
         this.music.muted = this.muted;
+        this.music.volume = 0.5; // Set reasonable default volume
+        console.log(`[Audio] Music registered from: ${src}`);
+        
         this.music.onerror = () => {
-          console.warn(`[Audio] Background music failed to load from ${src}`);
+          console.error(`[Audio] Background music failed to load from ${src}. Check CORS and URL accessibility.`);
           this.music = undefined;
+        };
+        
+        this.music.oncanplay = () => {
+          console.log('[Audio] BGM is ready to play');
         };
       }
     } catch (e) {
@@ -177,21 +190,53 @@ export class AudioManager {
   }
 
   playMusic(): void {
-    if (this.muted) return;
-    if (!this.music) return;
+    if (this.muted) {
+      console.log('[Audio] Music playback skipped - audio is muted');
+      return;
+    }
+    if (!this.music) {
+      console.warn('[Audio] No music element available - attempting to play via GameMaker only');
+      triggerGameMakerBGM();
+      return;
+    }
     try {
       // Resume audio context if needed
       if (this.audioContext && this.audioContext.state === 'suspended') {
-        this.audioContext.resume().catch(() => {});
+        this.audioContext.resume().catch((e) => {
+          console.warn('[Audio] Failed to resume audio context:', e);
+        });
       }
-      void this.music.play();
-    } catch (e) {}
+      
+      const playPromise = this.music.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('[Audio] BGM playing successfully');
+            // Also trigger GameMaker BGM if available
+            triggerGameMakerBGM();
+          })
+          .catch((err) => {
+            console.warn('[Audio] BGM playback failed:', err);
+            // Still try to trigger GameMaker BGM as fallback
+            triggerGameMakerBGM();
+          });
+      }
+    } catch (e) {
+      console.error('[Audio] Error playing music:', e);
+      triggerGameMakerBGM();
+    }
   }
 
   pauseMusic(): void {
     try {
-      this.music?.pause();
-    } catch (e) {}
+      if (this.music && !this.music.paused) {
+        this.music.pause();
+        console.log('[Audio] BGM paused');
+      }
+      pauseGameMakerBGM();
+    } catch (e) {
+      console.warn('[Audio] Error pausing music:', e);
+    }
   }
 
   setMuted(v: boolean): void {
