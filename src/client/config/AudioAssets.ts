@@ -13,7 +13,9 @@ export interface SoundConfig {
 
 export const AUDIO_CONFIG = {
     bgm: {
-        url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+        // Using self-hosted audio file bundled with the project
+        // Served from public/audio/ directory
+        url: '/audio/bgm.mp3',
         // Music typically doesn't have a synth fallback, but we keep the structure consistent
     },
     sfx: {

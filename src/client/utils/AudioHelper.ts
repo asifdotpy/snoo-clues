@@ -72,6 +72,7 @@ export class AudioManager {
       const a = new ctor(src);
       a.preload = 'auto';
       a.muted = this.muted;
+      a.crossOrigin = 'anonymous'; // ← Critical for CORS
 
       // Handle loading errors
       a.onerror = () => {
@@ -98,6 +99,7 @@ export class AudioManager {
         this.music.preload = 'auto';
         this.music.muted = this.muted;
         this.music.volume = 0.5; // Set reasonable default volume
+        this.music.crossOrigin = 'anonymous'; // ← Critical for CORS
         console.log(`[Audio] Music registered from: ${src}`);
         
         this.music.onerror = () => {
