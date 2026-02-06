@@ -21,6 +21,9 @@
       <div class="spinner" id="spinner"></div>
       <div class="status" id="status">Initializing Game...</div>
       <progress value="0" max="100" id="progress" hidden="1"></progress>
+      <div class="detective-briefing">
+        <p>🔍 Observe 3 clues. Guess the subreddit. Maintain your streak. Good luck, Detective.</p>
+      </div>
       <button id="start-investigation-btn" class="start-investigation-btn hidden">
         START INVESTIGATION
       </button>
@@ -56,8 +59,10 @@
             <div class="settings-container">
               <button id="settings-btn" class="settings-btn" title="Settings">⚙️</button>
               <div id="settings-panel" class="settings-panel hidden">
-                <button id="mute-btn" class="mute-btn">🔊 Sound On</button>
-                <button id="music-mute-btn" class="mute-btn">🎵 Music On</button>
+                <div class="settings-header">Settings</div>
+                <button id="mute-btn" class="mute-btn">🔊 Master Mute: Off</button>
+                <button id="music-mute-btn" class="mute-btn">🎵 Background Music: On</button>
+                <div class="settings-hint">"Master Mute" disables all game audio.</div>
               </div>
             </div>
           </div>

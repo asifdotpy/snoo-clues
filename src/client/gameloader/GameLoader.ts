@@ -76,25 +76,41 @@ export default class GameLoader {
             },
             canvas: this.canvasElement,
             setStatus: (text: string) => {
+                console.log("[GameLoader] setStatus:", text);
                 if (!window.Module.setStatus.last) {
                     window.Module.setStatus.last = { time: Date.now(), text: "" };
                 }
                 if (text === window.Module.setStatus.last.text) return;
 
-                const m = text.match(/([^(]+)\((\d+(?:\.\d+)?)\/(\d+)\)/);
+                // Parsing logic for different engine message formats
+                let percent: number | null = null;
+                let val: number | null = null;
+                let max: number | null = null;
+
+                // Format 1: "Label (10/100)" or just "(10/100)"
+                const bracketMatch = text.match(/\((\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)\)/);
+                if (bracketMatch) {
+                    val = parseFloat(bracketMatch[1]);
+                    max = parseFloat(bracketMatch[2]);
+                    percent = Math.round((val / max) * 100);
+                }
+                // Format 2: "Label 50%" or just "50%"
+                else {
+                    const percentMatch = text.match(/(\d+(?:\.\d+)?)%/);
+                    if (percentMatch) {
+                        percent = Math.round(parseFloat(percentMatch[1]));
+                    }
+                }
+
                 const now = Date.now();
-                if (m && now - window.Module.setStatus.last.time < 30) return;
+                if (percent !== null && now - window.Module.setStatus.last.time < 30) return;
 
                 window.Module.setStatus.last.time = now;
                 window.Module.setStatus.last.text = text;
 
-                if (m) {
-                    const val = parseInt(m[2]);
-                    const max = parseInt(m[3]);
-                    const percent = Math.round((val / max) * 100);
-
-                    this.progressElement.value = val * 100;
-                    this.progressElement.max = max * 100;
+                if (percent !== null) {
+                    this.progressElement.value = percent;
+                    this.progressElement.max = 100;
                     this.progressElement.hidden = false;
                     this.spinnerElement.hidden = false;
                     this.statusElement.innerHTML = `Loading: ${percent}%`;
@@ -116,7 +132,18 @@ export default class GameLoader {
             this.statusElement.innerHTML = "Case Files Ready.";
             this.spinnerElement.hidden = true;
             this.progressElement.hidden = true;
+
+            // Ensure no retry/error messages are visible
+            const retryBtn = this.statusElement.querySelector('button');
+            if (retryBtn) {
+                this.statusElement.innerHTML = "Case Files Ready.";
+            }
+
             this.startButton.classList.remove("hidden");
+        } else {
+            // If aspect ratio not ready, try again in a bit
+            console.log("[GameLoader] Engine ready but aspect ratio missing, retrying...");
+            setTimeout(() => this.ensureAspectRatio(), 100);
         }
     }
 
