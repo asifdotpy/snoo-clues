@@ -16,7 +16,15 @@ import { dispatchMascotAction } from '../bridge/HybridBridge';
 
 // Mock ResizeObserver for JSDOM
 (window as any).ResizeObserver = class {
-    observe() { }
+    callback: any;
+    constructor(callback: any) {
+        this.callback = callback;
+    }
+    observe() {
+        this.callback([{
+            contentRect: { width: 800, height: 600 }
+        }]);
+    }
     unobserve() { }
     disconnect() { }
 };
@@ -47,9 +55,9 @@ describe('Abandon Flow and Modal Behavior', () => {
                         streak: 5,
                         coldCasesSolved: 2,
                         audioAssets: {
-                           rustle: "rustle.mp3",
-                           victory: "victory.mp3",
-                           wrong: "wrong.mp3"
+                            rustle: "rustle.mp3",
+                            victory: "victory.mp3",
+                            wrong: "wrong.mp3"
                         }
                     })
                 });
@@ -76,9 +84,10 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Case Selection close button is visible and functional', async () => {
-        // Click the start investigation button first to transition from splash to menu
-        const startBtn = document.getElementById('start-investigation-btn');
-        fireEvent.click(startBtn!);
+        // Simulate engine load completion to trigger auto-start
+        if ((window as any).Module && (window as any).Module.print) {
+            (window as any).Module.print("Entering main loop.");
+        }
 
         const selectionModal = document.getElementById('selectionModal');
         const closeBtn = document.getElementById('closeSelectionModal');
@@ -94,9 +103,10 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Abandoning a game resets state and UI', async () => {
-        // Click the start investigation button first
-        const startBtn = document.getElementById('start-investigation-btn');
-        fireEvent.click(startBtn!);
+        // Simulate engine load completion to trigger auto-start
+        if ((window as any).Module && (window as any).Module.print) {
+            (window as any).Module.print("Entering main loop.");
+        }
 
         // Pick a mode
         const dailyBtn = document.getElementById('startDailyBtn');
@@ -142,9 +152,10 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Closing Case Selection shows Empty Desk on first open', async () => {
-        // Click the start investigation button first
-        const startBtn = document.getElementById('start-investigation-btn');
-        fireEvent.click(startBtn!);
+        // Simulate engine load completion
+        if ((window as any).Module && (window as any).Module.print) {
+            (window as any).Module.print("Entering main loop.");
+        }
 
         const closeBtn = document.getElementById('closeSelectionModal');
         fireEvent.click(closeBtn!);

@@ -8,8 +8,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        splash: "splash.html",
-        game: "index.html",
+        main: "index.html",
       },
       output: {
         entryFileNames: "[name].js",

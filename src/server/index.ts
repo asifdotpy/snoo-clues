@@ -188,6 +188,7 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
     const score = await redis.zScore(leaderboardKey(postId), username) || 0;
     res.json({
       type: "game_init",
+      username: username,
       clues: puzzle.clues,
       hasPlayedToday: hasPlayed,
       attempts: attempts,
@@ -229,6 +230,7 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
 
     res.json({
       type: "game_init",
+      username: username,
       clues: puzzle.clues,
       hasPlayedToday: false, // Unlimited mode
       attempts: 0,
