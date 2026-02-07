@@ -286,6 +286,21 @@ class SnooCluesGame {
         this.exitToHome();
       });
     }
+
+    if (this.startInvestigationBtn) {
+      this.startInvestigationBtn.addEventListener("click", () => {
+        this.startInvestigationBtn.disabled = true;
+        this.showMainMenu();
+      });
+    }
+  }
+
+  public showMainMenu(): void {
+    console.log("[Navigation] Showing Main Menu (Selection Hub)");
+    this.gameOverlay.classList.remove("hidden");
+    this.selectionModal.classList.remove("hidden");
+    dispatchMascotAction('idle');
+    Audio.playMusic();
   }
 
   private exitToHome(): void {
@@ -308,6 +323,7 @@ class SnooCluesGame {
     // Ensure the start button is visible (it should be if GameLoader is ready)
     if (this.startInvestigationBtn) {
       this.startInvestigationBtn.classList.remove("hidden");
+      this.startInvestigationBtn.disabled = false;
     }
 
     dispatchMascotAction('idle');

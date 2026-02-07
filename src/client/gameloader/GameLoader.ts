@@ -52,11 +52,13 @@ export default class GameLoader {
     private setupStartButton() {
         this.startButton.addEventListener("click", () => {
             console.log("[GameLoader] Start Investigation clicked");
-            Audio.playMusic();
+            this.startButton.disabled = true;
 
             this.loadingElement.classList.add("hidden");
             setTimeout(() => {
-                this.loadingElement.style.display = "none";
+                if (this.loadingElement.classList.contains("hidden")) {
+                    this.loadingElement.style.display = "none";
+                }
             }, 500);
         });
     }
