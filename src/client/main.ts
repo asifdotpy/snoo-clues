@@ -73,6 +73,10 @@ class SnooCluesGame {
   private gameSubtitle!: HTMLElement;
   private currentModeTag!: HTMLElement;
   private playedToColdBtn!: HTMLButtonElement;
+  private exitToHomeBtn!: HTMLButtonElement;
+  private selectionExitToHomeBtn!: HTMLButtonElement;
+  private loadingElement!: HTMLElement;
+  private startInvestigationBtn!: HTMLButtonElement;
 
   constructor() {
     this.initDOMElements();
@@ -86,10 +90,10 @@ class SnooCluesGame {
   private setupAudioAndSettings(): void {
     // Initialize settings UI (integrated into header)
     setupSettingsUI();
-    
+
     // Register Background Music
     Audio.registerMusic(AUDIO_CONFIG.bgm.url);
-    
+
     // Register Sound Effects and their Synth Fallbacks
     Object.entries(AUDIO_CONFIG.sfx).forEach(([name, config]) => {
       // Register the high-quality sound
@@ -98,7 +102,7 @@ class SnooCluesGame {
       // Register the zero-latency synth fallback
       Audio.registerSynth(name, config.synthFallback.freq, config.synthFallback.duration);
     });
-    
+
     const isMuted = Audio.isMuted();
     console.log(`[Audio] Modular system initialized. Muted: ${isMuted}`);
   }
@@ -143,6 +147,10 @@ class SnooCluesGame {
     this.closeSelectionBtn = document.getElementById("closeSelectionModal") as HTMLButtonElement;
     this.currentModeTag = document.getElementById("currentModeTag")!;
     this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
+    this.exitToHomeBtn = document.getElementById("exitToHome") as HTMLButtonElement;
+    this.selectionExitToHomeBtn = document.getElementById("selectionExitToHome") as HTMLButtonElement;
+    this.loadingElement = document.getElementById("loading")!;
+    this.startInvestigationBtn = document.getElementById("start-investigation-btn") as HTMLButtonElement;
 
     // Handle Case Selection modal close button
     if (this.closeSelectionBtn) {
@@ -155,8 +163,6 @@ class SnooCluesGame {
     // Setup Hybrid Bridge for mascot communication
     setupHybridBridge();
   }
-
-
 
   private playSound(soundType: 'rustle' | 'victory' | 'wrong' | 'hit' | 'click'): void {
     switch (soundType) {
@@ -265,6 +271,46 @@ class SnooCluesGame {
       this.closeModal("played");
       this.initGame('unlimited');
     });
+
+    // New Exit to Home listeners
+    if (this.exitToHomeBtn) {
+      this.exitToHomeBtn.addEventListener("click", () => {
+        this.playSound('click');
+        this.exitToHome();
+      });
+    }
+
+    if (this.selectionExitToHomeBtn) {
+      this.selectionExitToHomeBtn.addEventListener("click", () => {
+        this.playSound('click');
+        this.exitToHome();
+      });
+    }
+  }
+
+  private exitToHome(): void {
+    console.log("[Navigation] Exiting to Home (Main Menu)");
+
+    // Stop all music and activity
+    Audio.pauseMusic();
+
+    // Reset game state
+    this.resetGameUI();
+
+    // Hide game application layers
+    this.gameOverlay.classList.add("hidden");
+    this.selectionModal.classList.add("hidden");
+
+    // Show loading screen / splash
+    this.loadingElement.style.display = "flex";
+    this.loadingElement.classList.remove("hidden");
+
+    // Ensure the start button is visible (it should be if GameLoader is ready)
+    if (this.startInvestigationBtn) {
+      this.startInvestigationBtn.classList.remove("hidden");
+    }
+
+    dispatchMascotAction('idle');
   }
 
   private goBackToSelection(): void {
@@ -317,8 +363,6 @@ class SnooCluesGame {
     this.gameOverlay.classList.remove("hidden");
   }
 
-
-
   private async initGame(mode: 'daily' | 'unlimited'): Promise<void> {
     this.resetGameUI();
     this.currentGameMode = mode;
@@ -350,10 +394,6 @@ class SnooCluesGame {
       this.rank = data.rank || "Rookie Sleuth";
       this.coldCasesSolved = data.coldCasesSolved;
       this.audioAssets = data.audioAssets;
-
-      // If unlimited, the "answer" is stored in targetSubreddit to check locally or on server
-      // But we'll let the server handle validation for security
-      // The random endpoint doesn't send the answer, only clues.
 
       this.updateGameUI();
 

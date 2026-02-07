@@ -55,3 +55,16 @@
     color: #333;
     font-style: italic;
 }
+
+.selection-footer {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px dashed #ccc;
+    text-align: center;
+}
+
+.header-left-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
