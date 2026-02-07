@@ -20,17 +20,11 @@ import { ALL_PUZZLES } from "./data/puzzles.js";
 import {
   normalizeSubredditName,
   getDetectiveRank,
-  calculateNewStreak
+  calculateNewStreak,
+  getTodaysPuzzleInternal
 } from "./logic.js";
 
-// ##########################################################################
-// # DAILY PUZZLES DATA
-// ##########################################################################
-
-const DAILY_PUZZLES: DailyPuzzle[] = ALL_PUZZLES.slice(0, 10).map((p, i) => ({
-  ...p,
-  date: new Date(new Date("2026-02-01").getTime() + i * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-}));
+// Daily puzzles are dynamically selected from ALL_PUZZLES based on the current date
 
 function streakKey(postId: string, username: string): string {
   return `streak:${postId}:${username}`;
@@ -83,9 +77,9 @@ function leaderboardKey(postId: string): string {
   return `leaderboard:${postId}`;
 }
 
-async function incrementUserScore(postId: string, username: string): Promise<number> {
+async function incrementUserScore(postId: string, username: string, amount: number = 1): Promise<number> {
   const key = leaderboardKey(postId);
-  await redis.zIncrBy(key, 1, username);
+  await redis.zIncrBy(key, amount, username);
   const score = await redis.zScore(key, username);
   return score || 0;
 }
@@ -101,9 +95,7 @@ async function getTopDetectives(postId: string): Promise<LeaderboardEntry[]> {
 
 
 function getTodaysPuzzle(): DailyPuzzle {
-  const today = new Date().toISOString().split('T')[0];
-  const puzzle = DAILY_PUZZLES.find(p => p.date === today);
-  return puzzle ?? DAILY_PUZZLES[0];
+  return getTodaysPuzzleInternal(new Date(), ALL_PUZZLES);
 }
 
 function getTodayDateKey(): string {
@@ -303,12 +295,13 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     if (isCorrect) {
       if (isUnlimited) {
         coldCasesSolved = await incrementColdCases(postId, username);
-        // Cold cases still increment rank score but not streak
-        score = await incrementUserScore(postId, username);
+        // Cold cases still increment rank score but not streak. Award 1 point.
+        score = await incrementUserScore(postId, username, 1);
       } else {
         await markAsWinner(postId, username, today);
         streak = await updateStreak(postId, username, today);
-        score = await incrementUserScore(postId, username);
+        // Daily cases are more prestigious. Award 10 points.
+        score = await incrementUserScore(postId, username, 10);
       }
     }
 

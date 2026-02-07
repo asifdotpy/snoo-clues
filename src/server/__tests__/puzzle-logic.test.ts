@@ -1,20 +1,34 @@
 import { describe, it, expect } from 'vitest';
-import { getPuzzleByDate } from '../logic';
-import { DailyPuzzle } from '../../shared/types/api';
+import { getTodaysPuzzleInternal } from '../logic';
+import { Puzzle } from '../data/puzzles';
 
-const mockPuzzles: DailyPuzzle[] = [
-    { date: "2026-02-01", subreddit: "aww", clues: ["clue1", "clue2", "clue3"] },
-    { date: "2026-02-02", subreddit: "askreddit", clues: ["clue1", "clue2", "clue3"] }
+const mockPuzzles: Puzzle[] = [
+    { subreddit: "aww", clues: ["clue1", "clue2", "clue3"], category: "cat1" },
+    { subreddit: "askreddit", clues: ["clue1", "clue2", "clue3"], category: "cat2" }
 ];
 
 describe('Puzzle Logic Tests', () => {
-    it('should return the puzzle for exactly matching date', () => {
-        const puzzle = getPuzzleByDate("2026-02-01", mockPuzzles);
+    it('should return a consistent puzzle for a specific date', () => {
+        const date = new Date("2025-01-01T12:00:00Z"); // Day 0
+        const puzzle = getTodaysPuzzleInternal(date, mockPuzzles);
         expect(puzzle.subreddit).toBe("aww");
     });
 
-    it('should fallback to the first puzzle if no date matches', () => {
-        const puzzle = getPuzzleByDate("2099-01-01", mockPuzzles);
+    it('should return the next puzzle for the next day', () => {
+        const date = new Date("2025-01-02T12:00:00Z"); // Day 1
+        const puzzle = getTodaysPuzzleInternal(date, mockPuzzles);
+        expect(puzzle.subreddit).toBe("askreddit");
+    });
+
+    it('should loop back to the first puzzle after all puzzles are shown', () => {
+        const date = new Date("2025-01-03T12:00:00Z"); // Day 2
+        const puzzle = getTodaysPuzzleInternal(date, mockPuzzles);
         expect(puzzle.subreddit).toBe("aww");
+    });
+
+    it('should handle dates before epoch gracefully', () => {
+        const date = new Date("2024-12-31T12:00:00Z"); // Day -1
+        const puzzle = getTodaysPuzzleInternal(date, mockPuzzles);
+        expect(puzzle.subreddit).toBe("askreddit"); // |-1| % 2 = 1
     });
 });

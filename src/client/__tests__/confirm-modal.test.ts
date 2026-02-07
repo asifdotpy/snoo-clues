@@ -76,6 +76,10 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Case Selection close button is visible and functional', async () => {
+        // Click the start investigation button first to transition from splash to menu
+        const startBtn = document.getElementById('start-investigation-btn');
+        fireEvent.click(startBtn!);
+
         const selectionModal = document.getElementById('selectionModal');
         const closeBtn = document.getElementById('closeSelectionModal');
         const gameOverlay = document.getElementById('gameOverlay');
@@ -90,6 +94,10 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Abandoning a game resets state and UI', async () => {
+        // Click the start investigation button first
+        const startBtn = document.getElementById('start-investigation-btn');
+        fireEvent.click(startBtn!);
+
         // Pick a mode
         const dailyBtn = document.getElementById('startDailyBtn');
         fireEvent.click(dailyBtn!);
@@ -134,6 +142,10 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Closing Case Selection shows Empty Desk on first open', async () => {
+        // Click the start investigation button first
+        const startBtn = document.getElementById('start-investigation-btn');
+        fireEvent.click(startBtn!);
+
         const closeBtn = document.getElementById('closeSelectionModal');
         fireEvent.click(closeBtn!);
 
