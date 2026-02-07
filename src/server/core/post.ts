@@ -9,6 +9,6 @@ export const createPost = async () => {
   return await reddit.submitCustomPost({
     subredditName: subredditName,
     title: "snoo-clues",
-    entry: 'main',
+    entry: 'default',
   });
 };
