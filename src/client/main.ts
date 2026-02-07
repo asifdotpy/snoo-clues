@@ -32,6 +32,7 @@ class SnooCluesGame {
   private coldCasesSolved: number = 0;
   private currentGameMode: 'daily' | 'unlimited' | null = null;
   private audioAssets?: GameInitResponse['audioAssets'];
+  private pendingExitTarget: 'selection' | 'home' | null = null;
 
   // DOM Elements
   private clue1Text!: HTMLElement;
@@ -48,6 +49,8 @@ class SnooCluesGame {
   private winModal!: HTMLElement;
   private playedModal!: HTMLElement;
   private confirmModal!: HTMLElement;
+  private confirmModalTitle!: HTMLElement;
+  private confirmModalText!: HTMLElement;
   private correctAnswer!: HTMLElement;
   private winAttempts!: HTMLElement;
   private playedAttemptsCount!: HTMLElement;
@@ -82,7 +85,6 @@ class SnooCluesGame {
     this.initDOMElements();
     this.attachEventListeners();
     this.resetGameUI();
-    this.showSelectionHub();
     this.fetchLeaderboard();
     this.setupAudioAndSettings();
   }
@@ -122,6 +124,8 @@ class SnooCluesGame {
     this.winModal = document.getElementById("winModal")!;
     this.playedModal = document.getElementById("playedModal")!;
     this.confirmModal = document.getElementById("confirmModal")!;
+    this.confirmModalTitle = document.getElementById("confirmModalTitle")!;
+    this.confirmModalText = document.getElementById("confirmModalText")!;
     this.correctAnswer = document.getElementById("correct-answer")!;
     this.winAttempts = document.getElementById("win-attempts-count")!;
     this.playedAttemptsCount = document.getElementById('played-attempts-count')!;
@@ -233,7 +237,7 @@ class SnooCluesGame {
     this.confirmYesBtn.addEventListener("click", () => {
       this.playSound('click');
       this.closeModal("confirm");
-      this.executeBackToSelection(true);
+      this.handleExit(this.hasInvestigationProgress());
     });
 
     this.confirmNoBtn.addEventListener("click", () => {
@@ -262,7 +266,7 @@ class SnooCluesGame {
     if (backBtn) {
       backBtn.addEventListener("click", () => {
         this.playSound('click');
-        this.goBackToSelection();
+        this.requestExitConfirmation('selection');
       });
     }
 
@@ -276,14 +280,14 @@ class SnooCluesGame {
     if (this.exitToHomeBtn) {
       this.exitToHomeBtn.addEventListener("click", () => {
         this.playSound('click');
-        this.exitToHome();
+        this.requestExitConfirmation('home');
       });
     }
 
     if (this.selectionExitToHomeBtn) {
       this.selectionExitToHomeBtn.addEventListener("click", () => {
         this.playSound('click');
-        this.exitToHome();
+        this.requestExitConfirmation('home');
       });
     }
 
@@ -295,82 +299,120 @@ class SnooCluesGame {
     }
   }
 
-  public showMainMenu(): void {
+  public showMainMenu(keepCurrentMascot: boolean = false): void {
     console.log("[Navigation] Showing Main Menu (Selection Hub)");
+
+    // 1. Hide Loading/Splash Screen
+    this.loadingElement.classList.add("hidden");
+    setTimeout(() => {
+      if (this.loadingElement.classList.contains("hidden")) {
+        this.loadingElement.style.display = "none";
+      }
+    }, 500);
+
+    // 2. Show Game Layers
     this.gameOverlay.classList.remove("hidden");
     this.selectionModal.classList.remove("hidden");
-    dispatchMascotAction('idle');
+
+    // Ensure selection hub close button is properly managed
+    if (this.closeSelectionBtn) {
+      this.closeSelectionBtn.classList.remove("hidden");
+    }
+
+    if (!keepCurrentMascot) {
+      dispatchMascotAction('idle');
+    }
+
     Audio.playMusic();
   }
 
-  private exitToHome(): void {
-    console.log("[Navigation] Exiting to Home (Main Menu)");
-
-    // Stop all music and activity
-    Audio.pauseMusic();
-
-    // Reset game state
-    this.resetGameUI();
-
-    // Hide game application layers
-    this.gameOverlay.classList.add("hidden");
-    this.selectionModal.classList.add("hidden");
-
-    // Show loading screen / splash
-    this.loadingElement.style.display = "flex";
-    this.loadingElement.classList.remove("hidden");
-
-    // Ensure the start button is visible (it should be if GameLoader is ready)
-    if (this.startInvestigationBtn) {
-      this.startInvestigationBtn.classList.remove("hidden");
-      this.startInvestigationBtn.disabled = false;
-    }
-
-    dispatchMascotAction('idle');
+  private hasInvestigationProgress(): boolean {
+    return (this.attempts > 0 ||
+      this.clue2Card.classList.contains("visible") ||
+      this.clue3Card.classList.contains("visible")) && !this.isWinner;
   }
 
-  private goBackToSelection(): void {
-    console.log("[Navigation] Returning to Selection Hub");
-    // Only confirm if progress was made and user hasn't won yet
-    const hasProgress = this.attempts > 0 ||
-      this.clue2Card.classList.contains("visible") ||
-      this.clue3Card.classList.contains("visible");
+  private requestExitConfirmation(target: 'selection' | 'home'): void {
+    console.log(`[Navigation] Requesting exit to: ${target}`);
+    this.pendingExitTarget = target;
 
-    if (hasProgress && !this.isWinner) {
-      this.showModal("confirm");
+    if (!this.hasInvestigationProgress()) {
+      if (target === 'selection') {
+        this.handleExit(false);
+      } else {
+        // Home exit with no progress still shows a "safety" confirmation
+        this.confirmModalTitle.textContent = "Return to Main Menu?";
+        this.confirmModalText.textContent = "Going back to the splash screen. Your streak is safe. Continue?";
+        this.confirmYesBtn.textContent = "Yes, Exit";
+        this.showModal("confirm");
+      }
       return;
     }
 
-    this.executeBackToSelection();
-  }
-
-  private async executeBackToSelection(isAbandon: boolean = false): Promise<void> {
-    if (isAbandon) {
-      try {
-        await GameAPI.abandonGame();
-      } catch (error) {
-        console.error("Failed to abandon game:", error);
-      }
-      this.streak = 0;
-      this.streakValue.textContent = "0";
-      dispatchMascotAction('mascot_disappointed');
+    // Progress exists, show abandonment warning
+    if (target === 'home') {
+      this.confirmModalTitle.textContent = "Exit to Main Menu?";
+      this.confirmModalText.textContent = "Your current investigation progress will be lost and your streak will reset. Exit anyway?";
+      this.confirmYesBtn.textContent = "Yes, Exit";
     } else {
-      dispatchMascotAction('switch_mode');
+      this.confirmModalTitle.textContent = "Abandon Case?";
+      this.confirmModalText.textContent = "Abandoning this case will forfeit your current investigation and reset your streak to 0. Retreat?";
+      this.confirmYesBtn.textContent = "Yes, Abandon";
     }
 
-    this.resetGameUI();
-    this.showSelectionHub();
+    this.showModal("confirm");
   }
 
-  private showSelectionHub(): void {
-    this.selectionModal.classList.remove("hidden");
+  private async handleExit(isAbandon: boolean): Promise<void> {
+    const target = this.pendingExitTarget;
+    this.pendingExitTarget = null;
 
-    // Always keep game visible underneath for the "Empty Desk" feel
-    this.gameOverlay.classList.remove("hidden");
+    if (target === 'home') {
+      console.log("[Navigation] Executing Exit to Home");
+      Audio.pauseMusic();
 
-    // Always show close button
-    if (this.closeSelectionBtn) {
-      this.closeSelectionBtn.classList.remove("hidden");
+      if (isAbandon) {
+        try {
+          await GameAPI.abandonGame();
+        } catch (error) {
+          console.error("Failed to abandon game:", error);
+        }
+        this.streak = 0;
+        this.streakValue.textContent = "0";
+      }
+
+      this.resetGameUI(isAbandon); // Pass isAbandon to skip immediate idle reset
+
+      // Hide game application layers
+      this.gameOverlay.classList.add("hidden");
+      this.selectionModal.classList.add("hidden");
+
+      // Show loading screen / splash
+      this.loadingElement.style.display = "flex";
+      this.loadingElement.classList.remove("hidden");
+
+      // Re-enable the start button for future re-entry
+      if (this.startInvestigationBtn) {
+        this.startInvestigationBtn.classList.remove("hidden");
+        this.startInvestigationBtn.disabled = false;
+      }
+    } else {
+      console.log("[Navigation] Executing Return to Selection Hub");
+
+      if (isAbandon) {
+        try {
+          await GameAPI.abandonGame();
+        } catch (error) {
+          console.error("Failed to abandon game:", error);
+        }
+        this.streak = 0;
+        this.streakValue.textContent = "0";
+      } else {
+        dispatchMascotAction('switch_mode');
+      }
+
+      this.resetGameUI(isAbandon);
+      this.showMainMenu(isAbandon);
     }
   }
 
@@ -590,7 +632,7 @@ class SnooCluesGame {
     }
   }
 
-  private resetGameUI(): void {
+  private resetGameUI(isAbandon: boolean = false): void {
     console.log("[UI] Performing comprehensive state reset");
     this.currentGameMode = null;
     this.shareBtn.textContent = "📢 Share to Reddit";
@@ -648,8 +690,12 @@ class SnooCluesGame {
     this.closeModal("played");
     this.closeModal("confirm");
 
-    // 7. Mascot Reset
-    dispatchMascotAction('idle');
+    // 7. Mascot Reset - only if not disappointed by abandonment
+    if (!isAbandon) {
+      dispatchMascotAction('idle');
+    } else {
+      dispatchMascotAction('mascot_disappointed');
+    }
   }
 
   private disableInput(): void {
