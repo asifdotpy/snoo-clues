@@ -12,6 +12,8 @@ import type {
     AbandonResponse
 } from "../../shared/types/api";
 
+import type { InitResponse } from "../../shared/types/api";
+
 export class GameAPI {
     private static async fetchWithTimeout(resource: string, options: RequestInit & { timeout?: number } = {}) {
         const { timeout = 8000 } = options;
@@ -30,6 +32,17 @@ export class GameAPI {
             clearTimeout(id);
             throw error;
         }
+    }
+
+    /**
+     * Fetch basic app info (username, etc)
+     */
+    static async fetchInitInfo(): Promise<InitResponse> {
+        const response = await this.fetchWithTimeout("/api/init", { timeout: 5000 });
+        if (!response.ok) {
+            throw new Error("Failed to fetch init info");
+        }
+        return response.json();
     }
 
     /**

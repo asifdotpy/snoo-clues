@@ -6,6 +6,22 @@
     /* Uses base .modal-content styles */
 }
 
+#user-greeting {
+    font-size: 1.2rem;
+    color: #ff4500;
+    font-weight: 900;
+    margin: 10px 0;
+    display: block;
+}
+
+.selection-hub h3 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 .selection-options {
     display: flex;
     flex-direction: column;

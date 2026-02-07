@@ -80,6 +80,7 @@ class SnooCluesGame {
   private selectionExitToHomeBtn!: HTMLButtonElement;
   private loadingElement!: HTMLElement;
   private startInvestigationBtn!: HTMLButtonElement;
+  private userGreeting!: HTMLElement;
 
   constructor() {
     this.initDOMElements();
@@ -87,6 +88,18 @@ class SnooCluesGame {
     this.resetGameUI();
     this.fetchLeaderboard();
     this.setupAudioAndSettings();
+    this.fetchUserGreeting();
+  }
+
+  private async fetchUserGreeting(): Promise<void> {
+    try {
+      const data = await GameAPI.fetchInitInfo();
+      if (data.username) {
+        this.userGreeting.textContent = `Hey ${data.username} 👋`;
+      }
+    } catch (e) {
+      console.warn("Failed to fetch username for greeting");
+    }
   }
 
   private setupAudioAndSettings(): void {
@@ -155,6 +168,7 @@ class SnooCluesGame {
     this.selectionExitToHomeBtn = document.getElementById("selectionExitToHome") as HTMLButtonElement;
     this.loadingElement = document.getElementById("loading")!;
     this.startInvestigationBtn = document.getElementById("start-investigation-btn") as HTMLButtonElement;
+    this.userGreeting = document.getElementById("user-greeting")!;
 
     // Handle Case Selection modal close button
     if (this.closeSelectionBtn) {
@@ -445,6 +459,9 @@ class SnooCluesGame {
     try {
       const data = await GameAPI.initGame(mode);
       this.clues = data.clues;
+      if (data.username) {
+        this.userGreeting.textContent = `Hey ${data.username} 👋`;
+      }
       this.attempts = data.attempts;
       this.hasPlayed = data.hasPlayedToday;
       this.isWinner = data.isWinner;
@@ -705,6 +722,6 @@ class SnooCluesGame {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new GameLoader();
-  new SnooCluesGame();
+  const game = new SnooCluesGame();
+  new GameLoader(game);
 });

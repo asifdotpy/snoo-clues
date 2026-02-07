@@ -4,11 +4,7 @@
   "post": {
     "dir": "dist/client",
     "entrypoints": {
-      "default": {
-        "entry": "splash.html",
-        "inline": true
-      },
-      "game": {
+      "main": {
         "entry": "index.html"
       }
     }

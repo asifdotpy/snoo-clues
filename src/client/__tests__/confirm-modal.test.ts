@@ -16,7 +16,15 @@ import { dispatchMascotAction } from '../bridge/HybridBridge';
 
 // Mock ResizeObserver for JSDOM
 (window as any).ResizeObserver = class {
-    observe() { }
+    callback: any;
+    constructor(callback: any) {
+        this.callback = callback;
+    }
+    observe() {
+        this.callback([{
+            contentRect: { width: 800, height: 600 }
+        }]);
+    }
     unobserve() { }
     disconnect() { }
 };
@@ -76,6 +84,11 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Case Selection close button is visible and functional', async () => {
+        // Simulate engine load completion to trigger auto-start
+        if ((window as any).Module && (window as any).Module.print) {
+            (window as any).Module.print("Entering main loop.");
+        }
+
         const selectionModal = document.getElementById('selectionModal');
         const closeBtn = document.getElementById('closeSelectionModal');
         const gameOverlay = document.getElementById('gameOverlay');
@@ -134,6 +147,11 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Closing Case Selection shows Empty Desk on first open', async () => {
+        // Simulate engine load completion
+        if ((window as any).Module && (window as any).Module.print) {
+            (window as any).Module.print("Entering main loop.");
+        }
+
         const closeBtn = document.getElementById('closeSelectionModal');
         fireEvent.click(closeBtn!);
 

@@ -13,6 +13,7 @@ export type DailyPuzzle = {
 
 export type GameInitResponse = {
   type: "game_init";
+  username: string;
   clues: [string, string, string];
   hasPlayedToday: boolean;
   attempts: number;

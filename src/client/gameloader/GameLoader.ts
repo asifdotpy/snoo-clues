@@ -20,6 +20,10 @@ export type RunnerManifest = {
     runner?: { version?: string; yyc?: boolean };
 };
 
+export interface IGame {
+    showMainMenu(keepCurrentMascot?: boolean): void;
+}
+
 export default class GameLoader {
     private statusElement: HTMLElement;
     private progressElement: HTMLProgressElement;
@@ -30,8 +34,10 @@ export default class GameLoader {
     private startingHeight?: number;
     private startingWidth?: number;
     private startingAspect?: number;
+    private game?: IGame;
 
-    constructor() {
+    constructor(game?: IGame) {
+        this.game = game;
         this.statusElement = document.getElementById("status") as HTMLElement;
         this.progressElement = document.getElementById("progress") as HTMLProgressElement;
         this.spinnerElement = document.getElementById("spinner") as HTMLElement;
@@ -115,7 +121,7 @@ export default class GameLoader {
 
     private ensureAspectRatio() {
         if (this.startingAspect) {
-            console.log("[GameLoader] Engine ready, showing start button");
+            console.log("[GameLoader] Engine ready, auto-starting game");
             this.statusElement.innerHTML = "Case Files Ready.";
             this.spinnerElement.hidden = true;
             this.progressElement.hidden = true;
@@ -126,7 +132,14 @@ export default class GameLoader {
                 this.statusElement.innerHTML = "Case Files Ready.";
             }
 
-            this.startButton.classList.remove("hidden");
+            // Since we're using the native Reddit Play button, we have user activation.
+            // We can automatically transition to the main menu once loaded.
+            if (this.game) {
+                console.log("[GameLoader] Triggering auto-start");
+                this.game.showMainMenu();
+            } else {
+                this.startButton.classList.remove("hidden");
+            }
         } else {
             // If aspect ratio not ready, try again in a bit
             console.log("[GameLoader] Engine ready but aspect ratio missing, retrying...");
