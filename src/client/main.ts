@@ -85,7 +85,6 @@ class SnooCluesGame {
     this.initDOMElements();
     this.attachEventListeners();
     this.resetGameUI();
-    this.showSelectionHub();
     this.fetchLeaderboard();
     this.setupAudioAndSettings();
   }
@@ -300,8 +299,18 @@ class SnooCluesGame {
     }
   }
 
-  public showMainMenu(): void {
+  public showMainMenu(keepCurrentMascot: boolean = false): void {
     console.log("[Navigation] Showing Main Menu (Selection Hub)");
+
+    // 1. Hide Loading/Splash Screen
+    this.loadingElement.classList.add("hidden");
+    setTimeout(() => {
+      if (this.loadingElement.classList.contains("hidden")) {
+        this.loadingElement.style.display = "none";
+      }
+    }, 500);
+
+    // 2. Show Game Layers
     this.gameOverlay.classList.remove("hidden");
     this.selectionModal.classList.remove("hidden");
 
@@ -310,7 +319,10 @@ class SnooCluesGame {
       this.closeSelectionBtn.classList.remove("hidden");
     }
 
-    dispatchMascotAction('idle');
+    if (!keepCurrentMascot) {
+      dispatchMascotAction('idle');
+    }
+
     Audio.playMusic();
   }
 
@@ -355,21 +367,21 @@ class SnooCluesGame {
     const target = this.pendingExitTarget;
     this.pendingExitTarget = null;
 
-    if (isAbandon) {
-      try {
-        await GameAPI.abandonGame();
-      } catch (error) {
-        console.error("Failed to abandon game:", error);
-      }
-      this.streak = 0;
-      this.streakValue.textContent = "0";
-      dispatchMascotAction('mascot_disappointed');
-    }
-
     if (target === 'home') {
       console.log("[Navigation] Executing Exit to Home");
       Audio.pauseMusic();
-      this.resetGameUI();
+
+      if (isAbandon) {
+        try {
+          await GameAPI.abandonGame();
+        } catch (error) {
+          console.error("Failed to abandon game:", error);
+        }
+        this.streak = 0;
+        this.streakValue.textContent = "0";
+      }
+
+      this.resetGameUI(isAbandon); // Pass isAbandon to skip immediate idle reset
 
       // Hide game application layers
       this.gameOverlay.classList.add("hidden");
@@ -384,26 +396,23 @@ class SnooCluesGame {
         this.startInvestigationBtn.classList.remove("hidden");
         this.startInvestigationBtn.disabled = false;
       }
-      dispatchMascotAction('idle');
     } else {
       console.log("[Navigation] Executing Return to Selection Hub");
-      if (!isAbandon) {
+
+      if (isAbandon) {
+        try {
+          await GameAPI.abandonGame();
+        } catch (error) {
+          console.error("Failed to abandon game:", error);
+        }
+        this.streak = 0;
+        this.streakValue.textContent = "0";
+      } else {
         dispatchMascotAction('switch_mode');
       }
-      this.resetGameUI();
-      this.showSelectionHub();
-    }
-  }
 
-  private showSelectionHub(): void {
-    this.selectionModal.classList.remove("hidden");
-
-    // Always keep game visible underneath for the "Empty Desk" feel
-    this.gameOverlay.classList.remove("hidden");
-
-    // Always show close button
-    if (this.closeSelectionBtn) {
-      this.closeSelectionBtn.classList.remove("hidden");
+      this.resetGameUI(isAbandon);
+      this.showMainMenu(isAbandon);
     }
   }
 
@@ -623,7 +632,7 @@ class SnooCluesGame {
     }
   }
 
-  private resetGameUI(): void {
+  private resetGameUI(isAbandon: boolean = false): void {
     console.log("[UI] Performing comprehensive state reset");
     this.currentGameMode = null;
     this.shareBtn.textContent = "📢 Share to Reddit";
@@ -681,8 +690,12 @@ class SnooCluesGame {
     this.closeModal("played");
     this.closeModal("confirm");
 
-    // 7. Mascot Reset
-    dispatchMascotAction('idle');
+    // 7. Mascot Reset - only if not disappointed by abandonment
+    if (!isAbandon) {
+      dispatchMascotAction('idle');
+    } else {
+      dispatchMascotAction('mascot_disappointed');
+    }
   }
 
   private disableInput(): void {

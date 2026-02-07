@@ -45,22 +45,7 @@ export default class GameLoader {
 
         this.setupModule();
         this.setupResizeObserver();
-        this.setupStartButton();
         this.loadGame();
-    }
-
-    private setupStartButton() {
-        this.startButton.addEventListener("click", () => {
-            console.log("[GameLoader] Start Investigation clicked");
-            this.startButton.disabled = true;
-
-            this.loadingElement.classList.add("hidden");
-            setTimeout(() => {
-                if (this.loadingElement.classList.contains("hidden")) {
-                    this.loadingElement.style.display = "none";
-                }
-            }, 500);
-        });
     }
 
     private setupModule() {
