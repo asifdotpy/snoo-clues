@@ -1,4 +1,5 @@
 import { DailyPuzzle } from "../shared/types/api";
+import { Puzzle } from "./data/puzzles.js";
 
 export type Choice = {
     name: string;
@@ -19,11 +20,22 @@ export function calculateNewStreak(lastWinDate: string | null, today: string, cu
 }
 
 /**
- * Retrieves the puzzle for a specific date from the provided list.
+ * Selects a puzzle based on the date modulo the number of available puzzles.
  */
-export function getPuzzleByDate(date: string, puzzles: DailyPuzzle[]): DailyPuzzle {
-    const puzzle = puzzles.find(p => p.date === date);
-    return puzzle || (puzzles[0] as DailyPuzzle);
+export function getTodaysPuzzleInternal(today: Date, puzzles: Puzzle[]): DailyPuzzle {
+    const todayKey = today.toISOString().split('T')[0] ?? "2025-01-01";
+    const epoch = new Date("2025-01-01").getTime();
+    const current = new Date(todayKey).getTime();
+    const diffDays = Math.floor((current - epoch) / (1000 * 60 * 60 * 24));
+
+    const puzzleIndex = Math.abs(diffDays) % puzzles.length;
+    const p = puzzles[puzzleIndex]!;
+
+    return {
+        subreddit: p.subreddit,
+        clues: p.clues,
+        date: todayKey
+    };
 }
 
 /**
@@ -62,12 +74,17 @@ export function getMultipleChoices(correctSub: string, allPuzzles: any[]): Choic
 }
 
 /**
- * Returns the Detective Rank based on score (wins).
+ * Returns the Detective Rank based on score (points).
+ * 0-9: Rookie Sleuth
+ * 10-49: Junior Detective
+ * 50-99: Senior Investigator
+ * 100-199: Lead Profiler
+ * 200+: Chief of Detectives
  */
 export function getDetectiveRank(score: number): string {
-    if (score <= 1) return "Rookie Sleuth";
-    if (score <= 5) return "Private Eye";
-    if (score <= 10) return "Senior Detective";
-    if (score <= 20) return "Inspector";
-    return "Master Investigator";
+    if (score < 10) return "Rookie Sleuth";
+    if (score < 50) return "Junior Detective";
+    if (score < 100) return "Senior Investigator";
+    if (score < 200) return "Lead Profiler";
+    return "Chief of Detectives";
 }
