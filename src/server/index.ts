@@ -85,7 +85,7 @@ function leaderboardKey(postId: string): string {
 
 async function incrementUserScore(postId: string, username: string): Promise<number> {
   const key = leaderboardKey(postId);
-  await redis.zIncrBy(key, username, 1);
+  await redis.zIncrBy(key, 1, username);
   const score = await redis.zScore(key, username);
   return score || 0;
 }
