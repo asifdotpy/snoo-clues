@@ -11,7 +11,12 @@
     "dir": "dist/client",
     "entrypoints": {
       "default": {
-        "entry": "index.html"
+        "entry": "index.html",
+        "splash": {
+          "backgroundColor": "#fdf5e6",
+          "appIconUri": "logo.png",
+          "appDisplayName": "Snoo-Clues"
+        }
       }
     }
   },

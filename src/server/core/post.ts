@@ -11,7 +11,7 @@ export const createPost = async () => {
     title: "Snoo Clues!",
     entry: 'default',
     splash: {
-      appDisplayName: "Snoo Clues",
+      appDisplayName: "Snoo-Clues",
       backgroundUri: "splash-bg.png",
       appIconUri: "logo.png",
       buttonLabel: "Play Now",
