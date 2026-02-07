@@ -8,7 +8,14 @@ export const createPost = async () => {
 
   return await reddit.submitCustomPost({
     subredditName: subredditName,
-    title: "snoo-clues",
+    title: "Snoo Clues!",
     entry: 'default',
+    splash: {
+      appDisplayName: "Snoo Clues",
+      backgroundUri: "splash-bg.png",
+      appIconUri: "logo.png",
+      buttonLabel: "Play Now",
+      description: "Find the hidden clues and solve the mystery!",
+    },
   });
 };
