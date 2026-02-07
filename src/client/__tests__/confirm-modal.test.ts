@@ -55,9 +55,9 @@ describe('Abandon Flow and Modal Behavior', () => {
                         streak: 5,
                         coldCasesSolved: 2,
                         audioAssets: {
-                           rustle: "rustle.mp3",
-                           victory: "victory.mp3",
-                           wrong: "wrong.mp3"
+                            rustle: "rustle.mp3",
+                            victory: "victory.mp3",
+                            wrong: "wrong.mp3"
                         }
                     })
                 });
@@ -103,6 +103,11 @@ describe('Abandon Flow and Modal Behavior', () => {
     });
 
     it('Abandoning a game resets state and UI', async () => {
+        // Simulate engine load completion to trigger auto-start
+        if ((window as any).Module && (window as any).Module.print) {
+            (window as any).Module.print("Entering main loop.");
+        }
+
         // Pick a mode
         const dailyBtn = document.getElementById('startDailyBtn');
         fireEvent.click(dailyBtn!);
