@@ -12,8 +12,8 @@ export const createPost = async () => {
     entry: 'default',
     splash: {
       appDisplayName: "Snoo-Clues",
-      backgroundUri: "splash-bg.png",
-      appIconUri: "logo.png",
+      backgroundUri: "splash_bg_premium.png",
+      appIconUri: "logo_premium.png",
       buttonLabel: "Play Now",
       description: "Find the hidden clues and solve the mystery!",
     },

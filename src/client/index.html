@@ -15,9 +15,10 @@
   </canvas>
   <div class="loading" id="loading">
     <div class="splash-container">
-      <img src="img/splash.png" alt="Snoo-Clues Splash" class="splash-image" />
+      <img src="img/splash_bg.png" alt="Snoo-Clues Splash" class="splash-image" />
     </div>
     <div class="loading-content">
+      <img src="img/logo.png" alt="Snoo-Clues Logo" class="premium-logo" />
       <div class="spinner" id="spinner"></div>
       <div class="status" id="status">Initializing Game...</div>
       <progress value="0" max="100" id="progress" hidden="1"></progress>
@@ -187,7 +188,8 @@
   <div class="modal hidden" id="confirmModal">
     <div class="modal-content">
       <h2 id="confirmModalTitle">Abandon Case?</h2>
-      <p id="confirmModalText">Abandoning this case will forfeit your current investigation and reset your streak to 0. Retreat?</p>
+      <p id="confirmModalText">Abandoning this case will forfeit your current investigation and reset your streak to 0.
+        Retreat?</p>
       <div class="modal-actions">
         <button id="confirm-yes-btn" class="modal-btn">Yes, Abandon</button>
         <button id="confirm-no-btn" class="modal-btn secondary">No, Stay</button>

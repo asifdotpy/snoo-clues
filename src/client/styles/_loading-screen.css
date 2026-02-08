@@ -3,8 +3,19 @@
    ======================================== */
 
 .loading {
-    background: #000 !important; /* Darker background for splash */
+    background: #000 !important;
     overflow: hidden;
+    animation: fadeInBackground 1.5s ease-out;
+}
+
+@keyframes fadeInBackground {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .splash-container {
@@ -14,17 +25,44 @@
     width: 100%;
     height: 100%;
     z-index: -1;
-    opacity: 0.6; /* Dim the image to make text readable */
+    opacity: 0.45;
+    /* Slightly darker for better contrast */
     background-color: #000;
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: opacity 1s ease-in-out;
 }
 
 .splash-image {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    /* Cover for cinematic feel */
+    filter: blur(2px) brightness(0.7);
+    /* Subtle blur and darkness for depth */
+}
+
+.premium-logo {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 20px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 3px solid rgba(255, 69, 0, 0.3);
+    animation: logoEntrance 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes logoEntrance {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .loading-content {
@@ -35,33 +73,70 @@
     text-align: center;
     width: 100%;
     height: 100%;
+    animation: contentSlideUp 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes contentSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .start-investigation-btn {
-    margin-top: 30px;
-    padding: 10px 25px;
-    font-size: 1.2rem;
+    margin-top: 40px;
+    padding: 12px 30px;
+    font-size: 1.3rem;
     font-weight: 900;
     color: #fff;
-    background-color: #ff4500;
-    border: 4px solid #fff;
-    border-radius: 8px;
+    background: linear-gradient(135deg, #ff4500 0%, #ff6a00 100%);
+    border: 2px solid #fff;
+    border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-    font-family: inherit;
+    box-shadow: 0 8px 25px rgba(255, 69, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-family: 'Inter', sans-serif;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.start-investigation-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translate(-100%, -100%) rotate(45deg);
+    }
+
+    100% {
+        transform: translate(100%, 100%) rotate(45deg);
+    }
 }
 
 .start-investigation-btn:hover {
-    background-color: #ff5722;
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4);
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255, 69, 0, 0.6);
+    background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
 }
 
 .start-investigation-btn:active {
-    transform: scale(0.98);
+    transform: scale(0.95);
 }
 
 .start-investigation-btn.hidden {
@@ -69,41 +144,50 @@
 }
 
 #status {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-    font-size: 1.2rem;
-    letter-spacing: 1px;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fdf5e6;
+    margin-bottom: 15px;
+    font-family: 'Outfit', sans-serif;
 }
 
 /* Adjustments for the spinner and progress in splash mode */
 .spinner {
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-top: 4px solid #ff4500;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid #ff4500;
+    width: 50px;
+    height: 50px;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
 }
 
 #progress {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    height: 8px;
+    width: 300px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 #progress::-webkit-progress-value {
-    background-color: #ff4500;
-}
-
-#progress::-moz-progress-bar {
-    background-color: #ff4500;
+    background: linear-gradient(90deg, #ff4500, #ff8c00);
+    box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
 }
 
 .detective-briefing {
-    margin-top: 20px;
-    max-width: 80%;
+    margin-top: 30px;
+    max-width: 600px;
     color: #fdf5e6;
     font-style: italic;
-    font-size: 1.1rem;
-    line-height: 1.4;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
-    border-top: 1px solid rgba(255, 69, 0, 0.3);
-    border-bottom: 1px solid rgba(255, 69, 0, 0.3);
-    padding: 10px 0;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 1);
+    border-top: 1px solid rgba(255, 69, 0, 0.4);
+    border-bottom: 1px solid rgba(255, 69, 0, 0.4);
+    padding: 20px 0;
+    opacity: 0.9;
 }
 
 /* Mobile Adjustments */
