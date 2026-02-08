@@ -2,7 +2,7 @@
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
   "name": "snoo-clues",
   "marketingAssets": {
-    "icon": "assets/logo_premium.png"
+    "icon": "assets/logo_premium_1024_pixel.png"
   },
   "media": {
     "dir": "assets"

@@ -12,10 +12,11 @@ export const createPost = async () => {
     entry: 'default',
     splash: {
       appDisplayName: "Snoo-Clues",
-      backgroundUri: "splash_bg_premium.png",
-      appIconUri: "logo_premium.png",
-      buttonLabel: "Play Now",
+      heading: "Can you solve it?",
       description: "Find the hidden clues and solve the mystery!",
+      backgroundUri: "splash_bg_premium.png",
+      appIconUri: "logo_premium_1024_pixel.png",
+      buttonLabel: "Play Now",
     },
   });
 };
