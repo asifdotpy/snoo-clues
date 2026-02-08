@@ -1,11 +1,6 @@
 import { DailyPuzzle } from "../shared/types/api";
 import { Puzzle } from "./data/puzzles.js";
 
-export type Choice = {
-    name: string;
-    color: string;
-};
-
 export { normalizeSubredditName } from "../shared/utils/normalization.js";
 
 /**
@@ -36,41 +31,6 @@ export function getTodaysPuzzleInternal(today: Date, puzzles: Puzzle[]): DailyPu
         clues: p.clues,
         date: todayKey
     };
-}
-
-/**
- * Generates 4 choices: the correct answer and 3 random distractors.
- * Note: Category-based distractor logic preserved for potential rank-based difficulty.
- */
-export function getMultipleChoices(correctSub: string, allPuzzles: any[]): Choice[] {
-    const correctPuzzle = allPuzzles.find(p => p.subreddit === correctSub);
-    if (!correctPuzzle) return [];
-
-    const choices: Choice[] = [
-        { name: correctSub, color: "#FF4500" }
-    ];
-
-    const usedCategories = new Set([correctPuzzle.category]);
-    const shuffled = [...allPuzzles].sort(() => Math.random() - 0.5);
-
-    for (const p of shuffled) {
-        if (choices.length >= 4) break;
-        if (p.subreddit !== correctSub && !usedCategories.has(p.category)) {
-            choices.push({ name: p.subreddit, color: "#FF4500" });
-            usedCategories.add(p.category);
-        }
-    }
-
-    if (choices.length < 4) {
-        for (const p of shuffled) {
-            if (choices.length >= 4) break;
-            if (p.subreddit !== correctSub && !choices.find(c => c.name === p.subreddit)) {
-                choices.push({ name: p.subreddit, color: "#FF4500" });
-            }
-        }
-    }
-
-    return choices.sort(() => Math.random() - 0.5);
 }
 
 /**

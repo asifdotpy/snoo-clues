@@ -12,6 +12,8 @@ Snoo-Clues is a daily puzzle game where players guess a subreddit based on three
 
 ### How to Play
 
+> **Note:** Daily puzzles reset at midnight UTC. Your streak is based on UTC dates.
+
 1. **Read Clue #1** - Always visible on your detective notebook.
 2. **Reveal Clues #2 and #3** - Click "Show Clue" cards as needed to uncover more hints.
 3. **Guess the Subreddit** - Enter your answer (case-insensitive).
@@ -24,12 +26,12 @@ Snoo-Clues is a daily puzzle game where players guess a subreddit based on three
 - ❄️ **Cold Case Mode** - Unlimited practice mode with over 50 different subreddits.
 - 🔥 **Daily Streaks** - Track your consecutive daily wins. Don't let the flame go out!
 - 🏆 **Global Leaderboard** - See how you rank against other detectives in the community.
-- ⚖️ **Detective Ranks** - Earn titles based on your total successful investigations:
-  - **Rookie Sleuth** (0-1 Wins)
-  - **Private Eye** (2-5 Wins)
-  - **Senior Detective** (6-10 Wins)
-  - **Inspector** (11-20 Wins)
-  - **Master Investigator** (21+ Wins)
+- ⚖️ **Detective Ranks** - Earn titles based on your total points (Daily Case = 10 pts, Cold Case = 1 pt):
+  - **Rookie Sleuth** (0–9 points)
+  - **Junior Detective** (10–49 points)
+  - **Senior Investigator** (50–99 points)
+  - **Lead Profiler** (100–199 points)
+  - **Chief of Detectives** (200+ points)
 - 🎨 **Premium UI** - A "Detective Notebook" aesthetic with typewriter effects and glassmorphism.
 - 🏗️ **Hybrid Engine** - Uses GameMaker for background animations and mascot reactions, layered with a responsive HTML/TS interface.
 
