@@ -79,17 +79,16 @@ function leaderboardKey(postId: string): string {
 
 async function incrementUserScore(postId: string, username: string, amount: number = 1): Promise<number> {
   const key = leaderboardKey(postId);
-  await redis.zIncrBy(key, amount, username);
-  const score = await redis.zScore(key, username);
-  return score || 0;
+  // Devvit Redis API: zIncrBy(key, member, value) returns the new score
+  return await redis.zIncrBy(key, username, amount);
 }
 
 async function getTopDetectives(postId: string): Promise<LeaderboardEntry[]> {
   const key = leaderboardKey(postId);
   const top = await redis.zRange(key, 0, 9, { by: 'rank', reverse: true });
-  return Promise.all(top.map(async (member) => {
-    const score = await redis.zScore(key, member.member) || 0;
-    return { username: member.member, score: score };
+  return top.map((member) => ({
+    username: member.member,
+    score: member.score
   }));
 }
 
@@ -223,7 +222,11 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
     // Pick a random puzzle that isn't the daily one
     const dailyPuzzle = getTodaysPuzzle();
     const pool = ALL_PUZZLES.filter(p => p.subreddit !== dailyPuzzle.subreddit);
-    const puzzle = pool[Math.floor(Math.random() * pool.length)]!;
+
+    // Fallback if pool is empty (e.g. only 1 puzzle exists)
+    const puzzle = pool.length > 0
+      ? pool[Math.floor(Math.random() * pool.length)]!
+      : dailyPuzzle;
 
     // Store the answer for validation
     await redis.set(coldCaseAnswerKey(postId, username), puzzle.subreddit);
@@ -269,6 +272,9 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     }
 
     const isUnlimited = mode === 'unlimited';
+    if (!mode) {
+      console.warn(`[Guess] Missing mode for user ${username}. Defaulting to daily.`);
+    }
     const today = getTodayDateKey();
 
     // Determine the answer to check against
