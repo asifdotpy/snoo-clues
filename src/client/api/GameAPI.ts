@@ -72,6 +72,11 @@ export class GameAPI {
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                const e = new Error("LOGIN_REQUIRED") as Error & { status?: number };
+                e.status = 401;
+                throw e;
+            }
             throw new Error("Failed to submit guess");
         }
 

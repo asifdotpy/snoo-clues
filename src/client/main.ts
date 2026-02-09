@@ -565,9 +565,11 @@ class SnooCluesGame {
       }
     } catch (error: any) {
       console.error(error);
-      const message = error.name === 'AbortError'
-        ? "Submission timed out. Please try again."
-        : "Unable to submit guess. Please check your connection and try again.";
+      const message = error?.message === 'LOGIN_REQUIRED'
+        ? "You must be logged in to Reddit to submit guesses and earn streak/leaderboard."
+        : error?.name === 'AbortError'
+          ? "Submission timed out. Please try again."
+          : "Unable to submit guess. Please check your connection and try again.";
       this.showFeedback(message, "error");
       this.submitBtn.disabled = false;
       this.guessInput.disabled = false;
