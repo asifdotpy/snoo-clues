@@ -854,6 +854,5 @@ class SnooCluesGame {
 
 document.addEventListener('DOMContentLoaded', () => {
   const game = new SnooCluesGame();
-  (window as any).gameInstance = game;
   new GameLoader(game);
 });
