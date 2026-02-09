@@ -54,6 +54,10 @@
     background: linear-gradient(135deg, #fff 0%, #f0f8ff 100%);
 }
 
+.selection-btn.community-btn {
+    background: linear-gradient(135deg, #fff 0%, #f5fff0 100%);
+}
+
 .selection-btn .btn-title {
     display: block;
     font-size: 1.3rem;
@@ -75,6 +79,27 @@
     padding-top: 15px;
     border-top: 1px dashed #ccc;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.submit-case-trigger {
+    background: #ff4500;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    max-width: 300px;
+}
+
+.submit-case-trigger:hover {
+    background: #e03d00;
 }
 
 .header-left-actions {
