@@ -86,11 +86,11 @@ export class GameAPI {
     /**
      * Share result to Reddit
      */
-    static async shareResult(attempts: number): Promise<ShareResponse> {
+    static async shareResult(data: { attempts: number; cluesRevealed: number; mode: string }): Promise<ShareResponse> {
         const response = await this.fetchWithTimeout("/api/game/share", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ attempts }),
+            body: JSON.stringify(data),
             timeout: 5000
         });
 
@@ -111,6 +111,33 @@ export class GameAPI {
             throw new Error("Failed to fetch leaderboard");
         }
 
+        return response.json();
+    }
+
+    /**
+     * Fetch a random community case
+     */
+    static async fetchCommunityGame(): Promise<GameInitResponse> {
+        const response = await this.fetchWithTimeout("/api/game/community/random", { timeout: 5000 });
+        if (!response.ok) {
+            throw new Error("Failed to fetch community case");
+        }
+        return response.json();
+    }
+
+    /**
+     * Submit a community case
+     */
+    static async submitCommunityCase(data: { subreddit: string; clues: string[] }): Promise<{ success: boolean }> {
+        const response = await this.fetchWithTimeout("/api/game/community/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            timeout: 5000
+        });
+        if (!response.ok) {
+            throw new Error("Failed to submit community case");
+        }
         return response.json();
     }
 
