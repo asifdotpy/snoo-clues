@@ -46,8 +46,13 @@
           <span class="btn-title">BROWSE COLD CASES</span>
           <span class="btn-subtitle">Unlimited practice files</span>
         </button>
+        <button class="selection-btn community-btn" id="startCommunityBtn">
+          <span class="btn-title">COMMUNITY FILES</span>
+          <span class="btn-subtitle">Cases submitted by users</span>
+        </button>
       </div>
       <div class="selection-footer">
+        <button id="openSubmitModalBtn" class="modal-btn submit-case-trigger">➕ Submit a New Case</button>
         <button id="selectionExitToHome" class="back-btn">⌂ Return to Main Menu</button>
       </div>
     </div>
@@ -79,6 +84,7 @@
           <div class="header-titles">
             <h1>Snoo-Clues</h1>
             <div class="rank-badge">RANK: <span id="rank-value">Rookie Sleuth</span></div>
+            <button id="mascot-tip-btn" class="tip-btn" title="Get a Detective Tip">💡 Tip</button>
           </div>
           <div class="streak-badge">🔥 Streak: <span id="streak-value">0</span></div>
         </div>
@@ -180,6 +186,40 @@
       <div class="modal-actions">
         <button class="modal-btn secondary close-modal-btn">View Clues</button>
         <button id="playedToColdBtn" class="modal-btn training-btn">Browse Cold Cases</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Case Modal -->
+  <div class="modal hidden" id="submitModal">
+    <div class="modal-content submit-case-form">
+      <button class="modal-close-btn" id="closeSubmitModal">&times;</button>
+      <h2>Submit a Case</h2>
+      <p>Help expand the Snoo-Clues archives! Provide a subreddit and 3 progressive clues.</p>
+
+      <div class="form-group">
+        <label for="submitSubreddit">Subreddit Name (r/)</label>
+        <input type="text" id="submitSubreddit" placeholder="e.g. aww" />
+      </div>
+
+      <div class="form-group">
+        <label for="submitClue1">Clue #1 (Easiest/Vague)</label>
+        <textarea id="submitClue1" placeholder="e.g. A place for cute animals..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="submitClue2">Clue #2 (Moderate)</label>
+        <textarea id="submitClue2" placeholder="e.g. Often features cats and dogs..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="submitClue3">Clue #3 (Most Specific)</label>
+        <textarea id="submitClue3" placeholder="e.g. The name is the sound you make when you see something cute..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button id="submitCaseBtn" class="modal-btn">Submit Case</button>
+        <button id="cancelSubmitBtn" class="modal-btn secondary">Cancel</button>
       </div>
     </div>
   </div>

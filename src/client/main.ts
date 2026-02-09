@@ -30,7 +30,8 @@ class SnooCluesGame {
   private streak: number = 0;
   private rank: string = "Rookie Sleuth";
   private coldCasesSolved: number = 0;
-  private currentGameMode: 'daily' | 'unlimited' | null = null;
+  private cluesRevealed: number = 1;
+  private currentGameMode: 'daily' | 'unlimited' | 'community' | null = null;
   private audioAssets?: GameInitResponse['audioAssets'];
   private pendingExitTarget: 'selection' | 'home' | null = null;
 
@@ -48,6 +49,7 @@ class SnooCluesGame {
   private feedbackMessage!: HTMLElement;
   private winModal!: HTMLElement;
   private playedModal!: HTMLElement;
+  private submitModal!: HTMLElement;
   private confirmModal!: HTMLElement;
   private confirmModalTitle!: HTMLElement;
   private confirmModalText!: HTMLElement;
@@ -71,6 +73,7 @@ class SnooCluesGame {
   private gameOverlay!: HTMLElement;
   private startDailyBtn!: HTMLButtonElement;
   private startColdBtn!: HTMLButtonElement;
+  private startCommunityBtn!: HTMLButtonElement;
   private keepTrainingBtn!: HTMLButtonElement;
   private gameContainer!: HTMLElement;
   private gameSubtitle!: HTMLElement;
@@ -81,6 +84,11 @@ class SnooCluesGame {
   private loadingElement!: HTMLElement;
   private startInvestigationBtn!: HTMLButtonElement;
   private userGreeting!: HTMLElement;
+  private mascotTipBtn!: HTMLButtonElement;
+  private openSubmitModalBtn!: HTMLButtonElement;
+  private closeSubmitModalBtn!: HTMLButtonElement;
+  private submitCaseBtn!: HTMLButtonElement;
+  private cancelSubmitBtn!: HTMLButtonElement;
 
   constructor() {
     this.initDOMElements();
@@ -136,6 +144,7 @@ class SnooCluesGame {
     this.feedbackMessage = document.getElementById("feedbackMessage")!;
     this.winModal = document.getElementById("winModal")!;
     this.playedModal = document.getElementById("playedModal")!;
+    this.submitModal = document.getElementById("submitModal")!;
     this.confirmModal = document.getElementById("confirmModal")!;
     this.confirmModalTitle = document.getElementById("confirmModalTitle")!;
     this.confirmModalText = document.getElementById("confirmModalText")!;
@@ -153,6 +162,7 @@ class SnooCluesGame {
     this.selectionModal = document.getElementById("selectionModal")!;
     this.startDailyBtn = document.getElementById("startDailyBtn") as HTMLButtonElement;
     this.startColdBtn = document.getElementById("startColdBtn") as HTMLButtonElement;
+    this.startCommunityBtn = document.getElementById("startCommunityBtn") as HTMLButtonElement;
     this.keepTrainingBtn = document.getElementById("keep-training-btn") as HTMLButtonElement;
     this.gameOverlay = document.getElementById("gameOverlay")!;
     this.gameContainer = document.querySelector(".game-container")!;
@@ -169,6 +179,11 @@ class SnooCluesGame {
     this.loadingElement = document.getElementById("loading")!;
     this.startInvestigationBtn = document.getElementById("start-investigation-btn") as HTMLButtonElement;
     this.userGreeting = document.getElementById("user-greeting")!;
+    this.mascotTipBtn = document.getElementById("mascot-tip-btn") as HTMLButtonElement;
+    this.openSubmitModalBtn = document.getElementById("openSubmitModalBtn") as HTMLButtonElement;
+    this.closeSubmitModalBtn = document.getElementById("closeSubmitModal") as HTMLButtonElement;
+    this.submitCaseBtn = document.getElementById("submitCaseBtn") as HTMLButtonElement;
+    this.cancelSubmitBtn = document.getElementById("cancelSubmitBtn") as HTMLButtonElement;
 
     // Handle Case Selection modal close button
     if (this.closeSelectionBtn) {
@@ -217,6 +232,9 @@ class SnooCluesGame {
     });
     this.guessInput.addEventListener("input", () => {
       this.guessInput.value = this.guessInput.value.toLowerCase();
+      if (this.guessInput.value.length > 0) {
+        dispatchMascotAction('typing');
+      }
     });
     this.shareBtn.addEventListener("click", () => {
       this.playSound('click');
@@ -230,6 +248,15 @@ class SnooCluesGame {
       this.playSound('click');
       this.closeModal("played");
     });
+
+    // Share from played modal too
+    const playedShareBtn = this.playedModal.querySelector(".share-btn") as HTMLButtonElement;
+    if (playedShareBtn) {
+      playedShareBtn.addEventListener("click", () => {
+        this.playSound('click');
+        this.shareResult(playedShareBtn);
+      });
+    }
 
     // Attach listeners to "X" buttons
     const winCloseX = this.winModal.querySelector(".win-close-x");
@@ -266,6 +293,10 @@ class SnooCluesGame {
     this.startColdBtn.addEventListener("click", () => {
       this.playSound('click');
       this.initGame('unlimited');
+    });
+    this.startCommunityBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.initGame('community');
     });
     this.keepTrainingBtn.addEventListener("click", () => {
       this.playSound('click');
@@ -311,6 +342,32 @@ class SnooCluesGame {
         this.showMainMenu();
       });
     }
+
+    if (this.mascotTipBtn) {
+      this.mascotTipBtn.addEventListener("click", () => {
+        this.playSound('click');
+        this.showMascotTip();
+      });
+    }
+
+    // Submit case listeners
+    this.openSubmitModalBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.showModal("submit");
+    });
+
+    const closeSubmit = () => {
+      this.playSound('click');
+      this.closeModal("submit");
+    };
+
+    this.closeSubmitModalBtn.addEventListener("click", closeSubmit);
+    this.cancelSubmitBtn.addEventListener("click", closeSubmit);
+
+    this.submitCaseBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.handleCaseSubmission();
+    });
   }
 
   public showMainMenu(keepCurrentMascot: boolean = false): void {
@@ -435,7 +492,7 @@ class SnooCluesGame {
     this.gameOverlay.classList.remove("hidden");
   }
 
-  private async initGame(mode: 'daily' | 'unlimited'): Promise<void> {
+  private async initGame(mode: 'daily' | 'unlimited' | 'community'): Promise<void> {
     this.resetGameUI();
     this.currentGameMode = mode;
     this.hideSelectionHub();
@@ -449,6 +506,11 @@ class SnooCluesGame {
       this.gameSubtitle.textContent = "Cold Case Investigation (Practice)";
       this.currentModeTag.textContent = "COLD CASE";
       this.currentModeTag.className = "mode-tag unlimited";
+    } else if (mode === 'community') {
+      this.gameContainer.classList.add('cold-case'); // Reuse cold case blue for now
+      this.gameSubtitle.textContent = "Community Case File (User Contributed)";
+      this.currentModeTag.textContent = "COMMUNITY";
+      this.currentModeTag.className = "mode-tag unlimited";
     } else {
       this.gameContainer.classList.remove('cold-case');
       this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
@@ -457,7 +519,9 @@ class SnooCluesGame {
     }
 
     try {
-      const data = await GameAPI.initGame(mode);
+      const data = mode === 'community'
+        ? await GameAPI.fetchCommunityGame()
+        : await GameAPI.initGame(mode as 'daily' | 'unlimited');
       this.clues = data.clues;
       if (data.username) {
         this.userGreeting.textContent = `Hey ${data.username} 👋`;
@@ -510,6 +574,10 @@ class SnooCluesGame {
     const text = n === 2 ? this.clue2Text : this.clue3Text;
     const btn = n === 2 ? this.revealClue2Btn : this.revealClue3Btn;
 
+    if (n > this.cluesRevealed) {
+      this.cluesRevealed = n;
+    }
+
     cardObj.classList.remove("locked");
     cardObj.classList.add("visible");
     text.classList.remove("hidden");
@@ -526,6 +594,8 @@ class SnooCluesGame {
     if (!guess) return;
     this.submitBtn.disabled = true;
     this.guessInput.disabled = true;
+
+    dispatchMascotAction('searching');
 
     try {
       const data = await GameAPI.submitGuess(guess, this.currentGameMode);
@@ -576,11 +646,15 @@ class SnooCluesGame {
     }
   }
 
-  private async shareResult(): Promise<void> {
+  private async shareResult(btnElement: HTMLButtonElement = this.shareBtn): Promise<void> {
     try {
-      const data = await GameAPI.shareResult(this.attempts);
+      const data = await GameAPI.shareResult({
+        attempts: this.attempts,
+        cluesRevealed: this.cluesRevealed,
+        mode: this.currentGameMode || 'daily'
+      });
       if (data.success) {
-        this.shareBtn.textContent = "✅ Shared!";
+        btnElement.textContent = "✅ Shared!";
       }
     } catch (error) {
       console.error(error);
@@ -627,20 +701,22 @@ class SnooCluesGame {
       .join("");
   }
 
-  private showModal(t: "win" | "played" | "confirm"): void {
+  private showModal(t: "win" | "played" | "confirm" | "submit"): void {
     const modalMap = {
       win: this.winModal,
       played: this.playedModal,
-      confirm: this.confirmModal
+      confirm: this.confirmModal,
+      submit: this.submitModal
     };
     modalMap[t].classList.remove("hidden");
   }
 
-  private closeModal(t: "win" | "played" | "confirm"): void {
+  private closeModal(t: "win" | "played" | "confirm" | "submit"): void {
     const modalMap = {
       win: this.winModal,
       played: this.playedModal,
-      confirm: this.confirmModal
+      confirm: this.confirmModal,
+      submit: this.submitModal
     };
     modalMap[t].classList.add("hidden");
 
@@ -657,6 +733,7 @@ class SnooCluesGame {
     this.shareBtn.textContent = "📢 Share to Reddit";
     this.clues = ["", "", ""];
     this.attempts = 0;
+    this.cluesRevealed = 1;
     this.isWinner = false;
     this.hasPlayed = false;
     this.audioAssets = undefined;
@@ -720,6 +797,58 @@ class SnooCluesGame {
   private disableInput(): void {
     this.guessInput.disabled = true;
     this.submitBtn.disabled = true;
+  }
+
+  private showMascotTip(): void {
+    const DETECTIVE_TIPS = [
+      "Look for keywords in the clues—they often point to the sub's niche!",
+      "Common prefixes like 'ask', 'today', or 'mildly' are very popular on Reddit.",
+      "Check the emoji at the start of Clue #3—it's usually a direct hint!",
+      "Don't worry about 'r/'—I'll handle that for you.",
+      "Cold cases are great for practice and still earn you rank points!",
+      "The daily case resets at midnight UTC. Don't break your streak!",
+      "Some subreddits are compound words. Try combining them if it sounds right.",
+      "Mascot says: 'I'm watching your progress, Detective. No pressure!'"
+    ];
+    const tip = DETECTIVE_TIPS[Math.floor(Math.random() * DETECTIVE_TIPS.length)];
+    this.showFeedback(`🔎 Tip: ${tip}`, "success");
+    dispatchMascotAction('reveal'); // Reuse reveal animation for tip
+  }
+
+  private async handleCaseSubmission(): Promise<void> {
+    const sub = (document.getElementById("submitSubreddit") as HTMLInputElement).value;
+    const c1 = (document.getElementById("submitClue1") as HTMLTextAreaElement).value;
+    const c2 = (document.getElementById("submitClue2") as HTMLTextAreaElement).value;
+    const c3 = (document.getElementById("submitClue3") as HTMLTextAreaElement).value;
+
+    if (!sub || !c1 || !c2 || !c3) {
+      alert("Please fill in all fields!");
+      return;
+    }
+
+    this.submitCaseBtn.disabled = true;
+    this.submitCaseBtn.textContent = "Submitting...";
+
+    try {
+      const res = await GameAPI.submitCommunityCase({
+        subreddit: sub,
+        clues: [c1, c2, c3]
+      });
+      if (res.success) {
+        this.showFeedback("✅ Case Submitted!", "success");
+        this.closeModal("submit");
+        // Clear form
+        (document.getElementById("submitSubreddit") as HTMLInputElement).value = "";
+        (document.getElementById("submitClue1") as HTMLTextAreaElement).value = "";
+        (document.getElementById("submitClue2") as HTMLTextAreaElement).value = "";
+        (document.getElementById("submitClue3") as HTMLTextAreaElement).value = "";
+      }
+    } catch (e) {
+      this.showFeedback("Failed to submit case.", "error");
+    } finally {
+      this.submitCaseBtn.disabled = false;
+      this.submitCaseBtn.textContent = "Submit Case";
+    }
   }
 }
 

@@ -46,6 +46,8 @@ export type GuessResponse = {
 
 export type ShareRequest = {
   attempts: number;
+  cluesRevealed: number;
+  mode?: 'daily' | 'unlimited' | 'community';
 };
 
 export type ShareResponse = {
@@ -67,4 +69,14 @@ export type LeaderboardEntry = {
 export type LeaderboardResponse = {
   type: "leaderboard_data";
   leaderboard: LeaderboardEntry[];
+};
+
+export type CommunitySubmissionRequest = {
+  subreddit: string;
+  clues: [string, string, string];
+};
+
+export type CommunitySubmissionResponse = {
+  success: boolean;
+  message: string;
 };
