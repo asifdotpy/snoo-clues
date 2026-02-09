@@ -3,82 +3,86 @@
    ======================================== */
 
 .leaderboard-section {
-    background: linear-gradient(to bottom, #fdf5e6, #fff);
-    padding: 20px;
-    border: 2px dashed #333;
-    margin-top: 30px;
+    background: var(--paper-white);
+    padding: var(--space-5);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-8);
+    box-shadow: var(--shadow-sm);
 }
 
 .leaderboard-section h3 {
-    font-size: 1.4rem;
-    color: #333;
+    font-size: 1.125rem;
+    color: var(--gray-800);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 15px;
+    letter-spacing: 1.5px;
+    margin-bottom: var(--space-4);
     text-align: center;
-    border-bottom: 2px solid #ff4500;
-    padding-bottom: 10px;
+    font-weight: 800;
 }
 
 .leaderboard-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
 }
 
 .leaderboard-item {
-    padding: 12px;
+    padding: var(--space-3) var(--space-4);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #ddd;
-    transition: background 0.2s;
-    background: #fff;
+    border-bottom: 1px solid var(--gray-100);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--paper-white);
+}
+
+.leaderboard-item:last-child {
+    border-bottom: none;
 }
 
 .leaderboard-item:hover {
-    background: #fff9e6;
+    background: var(--gray-50);
 }
 
-/* Ranking highlights from original design */
+/* Ranking highlights */
 .leaderboard-item:nth-child(1) {
-    background: gold;
-    font-weight: bold;
-    border: 2px solid #ff4500;
+    background: var(--orange-50);
+    border-left: 4px solid var(--orange-500);
 }
 
-.leaderboard-item:nth-child(2) {
-    background: silver;
-    font-weight: bold;
-}
-
-.leaderboard-item:nth-child(3) {
-    background: #cd7f32;
-    font-weight: bold;
-    color: #fff;
+.leaderboard-item:nth-child(1) .leaderboard-rank {
+    color: var(--orange-500);
 }
 
 .leaderboard-rank {
-    font-weight: bold;
-    color: #444; /* Darker than original #666 */
-    min-width: 30px;
+    font-weight: 800;
+    color: var(--gray-400);
+    min-width: 32px;
+    font-size: 0.875rem;
 }
 
 .leaderboard-name {
     flex-grow: 1;
-    margin: 0 10px;
-    color: #333;
+    margin: 0 var(--space-3);
+    color: var(--gray-700);
+    font-weight: 600;
+    font-size: 0.9375rem;
 }
 
 .leaderboard-score {
-    font-weight: bold;
-    color: #ff4500;
+    font-weight: 800;
+    color: var(--gray-900);
+    font-size: 1rem;
 }
 
 .leaderboard-item.loading {
     justify-content: center;
-    color: #444;
+    color: var(--gray-400);
     font-style: italic;
     background: transparent;
     border-bottom: none;
+    padding: var(--space-6);
 }

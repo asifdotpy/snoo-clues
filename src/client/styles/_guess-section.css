@@ -7,47 +7,58 @@
     border-radius: 0;
     padding: 0;
     border: none;
-    border-top: 1px solid #333;
-    padding-top: 25px;
-    margin-top: 20px;
-    padding-bottom: 40px;
+    border-top: 1px solid var(--paper-line);
+    padding-top: var(--space-6);
+    margin-top: var(--space-5);
+    padding-bottom: var(--space-10);
 }
 
 .attempts-counter {
-    color: #444;
-    font-weight: bold;
-    margin-bottom: 20px;
+    color: var(--gray-600);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .attempts-counter span {
-    color: #ff4500;
-    font-size: 1.2rem;
-    text-decoration: underline;
+    color: var(--orange-500);
+    font-size: 1.1rem;
+    margin-left: var(--space-1);
 }
 
 .input-row {
     display: flex;
     width: 100%;
     gap: 0;
-    border: 2px solid #333;
-    background: #fff;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    border: 2px solid var(--gray-800);
+    background: var(--paper-white);
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-row:focus-within {
+    border-color: var(--orange-500);
+    box-shadow: var(--shadow-md), 0 0 0 4px var(--orange-50);
 }
 
 .r-prefix {
-    background: #eaedef !important;
-    padding: 10px 12px;
-    font-weight: 900;
-    border-right: 2px solid #333;
+    background: var(--gray-100) !important;
+    padding: var(--space-2) var(--space-3);
+    font-weight: 800;
+    border-right: 2px solid var(--gray-800);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ff4500 !important;
-    font-size: 1.1rem;
-    min-width: 45px;
+    color: var(--orange-500) !important;
+    font-size: 1rem;
+    min-width: 48px;
     position: relative;
     z-index: 2;
 }
@@ -55,33 +66,43 @@
 .guess-input {
     border: none;
     flex-grow: 1;
-    padding: 10px;
+    padding: var(--space-3);
     width: 10px;
     outline: none;
     font-family: inherit;
     font-size: 1rem;
+    font-weight: 500;
+    color: var(--gray-900);
+    background: transparent;
 }
 
 .submit-btn {
     border: none;
-    border-left: 2px solid #333;
-    background: #ff4500;
+    border-left: 2px solid var(--gray-800);
+    background: var(--gray-800);
     color: white;
-    padding: 0 15px;
+    padding: 0 var(--space-5);
     cursor: pointer;
     text-transform: uppercase;
-    font-weight: bold;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
 }
 
 .submit-btn:hover {
-    background: #ff6347;
-    transform: none;
+    background: var(--orange-500);
+    color: white;
+}
+
+.submit-btn:active {
+    background: var(--orange-600);
 }
 
 .submit-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    background: var(--gray-400);
 }
 
 .feedback-message {

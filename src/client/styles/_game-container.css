@@ -20,58 +20,61 @@
     position: relative;
     z-index: var(--z-clue);
     width: 94%;
-    max-width: 420px;
-    margin: auto;
-    background: #fdf5e6;
-    padding: 25px 20px 40px 45px;
-    border-radius: 2px 15px 15px 2px;
-    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.6), inset 2px 0 5px rgba(0, 0, 0, 0.1);
+    max-width: 440px;
+    margin: var(--space-4) auto;
+    background: var(--paper-light);
+    padding: var(--space-6) var(--space-5) var(--space-10) var(--space-10);
+    border-radius: 2px var(--radius-lg) var(--radius-lg) 2px;
+    box-shadow: var(--shadow-xl), inset 2px 0 5px rgba(0, 0, 0, 0.05);
     font-family: inherit;
     text-align: left;
     height: auto;
-    max-height: 90vh;
+    max-height: 94vh;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-300) transparent;
 }
 
 .game-container::before {
     content: "";
     position: absolute;
-    left: 35px;
+    left: var(--space-8);
     top: 0;
     bottom: 0;
     width: 2px;
-    background: rgba(255, 0, 0, 0.3);
-    border-left: 1px solid rgba(255, 0, 0, 0.1);
+    background: var(--paper-line);
+    border-left: 1px solid rgba(255, 69, 0, 0.05);
 }
 
 .game-container.cold-case {
-    background: #f0f8ff;
-    box-shadow: 5px 5px 20px rgba(0, 100, 255, 0.4), inset 2px 0 5px rgba(0, 100, 200, 0.15);
+    background: #f8fbff;
+    box-shadow: 0 20px 25px -5px rgba(0, 100, 255, 0.1), 0 10px 10px -5px rgba(0, 100, 255, 0.04), inset 2px 0 5px rgba(0, 100, 200, 0.05);
 }
 
 .game-container.cold-case::before {
-    background: rgba(0, 100, 255, 0.25);
-    border-left: 1px solid rgba(0, 100, 255, 0.15);
+    background: rgba(0, 100, 255, 0.15);
+    border-left: 1px solid rgba(0, 100, 255, 0.05);
 }
 
 .game-header {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-6);
 }
 
 .game-header h1 {
-    font-size: 2.2rem;
-    color: #333;
+    font-size: 2rem;
+    color: var(--gray-900);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-1);
+    font-weight: 800;
 }
 
 .game-subtitle {
-    font-size: 0.95rem;
-    font-weight: normal;
-    color: #555;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-600);
     font-style: italic;
-    margin-bottom: 5px;
+    margin-bottom: var(--space-1);
 }
 
 .mode-tag {

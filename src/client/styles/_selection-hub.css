@@ -7,95 +7,99 @@
 }
 
 #user-greeting {
-    font-size: 1.2rem;
-    color: #ff4500;
-    font-weight: 900;
-    margin: 10px 0;
+    font-size: 1rem;
+    color: var(--orange-600);
+    font-weight: 800;
+    margin: var(--space-2) 0;
     display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .selection-hub h3 {
-    font-size: 1.4rem;
-    color: #333;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 1.5rem;
+    color: var(--gray-900);
+    margin-bottom: var(--space-4);
+    font-weight: 800;
+    letter-spacing: -0.025em;
 }
 
 .selection-options {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: var(--space-4);
 }
 
 .selection-btn {
-    background: #fff;
-    border: 3px solid #333;
-    padding: 20px;
+    background: var(--paper-white);
+    border: 1.5px solid var(--gray-200);
+    padding: var(--space-5);
     cursor: pointer;
     font-family: inherit;
     text-align: left;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-md);
 }
 
 .selection-btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 7px 7px 0 rgba(0, 0, 0, 0.3);
-    border-color: #ff4500;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--orange-500);
 }
 
 .selection-btn.daily-btn {
-    background: linear-gradient(135deg, #fff 0%, #fff9e6 100%);
+    background: linear-gradient(135deg, var(--paper-white) 0%, var(--orange-50) 100%);
 }
 
 .selection-btn.cold-btn {
-    background: linear-gradient(135deg, #fff 0%, #f0f8ff 100%);
+    background: linear-gradient(135deg, var(--paper-white) 0%, #f0f7ff 100%);
 }
 
 .selection-btn.community-btn {
-    background: linear-gradient(135deg, #fff 0%, #f5fff0 100%);
+    background: linear-gradient(135deg, var(--paper-white) 0%, #f6fff0 100%);
 }
 
 .selection-btn .btn-title {
     display: block;
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
-    letter-spacing: 0.5px;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: var(--space-1);
+    letter-spacing: -0.01em;
 }
 
 .selection-btn .btn-subtitle {
     display: block;
-    font-size: 0.9rem;
-    color: #333;
-    font-style: italic;
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    font-weight: 500;
 }
 
 .selection-footer {
-    margin-top: 25px;
-    padding-top: 15px;
-    border-top: 1px dashed #ccc;
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--gray-200);
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: var(--space-4);
     align-items: center;
 }
 
 .submit-case-trigger {
-    background: #ff4500;
+    background: var(--gray-800);
     color: white;
-    font-weight: bold;
+    font-weight: 700;
     border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-full);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
     width: 100%;
-    max-width: 300px;
+    max-width: 280px;
+    font-size: 0.875rem;
 }
 
 .submit-case-trigger:hover {

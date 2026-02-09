@@ -4,38 +4,67 @@
 
 @media (max-width: 640px) {
     .game-container {
-        padding: 25px 15px 60px 40px;
+        padding: var(--space-6) var(--space-4) var(--space-12) var(--space-8);
+        max-width: 100%;
+        margin: var(--space-2) auto;
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
     }
 
     .game-header h1 {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
     }
 
     .clue-text {
-        font-size: 0.95rem;
-    }
-
-    .input-row {
-        margin-bottom: 20px;
+        font-size: 0.9375rem;
     }
 
     .r-prefix {
-        padding: 10px 8px;
+        padding: var(--space-2) var(--space-2);
+        min-width: 42px;
     }
 
     .guess-input {
-        padding: 10px;
+        padding: var(--space-2);
     }
 
     .submit-btn {
-        padding: 10px 15px;
+        padding: 0 var(--space-4);
     }
 
     .modal-content {
-        padding: 30px 20px;
+        padding: var(--space-6) var(--space-4);
     }
 
     .modal-content h2 {
         font-size: 1.5rem;
+    }
+
+    .modal-content .answer-reveal {
+        font-size: 1.5rem;
+    }
+
+    .modal-content .stat-box {
+        padding: var(--space-3) var(--space-2);
+    }
+
+    .modal-content .stat-box .stat-value {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .game-container {
+        padding: var(--space-5) var(--space-3) var(--space-10) var(--space-7);
+    }
+
+    .header-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+
+    .header-right-actions {
+        width: 100%;
+        justify-content: space-between;
     }
 }

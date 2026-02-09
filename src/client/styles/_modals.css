@@ -21,93 +21,104 @@
 }
 
 .modal-content {
-    background: #fdf5e6;
-    padding: 40px;
-    border-radius: 4px;
-    max-width: 420px;
+    background: var(--paper-light);
+    padding: var(--space-8);
+    border-radius: var(--radius-lg);
+    max-width: 440px;
     width: 90%;
     text-align: center;
-    border: 4px solid #333;
-    box-shadow: 20px 20px 0 rgba(0, 0, 0, 0.4);
-    font-family: 'Courier New', Courier, monospace;
+    border: 2px solid var(--gray-800);
+    box-shadow: var(--shadow-xl);
     position: relative;
+    overflow: hidden;
 }
 
 .modal-content.win {
-    border-color: #ff4500;
+    border-color: var(--orange-500);
+    box-shadow: 0 25px 50px -12px rgba(255, 69, 0, 0.25);
 }
 
 .modal-close-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
+    top: var(--space-2);
+    right: var(--space-2);
+    background: transparent;
     border: none;
-    font-size: 2rem;
+    font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
-    color: #999;
-    transition: color 0.2s, transform 0.2s;
-    padding: 5px 10px;
-    font-family: Arial, sans-serif;
+    color: var(--gray-400);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: var(--space-2);
+    border-radius: var(--radius-full);
 }
 
 .modal-close-btn:hover {
-    color: #ff4500;
-    transform: scale(1.1);
+    color: var(--orange-500);
+    background: var(--orange-50);
+    transform: rotate(90deg);
 }
 
 .modal-content h2 {
-    color: #333;
-    font-size: 2.2rem;
-    margin: 0 0 15px 0;
-    font-weight: 900;
-    letter-spacing: 1px;
+    color: var(--gray-900);
+    font-size: 1.75rem;
+    margin: 0 0 var(--space-3) 0;
+    font-weight: 800;
+    letter-spacing: -0.025em;
 }
 
 .modal-content p {
-    color: #333;
+    color: var(--gray-600);
     font-size: 1rem;
-    margin: 10px 0 25px;
+    margin: var(--space-2) 0 var(--space-6);
+    line-height: 1.6;
 }
 
 .modal-content .stats-row {
     display: flex;
-    gap: 20px;
+    gap: var(--space-4);
     justify-content: center;
-    margin: 20px 0;
+    margin: var(--space-6) 0;
 }
 
 .modal-content .stat-box {
-    background: #333;
-    color: #fff;
-    padding: 15px 20px;
-    border-radius: 4px;
+    background: var(--paper-white);
+    color: var(--gray-800);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
     flex: 1;
-    max-width: 150px;
+    max-width: 140px;
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
 }
 
 .modal-content .stat-box .stat-value {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #ff4500;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--orange-500);
 }
 
 .modal-content .stat-box .stat-label {
-    font-size: 0.8rem;
-    margin-top: 5px;
-    color: #ccc;
+    font-size: 0.75rem;
+    margin-top: var(--space-1);
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
 }
 
 .modal-content .answer-reveal {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 900;
-    color: #ff4500 !important;
-    margin: 20px 0;
+    color: var(--orange-500) !important;
+    margin: var(--space-4) 0;
     text-transform: lowercase;
     letter-spacing: -1px;
-    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
     display: block;
+    background: var(--orange-50);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--orange-200);
 }
 
 .modal-actions {
@@ -118,40 +129,42 @@
 }
 
 .modal-btn {
-    background: #ff4500;
+    background: var(--orange-500);
     color: white;
-    border: 3px solid #333;
-    padding: 14px 24px;
+    border: none;
+    padding: var(--space-4) var(--space-6);
     cursor: pointer;
-    font-size: 1.1rem;
-    border-radius: 4px;
-    font-weight: 900;
+    font-size: 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 800;
     font-family: inherit;
-    transition: all 0.2s;
-    box-shadow: 4px 4px 0 #333;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-md);
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .modal-btn.secondary {
-    background: #888;
-    border-color: #333;
-    font-size: 0.9rem;
-    padding: 10px 20px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-size: 0.875rem;
+    padding: var(--space-3) var(--space-5);
+    box-shadow: none;
 }
 
 .modal-btn.training-btn {
-    background: #333;
-    color: #fff;
+    background: var(--gray-800);
+    color: var(--gray-50);
 }
 
 .modal-btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 #333;
+    background: var(--orange-600);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .modal-btn:active {
-    transform: translate(0, 0);
-    box-shadow: 2px 2px 0 #333;
+    transform: translateY(0);
 }
 
 .modal-btn.secondary:hover {
@@ -167,36 +180,41 @@
 /* Form Styles for Submission */
 .form-group {
     text-align: left;
-    margin-bottom: 15px;
+    margin-bottom: var(--space-4);
 }
 
 .form-group label {
     display: block;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #555;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: var(--space-1);
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 10px;
-    border: 2px solid #333;
-    border-radius: 4px;
+    padding: var(--space-3);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-md);
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.9375rem;
     box-sizing: border-box;
-    background: #fff;
+    background: var(--paper-white);
+    transition: all 0.2s;
+    color: var(--gray-800);
 }
 
 .form-group textarea {
-    height: 60px;
+    height: 80px;
     resize: vertical;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #ff4500;
+    border-color: var(--orange-500);
+    box-shadow: 0 0 0 3px var(--orange-50);
 }

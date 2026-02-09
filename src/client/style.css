@@ -39,21 +39,22 @@
 
 /* Additional UI enhancements */
 .rank-badge {
-  background: #eee;
-  border: 2px solid #333;
-  color: #333;
-  padding: 4px 12px;
-  border-radius: 4px;
+  background: var(--gray-100);
+  border: 1.5px solid var(--gray-800);
+  color: var(--gray-800);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
   font-size: 0.7rem;
-  font-weight: bold;
-  margin-top: 5px;
+  font-weight: 700;
+  margin-top: var(--space-1);
   display: inline-block;
   font-family: inherit;
   transform: rotate(1deg);
+  box-shadow: 2px 2px 0 var(--gray-200);
 }
 
 .rank-badge span {
-  color: #ff4500;
+  color: var(--orange-500);
 }
 
 .stamp-container {
@@ -86,27 +87,27 @@
 }
 
 .streak-badge {
-  background: #333;
-  color: #fff;
-  padding: 4px 12px;
-  border: 2px solid #333;
-  border-radius: 20px;
+  background: var(--gray-800);
+  color: var(--gray-50);
+  padding: var(--space-1) var(--space-3);
+  border: 2px solid var(--gray-800);
+  border-radius: var(--radius-full);
   font-size: 0.8rem;
-  font-weight: bold;
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
   white-space: nowrap;
   display: inline-block;
   transform: rotate(-1deg);
 }
 
 .streak-badge span {
-  color: #ff4500;
+  color: var(--orange-400);
 }
 
 /* Cold case aesthetic override */
 .game-container.cold-case {
-  background: #e6f3ff;
-  border-color: #b3d9ff;
+  background: #f0f7ff;
+  border-color: #cce4ff;
 }
 
 .game-container.cold-case::after {
@@ -115,9 +116,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-30deg);
-  font-size: 3rem;
+  font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 900;
-  color: rgba(74, 144, 226, 0.1);
+  color: rgba(0, 100, 255, 0.05);
   pointer-events: none;
   z-index: var(--z-base);
   white-space: nowrap;
@@ -129,9 +130,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  border-bottom: 1px dotted #ccc;
-  padding-bottom: 10px;
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--paper-line);
+  padding-bottom: var(--space-3);
   position: relative;
   z-index: 10;
 }
@@ -139,57 +140,62 @@
 .header-right-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .back-btn {
   background: none;
   border: none;
-  color: #444;
+  color: var(--gray-600);
   font-family: inherit;
   font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
   padding: 0;
-  text-decoration: underline;
-  transition: color 0.2s;
+  text-decoration: none;
+  transition: all 0.2s;
 }
 
 .back-btn:hover {
-  color: #ff4500;
+  color: var(--orange-500);
+  text-decoration: underline;
 }
 
 .tip-btn {
-  background: #fff;
-  border: 2px solid #333;
-  color: #333;
-  padding: 4px 10px;
-  border-radius: 20px;
+  background: var(--paper-white);
+  border: 1.5px solid var(--gray-800);
+  color: var(--gray-800);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
   font-size: 0.7rem;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
-  margin-top: 5px;
-  margin-left: 10px;
+  margin-top: var(--space-1);
+  margin-left: var(--space-2);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  transition: all 0.2s;
+  gap: var(--space-1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 0 var(--gray-200);
 }
 
 .tip-btn:hover {
-  background: #fff9e6;
-  border-color: #ff4500;
-  color: #ff4500;
+  background: var(--orange-50);
+  border-color: var(--orange-500);
+  color: var(--orange-500);
   transform: translateY(-1px);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 3px 3px 0 var(--orange-100);
 }
 
 /* Feedback animations */
 .feedback-message {
   opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.3s, transform 0.3s;
+  transform: translateY(var(--space-2));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: var(--space-2);
 }
 
 .feedback-message.active {
