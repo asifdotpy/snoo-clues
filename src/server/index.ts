@@ -42,6 +42,14 @@ function coldCaseAnswerKey(postId: string, username: string): string {
   return `cold_case_answer:${postId}:${username}`;
 }
 
+function communityCasesKey(): string {
+  return `community_cases`;
+}
+
+function communityCaseAnswerKey(postId: string, username: string): string {
+  return `community_case_answer:${postId}:${username}`;
+}
+
 async function getUserStreak(postId: string, username: string): Promise<number> {
   const value = await redis.get(streakKey(postId, username));
   return value ? parseInt(value, 10) : 0;
@@ -95,6 +103,12 @@ async function getTopDetectives(postId: string): Promise<LeaderboardEntry[]> {
 
 function getTodaysPuzzle(): DailyPuzzle {
   return getTodaysPuzzleInternal(new Date(), ALL_PUZZLES);
+}
+
+function getTodayCaseNumber(): number {
+  const epoch = new Date("2025-01-01").getTime();
+  const current = new Date().getTime();
+  return Math.floor((current - epoch) / (1000 * 60 * 60 * 24)) + 1;
 }
 
 function getTodayDateKey(): string {
@@ -265,13 +279,14 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
       return;
     }
 
-    const { guess, mode } = req.body as (GuessRequest & { mode?: 'daily' | 'unlimited' });
+    const { guess, mode } = req.body as (GuessRequest & { mode?: 'daily' | 'unlimited' | 'community' });
     if (!guess) {
       res.status(400).json({ error: "Invalid" });
       return;
     }
 
     const isUnlimited = mode === 'unlimited';
+    const isCommunity = mode === 'community';
     if (!mode) {
       console.warn(`[Guess] Missing mode for user ${username}. Defaulting to daily.`);
     }
@@ -281,6 +296,8 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     let correctAnswer = "";
     if (isUnlimited) {
       correctAnswer = await redis.get(coldCaseAnswerKey(postId, username)) || "";
+    } else if (isCommunity) {
+      correctAnswer = await redis.get(communityCaseAnswerKey(postId, username)) || "";
     } else {
       const puzzle = getTodaysPuzzle();
       correctAnswer = puzzle.subreddit;
@@ -301,9 +318,9 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     }
 
     if (isCorrect) {
-      if (isUnlimited) {
+      if (isUnlimited || isCommunity) {
         coldCasesSolved = await incrementColdCases(postId, username);
-        // Cold cases still increment rank score but not streak. Award 1 point.
+        // Practice cases still increment rank score but not streak. Award 1 point.
         score = await incrementUserScore(postId, username, 1);
       } else {
         await markAsWinner(postId, username, today);
@@ -368,22 +385,133 @@ router.post("/api/game/abandon", async (_req, res): Promise<void> => {
 
 router.post("/api/game/share", async (req, res): Promise<void> => {
   try {
-    const postId = context.postId;
+    const { postId } = context;
     if (!postId) {
-      res.status(400).json({ error: "Missing" });
+      res.status(400).json({ error: "Missing postId" });
       return;
     }
     const username = await getUsername();
-    if (username === "anonymous" || !(await isWinner(postId, username, getTodayDateKey()))) {
-      res.status(401).json({ error: "Unauthorized" });
+    if (username === "anonymous") {
+      res.status(401).json({ error: "Login required" });
       return;
     }
-    const { attempts } = req.body as ShareRequest;
+
+    const { attempts, cluesRevealed, mode } = req.body as ShareRequest;
+    
+    let emojiRow = "";
+    for (let i = 1; i <= 3; i++) {
+      emojiRow += i <= cluesRevealed ? "🔎 " : "⬛ ";
+    }
+
+    const today = getTodayDateKey();
+    let correctAnswer = "";
+    let caseTitle = "Investigation";
+
+    if (mode === 'daily') {
+      const puzzle = getTodaysPuzzle();
+      correctAnswer = puzzle.subreddit;
+      caseTitle = `Daily Case #${getTodayCaseNumber()}`;
+      // Verify they actually won
+      if (!(await isWinner(postId, username, today))) {
+        res.status(403).json({ error: "You must solve the case first!" });
+        return;
+      }
+    } else if (mode === 'unlimited') {
+      correctAnswer = await redis.get(coldCaseAnswerKey(postId, username)) || "???";
+      caseTitle = "Cold Case";
+    } else if (mode === 'community') {
+      correctAnswer = await redis.get(communityCaseAnswerKey(postId, username)) || "???";
+      caseTitle = "Community Case";
+    }
+
+    const text = `Snoo-Clues ${caseTitle}
+${emojiRow.trim()}
+I solved it in ${attempts} attempt${attempts !== 1 ? 's' : ''}! 🔍🎉
+r/${correctAnswer}`;
+
     const comment = await reddit.submitComment({
       id: postId,
-      text: `I solved today's Snoo-Clues in ${attempts} attempt${attempts !== 1 ? 's' : ''}! 🔍🎉`
+      text: text
     });
+
     res.json({ type: "share_result", success: true, commentUrl: `https://reddit.com${comment.permalink}` });
+  } catch (err) {
+    console.error("[Share] Error:", err);
+    res.status(500).json({ error: "Failed to share" });
+  }
+});
+
+router.post("/api/game/community/submit", async (req, res): Promise<void> => {
+  try {
+    const { subreddit, clues } = req.body as CommunitySubmissionRequest;
+    if (!subreddit || !clues || clues.length !== 3) {
+      res.status(400).json({ error: "Invalid submission" });
+      return;
+    }
+
+    const username = await getUsername();
+    const submission = {
+      subreddit: normalizeSubredditName(subreddit),
+      clues,
+      author: username,
+      timestamp: Date.now()
+    };
+
+    await redis.lPush(communityCasesKey(), JSON.stringify(submission));
+    res.json({ success: true, message: "Case submitted to the community files!" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to submit" });
+  }
+});
+
+router.get("/api/game/community/random", async (_req, res): Promise<void> => {
+  try {
+    const { postId } = context;
+    if (!postId) {
+      res.status(400).json({ error: "Missing postId" });
+      return;
+    }
+    const username = await getUsername();
+    const score = await redis.zScore(leaderboardKey(postId), username) || 0;
+    const streak = await getUserStreak(postId, username);
+    const coldCases = await getColdCasesSolved(postId, username);
+
+    // Get a random community case
+    const len = await redis.lLen(communityCasesKey());
+    if (len === 0) {
+      res.status(404).json({ error: "No community cases found yet. Be the first to submit one!" });
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * len);
+    const raw = await redis.lRange(communityCasesKey(), randomIndex, randomIndex);
+    if (!raw || raw.length === 0) {
+      res.status(404).json({ error: "Failed to fetch community case" });
+      return;
+    }
+
+    // Devvit lRange returns string[]
+    const puzzle = JSON.parse(raw[0]) as { subreddit: string, clues: [string, string, string] };
+    
+    // Store answer for validation
+    await redis.set(communityCaseAnswerKey(postId, username), puzzle.subreddit);
+
+    res.json({
+      type: "game_init",
+      username: username,
+      clues: puzzle.clues,
+      hasPlayedToday: false,
+      attempts: 0,
+      isWinner: false,
+      streak: streak,
+      coldCasesSolved: coldCases,
+      rank: getDetectiveRank(score),
+      audioAssets: {
+        rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",
+        victory: "https://www.soundjay.com/human/sounds/applause-01.mp3",
+        wrong: "https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"
+      }
+    } as GameInitResponse);
   } catch (err) {
     res.status(500).json({ error: "Failed" });
   }

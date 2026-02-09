@@ -158,6 +158,33 @@
   color: #ff4500;
 }
 
+.tip-btn {
+  background: #fff;
+  border: 2px solid #333;
+  color: #333;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 5px;
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  font-family: inherit;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tip-btn:hover {
+  background: #fff9e6;
+  border-color: #ff4500;
+  color: #ff4500;
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
 /* Feedback animations */
 .feedback-message {
   opacity: 0;
