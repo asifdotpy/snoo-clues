@@ -68,6 +68,12 @@
     display: none;
 }
 
+.copy-trigger.copied {
+    color: #2e7d32;
+    text-decoration: none;
+    cursor: default;
+}
+
 .clue-number {
     color: var(--orange-600);
 }

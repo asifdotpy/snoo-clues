@@ -640,6 +640,18 @@ class SnooCluesGame {
 
     this.playSound('click');
     navigator.clipboard.writeText(text).then(() => {
+      // Find the specific trigger that was clicked
+      const trigger = document.querySelector(`.copy-trigger[data-clue="${num}"]`) as HTMLElement;
+      if (trigger) {
+        const originalText = trigger.textContent;
+        trigger.textContent = "Copied!";
+        trigger.classList.add("copied");
+
+        setTimeout(() => {
+          trigger.textContent = originalText;
+          trigger.classList.remove("copied");
+        }, 2000);
+      }
       this.showFeedback(`🔎 Evidence #${num} copied to clipboard!`, "success", 3000);
     }).catch(err => {
       console.error("Failed to copy:", err);
