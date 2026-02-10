@@ -83,7 +83,7 @@ class SnooCluesGame {
   private exitToHomeBtn!: HTMLButtonElement;
   private selectionExitToHomeBtn!: HTMLButtonElement;
   private loadingElement!: HTMLElement;
-  private startCaseFileBtn!: HTMLButtonElement;
+  private startInvestigationBtn!: HTMLButtonElement;
   private userGreeting!: HTMLElement;
   private mascotTipBtn!: HTMLButtonElement;
   private openSubmitModalBtn!: HTMLButtonElement;
