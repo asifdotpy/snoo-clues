@@ -40,21 +40,23 @@ export class GameAPI {
     static async fetchInitInfo(): Promise<InitResponse> {
         const response = await this.fetchWithTimeout("/api/init", { timeout: 5000 });
         if (!response.ok) {
-            throw new Error("Failed to fetch init info");
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || "Failed to fetch Sleuth initialization info.");
         }
         return response.json();
     }
 
     /**
-     * Initialize a game (daily or random)
-     * @param mode - 'daily' for daily puzzle, 'unlimited' for random puzzle
+     * Initialize a game (daily or archives)
+     * @param mode - 'daily' for daily puzzle, 'archives' for random puzzle
      */
-    static async initGame(mode: 'daily' | 'unlimited'): Promise<GameInitResponse> {
+    static async initGame(mode: 'daily' | 'archives'): Promise<GameInitResponse> {
         const endpoint = mode === 'daily' ? "/api/game/init" : "/api/game/random";
         const response = await this.fetchWithTimeout(endpoint, { timeout: 5000 });
 
         if (!response.ok) {
-            throw new Error(`Failed to initialize ${mode} game`);
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || `Failed to initialize ${mode} Case File.`);
         }
 
         return response.json();
@@ -63,7 +65,7 @@ export class GameAPI {
     /**
      * Submit a guess
      */
-    static async submitGuess(guess: string, mode: 'daily' | 'unlimited' | null): Promise<GuessResponse> {
+    static async submitGuess(guess: string, mode: 'daily' | 'archives' | 'community' | null): Promise<GuessResponse> {
         const response = await this.fetchWithTimeout("/api/game/guess", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -72,12 +74,13 @@ export class GameAPI {
         });
 
         if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
             if (response.status === 401) {
-                const e = new Error("LOGIN_REQUIRED") as Error & { status?: number };
+                const e = new Error(data.error || "LOGIN_REQUIRED") as Error & { status?: number };
                 e.status = 401;
                 throw e;
             }
-            throw new Error("Failed to submit guess");
+            throw new Error(data.error || "Failed to submit findings.");
         }
 
         return response.json();
@@ -86,7 +89,7 @@ export class GameAPI {
     /**
      * Share result to Reddit
      */
-    static async shareResult(data: { attempts: number; cluesRevealed: number; mode: string }): Promise<ShareResponse> {
+    static async shareResult(data: { attempts: number; evidenceFound: number; mode: string }): Promise<ShareResponse> {
         const response = await this.fetchWithTimeout("/api/game/share", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -95,7 +98,8 @@ export class GameAPI {
         });
 
         if (!response.ok) {
-            throw new Error("Failed to share result");
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || "Failed to report findings.");
         }
 
         return response.json();
@@ -108,7 +112,8 @@ export class GameAPI {
         const response = await this.fetchWithTimeout("/api/game/leaderboard", { timeout: 5000 });
 
         if (!response.ok) {
-            throw new Error("Failed to fetch leaderboard");
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || "Failed to fetch detective rankings.");
         }
 
         return response.json();
@@ -120,7 +125,8 @@ export class GameAPI {
     static async fetchCommunityGame(): Promise<GameInitResponse> {
         const response = await this.fetchWithTimeout("/api/game/community/random", { timeout: 5000 });
         if (!response.ok) {
-            throw new Error("Failed to fetch community case");
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || "Failed to fetch community Case File.");
         }
         return response.json();
     }
@@ -128,7 +134,7 @@ export class GameAPI {
     /**
      * Submit a community case
      */
-    static async submitCommunityCase(data: { subreddit: string; clues: string[] }): Promise<{ success: boolean }> {
+    static async submitCommunityCase(data: { subreddit: string; evidence: string[] }): Promise<{ success: boolean }> {
         const response = await this.fetchWithTimeout("/api/game/community/submit", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -136,7 +142,8 @@ export class GameAPI {
             timeout: 5000
         });
         if (!response.ok) {
-            throw new Error("Failed to submit community case");
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || "Failed to submit community Case File.");
         }
         return response.json();
     }
@@ -152,7 +159,8 @@ export class GameAPI {
         });
 
         if (!response.ok) {
-            throw new Error("Failed to abandon game");
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || "Failed to abandon investigation.");
         }
 
         return response.json();

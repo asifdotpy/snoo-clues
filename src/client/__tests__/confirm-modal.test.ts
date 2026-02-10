@@ -48,12 +48,12 @@ describe('Abandon Flow and Modal Behavior', () => {
                 return Promise.resolve({
                     ok: true,
                     json: () => Promise.resolve({
-                        clues: ['Clue 1', 'Clue 2', 'Clue 3'],
+                        evidence: ['Evidence 1', 'Evidence 2', 'Evidence 3'],
                         attempts: 0,
                         hasPlayedToday: false,
                         isWinner: false,
                         streak: 5,
-                        coldCasesSolved: 2,
+                        archivesSolved: 2,
                         audioAssets: {
                             rustle: "rustle.mp3",
                             victory: "victory.mp3",
@@ -118,10 +118,10 @@ describe('Abandon Flow and Modal Behavior', () => {
         await waitFor(() => expect(document.getElementById('streak-value')?.textContent).toBe('5'));
 
         // Reveal a clue to create progress
-        const revealBtn2 = document.getElementById('revealClue2');
+        const revealBtn2 = document.getElementById('revealEvidence2');
         fireEvent.click(revealBtn2!);
 
-        await waitFor(() => expect(document.getElementById('clue2Card')).toHaveClass('visible'));
+        await waitFor(() => expect(document.getElementById('evidence2Card')).toHaveClass('visible'));
 
         // Click back to selection
         const backBtn = document.getElementById('backToSelection');
@@ -130,7 +130,7 @@ describe('Abandon Flow and Modal Behavior', () => {
         // Confirm modal should show
         const confirmModal = document.getElementById('confirmModal');
         expect(confirmModal).not.toHaveClass('hidden');
-        expect(confirmModal?.textContent).toContain('Abandoning this case will forfeit your current investigation and reset your streak to 0. Retreat?');
+        expect(confirmModal?.textContent).toContain('Abandoning this Case File will forfeit your current progress and reset your streak to 0. Retreat?');
 
         // Click Yes, Abandon
         const confirmYesBtn = document.getElementById('confirm-yes-btn');
@@ -140,9 +140,9 @@ describe('Abandon Flow and Modal Behavior', () => {
         await waitFor(() => expect(document.getElementById('streak-value')?.textContent).toBe('0'));
 
         // Check UI reset to Empty Desk
-        expect(document.getElementById('clue1Text')?.textContent).toBe('NO ACTIVE CASE');
-        expect(document.getElementById('clue2Card')).toHaveClass('locked');
-        expect(document.getElementById('clue2Card')).not.toHaveClass('visible');
+        expect(document.getElementById('evidence1Text')?.textContent).toBe('NO ACTIVE CASE FILE');
+        expect(document.getElementById('evidence2Card')).toHaveClass('locked');
+        expect(document.getElementById('evidence2Card')).not.toHaveClass('visible');
 
         // Check fetch called for abandon
         expect(fetch).toHaveBeenCalledWith('/api/game/abandon', expect.any(Object));
@@ -161,6 +161,6 @@ describe('Abandon Flow and Modal Behavior', () => {
         fireEvent.click(closeBtn!);
 
         expect(document.getElementById('selectionModal')).toHaveClass('hidden');
-        expect(document.getElementById('clue1Text')?.textContent).toBe('NO ACTIVE CASE');
+        expect(document.getElementById('evidence1Text')?.textContent).toBe('NO ACTIVE CASE FILE');
     });
 });

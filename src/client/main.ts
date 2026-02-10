@@ -23,27 +23,27 @@ import type {
 // ##########################################################################
 
 class SnooCluesGame {
-  private clues: [string, string, string] = ["", "", ""];
+  private evidence: [string, string, string] = ["", "", ""];
   private attempts: number = 0;
   private isWinner: boolean = false;
   private hasPlayed: boolean = false;
   private streak: number = 0;
   private rank: string = "Rookie Sleuth";
-  private coldCasesSolved: number = 0;
-  private cluesRevealed: number = 1;
+  private archivesSolved: number = 0;
+  private evidenceFound: number = 1;
   private currentCategory: string = "";
-  private currentGameMode: 'daily' | 'unlimited' | 'community' | null = null;
+  private currentGameMode: 'daily' | 'archives' | 'community' | null = null;
   private audioAssets?: GameInitResponse['audioAssets'];
   private pendingExitTarget: 'selection' | 'home' | null = null;
 
   // DOM Elements
-  private clue1Text!: HTMLElement;
-  private clue2Text!: HTMLElement;
-  private clue3Text!: HTMLElement;
-  private clue2Card!: HTMLElement;
-  private clue3Card!: HTMLElement;
-  private revealClue2Btn!: HTMLButtonElement;
-  private revealClue3Btn!: HTMLButtonElement;
+  private evidence1Text!: HTMLElement;
+  private evidence2Text!: HTMLElement;
+  private evidence3Text!: HTMLElement;
+  private evidence2Card!: HTMLElement;
+  private evidence3Card!: HTMLElement;
+  private revealEvidence2Btn!: HTMLButtonElement;
+  private revealEvidence3Btn!: HTMLButtonElement;
   private guessInput!: HTMLInputElement;
   private submitBtn!: HTMLButtonElement;
   private attemptsCount!: HTMLElement;
@@ -73,17 +73,17 @@ class SnooCluesGame {
   private selectionModal!: HTMLElement;
   private gameOverlay!: HTMLElement;
   private startDailyBtn!: HTMLButtonElement;
-  private startColdBtn!: HTMLButtonElement;
+  private startArchivesBtn!: HTMLButtonElement;
   private startCommunityBtn!: HTMLButtonElement;
   private keepTrainingBtn!: HTMLButtonElement;
   private gameContainer!: HTMLElement;
   private gameSubtitle!: HTMLElement;
   private currentModeTag!: HTMLElement;
-  private playedToColdBtn!: HTMLButtonElement;
+  private playedToArchivesBtn!: HTMLButtonElement;
   private exitToHomeBtn!: HTMLButtonElement;
   private selectionExitToHomeBtn!: HTMLButtonElement;
   private loadingElement!: HTMLElement;
-  private startInvestigationBtn!: HTMLButtonElement;
+  private startCaseFileBtn!: HTMLButtonElement;
   private userGreeting!: HTMLElement;
   private mascotTipBtn!: HTMLButtonElement;
   private openSubmitModalBtn!: HTMLButtonElement;
@@ -132,13 +132,13 @@ class SnooCluesGame {
   }
 
   private initDOMElements(): void {
-    this.clue1Text = document.getElementById("clue1Text")!;
-    this.clue2Text = document.getElementById("clue2Text")!;
-    this.clue3Text = document.getElementById("clue3Text")!;
-    this.clue2Card = document.getElementById("clue2Card")!;
-    this.clue3Card = document.getElementById("clue3Card")!;
-    this.revealClue2Btn = document.getElementById("revealClue2") as HTMLButtonElement;
-    this.revealClue3Btn = document.getElementById("revealClue3") as HTMLButtonElement;
+    this.evidence1Text = document.getElementById("evidence1Text")!;
+    this.evidence2Text = document.getElementById("evidence2Text")!;
+    this.evidence3Text = document.getElementById("evidence3Text")!;
+    this.evidence2Card = document.getElementById("evidence2Card")!;
+    this.evidence3Card = document.getElementById("evidence3Card")!;
+    this.revealEvidence2Btn = document.getElementById("revealEvidence2") as HTMLButtonElement;
+    this.revealEvidence3Btn = document.getElementById("revealEvidence3") as HTMLButtonElement;
     this.guessInput = document.getElementById("guessInput") as HTMLInputElement;
     this.submitBtn = document.getElementById("submitBtn") as HTMLButtonElement;
     this.attemptsCount = document.getElementById("attemptsCount")!;
@@ -162,7 +162,7 @@ class SnooCluesGame {
     this.shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
     this.selectionModal = document.getElementById("selectionModal")!;
     this.startDailyBtn = document.getElementById("startDailyBtn") as HTMLButtonElement;
-    this.startColdBtn = document.getElementById("startColdBtn") as HTMLButtonElement;
+    this.startArchivesBtn = document.getElementById("startArchivesBtn") as HTMLButtonElement;
     this.startCommunityBtn = document.getElementById("startCommunityBtn") as HTMLButtonElement;
     this.keepTrainingBtn = document.getElementById("keep-training-btn") as HTMLButtonElement;
     this.gameOverlay = document.getElementById("gameOverlay")!;
@@ -174,11 +174,11 @@ class SnooCluesGame {
     this.confirmNoBtn = document.getElementById("confirm-no-btn") as HTMLButtonElement;
     this.closeSelectionBtn = document.getElementById("closeSelectionModal") as HTMLButtonElement;
     this.currentModeTag = document.getElementById("currentModeTag")!;
-    this.playedToColdBtn = document.getElementById("playedToColdBtn") as HTMLButtonElement;
+    this.playedToArchivesBtn = document.getElementById("playedToArchivesBtn") as HTMLButtonElement;
     this.exitToHomeBtn = document.getElementById("exitToHome") as HTMLButtonElement;
     this.selectionExitToHomeBtn = document.getElementById("selectionExitToHome") as HTMLButtonElement;
     this.loadingElement = document.getElementById("loading")!;
-    this.startInvestigationBtn = document.getElementById("start-investigation-btn") as HTMLButtonElement;
+    this.startInvestigationBtn = document.getElementById("start-case-file-btn") as HTMLButtonElement;
     this.userGreeting = document.getElementById("user-greeting")!;
     this.mascotTipBtn = document.getElementById("mascot-tip-btn") as HTMLButtonElement;
     this.openSubmitModalBtn = document.getElementById("openSubmitModalBtn") as HTMLButtonElement;
@@ -219,8 +219,8 @@ class SnooCluesGame {
   }
 
   private attachEventListeners(): void {
-    this.revealClue2Btn.addEventListener("click", () => this.revealClue(2));
-    this.revealClue3Btn.addEventListener("click", () => this.revealClue(3));
+    this.revealEvidence2Btn.addEventListener("click", () => this.revealEvidence(2));
+    this.revealEvidence3Btn.addEventListener("click", () => this.revealEvidence(3));
     this.submitBtn.addEventListener("click", () => {
       this.playSound('click');
       this.submitGuess();
@@ -249,6 +249,11 @@ class SnooCluesGame {
       this.playSound('click');
       this.closeModal("played");
     });
+
+    // Share from win modal
+    if (this.shareBtn) {
+      this.shareBtn.textContent = "📢 Report Findings";
+    }
 
     // Share from played modal too
     const playedShareBtn = this.playedModal.querySelector(".share-btn") as HTMLButtonElement;
@@ -279,7 +284,7 @@ class SnooCluesGame {
     this.confirmYesBtn.addEventListener("click", () => {
       this.playSound('click');
       this.closeModal("confirm");
-      this.handleExit(this.hasInvestigationProgress());
+      this.handleExit(this.hasCaseProgress());
     });
 
     this.confirmNoBtn.addEventListener("click", () => {
@@ -291,9 +296,9 @@ class SnooCluesGame {
       this.playSound('click');
       this.initGame('daily');
     });
-    this.startColdBtn.addEventListener("click", () => {
+    this.startArchivesBtn.addEventListener("click", () => {
       this.playSound('click');
-      this.initGame('unlimited');
+      this.initGame('archives');
     });
     this.startCommunityBtn.addEventListener("click", () => {
       this.playSound('click');
@@ -301,10 +306,10 @@ class SnooCluesGame {
     });
     this.keepTrainingBtn.addEventListener("click", () => {
       this.playSound('click');
-      const wasUnlimited = this.currentGameMode === 'unlimited';
+      const wasArchives = this.currentGameMode === 'archives';
       this.closeModal("win");
-      if (!wasUnlimited) {
-        this.initGame('unlimited');
+      if (!wasArchives) {
+        this.initGame('archives');
       }
     });
     // Connect Change Case Type button
@@ -316,10 +321,10 @@ class SnooCluesGame {
       });
     }
 
-    this.playedToColdBtn.addEventListener("click", () => {
+    this.playedToArchivesBtn.addEventListener("click", () => {
       this.playSound('click');
       this.closeModal("played");
-      this.initGame('unlimited');
+      this.initGame('archives');
     });
 
     // New Exit to Home listeners
@@ -398,17 +403,17 @@ class SnooCluesGame {
     Audio.playMusic();
   }
 
-  private hasInvestigationProgress(): boolean {
+  private hasCaseProgress(): boolean {
     return (this.attempts > 0 ||
-      this.clue2Card.classList.contains("visible") ||
-      this.clue3Card.classList.contains("visible")) && !this.isWinner;
+      this.evidence2Card.classList.contains("visible") ||
+      this.evidence3Card.classList.contains("visible")) && !this.isWinner;
   }
 
   private requestExitConfirmation(target: 'selection' | 'home'): void {
     console.log(`[Navigation] Requesting exit to: ${target}`);
     this.pendingExitTarget = target;
 
-    if (!this.hasInvestigationProgress()) {
+    if (!this.hasCaseProgress()) {
       if (target === 'selection') {
         this.handleExit(false);
       } else {
@@ -424,11 +429,11 @@ class SnooCluesGame {
     // Progress exists, show abandonment warning
     if (target === 'home') {
       this.confirmModalTitle.textContent = "Exit to Main Menu?";
-      this.confirmModalText.textContent = "Your current investigation progress will be lost and your streak will reset. Exit anyway?";
+      this.confirmModalText.textContent = "Your current Case File progress will be lost and your streak will reset. Exit anyway?";
       this.confirmYesBtn.textContent = "Yes, Exit";
     } else {
       this.confirmModalTitle.textContent = "Abandon Case?";
-      this.confirmModalText.textContent = "Abandoning this case will forfeit your current investigation and reset your streak to 0. Retreat?";
+      this.confirmModalText.textContent = "Abandoning this Case File will forfeit your current progress and reset your streak to 0. Retreat?";
       this.confirmYesBtn.textContent = "Yes, Abandon";
     }
 
@@ -493,7 +498,7 @@ class SnooCluesGame {
     this.gameOverlay.classList.remove("hidden");
   }
 
-  private async initGame(mode: 'daily' | 'unlimited' | 'community'): Promise<void> {
+  private async initGame(mode: 'daily' | 'archives' | 'community'): Promise<void> {
     this.resetGameUI();
     this.currentGameMode = mode;
     this.hideSelectionHub();
@@ -502,19 +507,19 @@ class SnooCluesGame {
     Audio.playMusic();
 
     // Toggle aesthetics
-    if (mode === 'unlimited') {
-      this.gameContainer.classList.add('cold-case');
-      this.gameSubtitle.textContent = "Cold Case Investigation (Practice)";
-      this.currentModeTag.textContent = "COLD CASE";
-      this.currentModeTag.className = "mode-tag unlimited";
+    if (mode === 'archives') {
+      this.gameContainer.classList.add('archives-case');
+      this.gameSubtitle.textContent = "The Archives (Practice)";
+      this.currentModeTag.textContent = "ARCHIVES";
+      this.currentModeTag.className = "mode-tag archives";
     } else if (mode === 'community') {
-      this.gameContainer.classList.add('cold-case'); // Reuse cold case blue for now
+      this.gameContainer.classList.add('archives-case'); // Reuse archives blue for now
       this.gameSubtitle.textContent = "Community Case File (User Contributed)";
       this.currentModeTag.textContent = "COMMUNITY";
-      this.currentModeTag.className = "mode-tag unlimited";
+      this.currentModeTag.className = "mode-tag archives";
     } else {
-      this.gameContainer.classList.remove('cold-case');
-      this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
+      this.gameContainer.classList.remove('archives-case');
+      this.gameSubtitle.textContent = "The Daily Subreddit Case File";
       this.currentModeTag.textContent = "DAILY CASE";
       this.currentModeTag.className = "mode-tag daily";
     }
@@ -522,8 +527,8 @@ class SnooCluesGame {
     try {
       const data = mode === 'community'
         ? await GameAPI.fetchCommunityGame()
-        : await GameAPI.initGame(mode as 'daily' | 'unlimited');
-      this.clues = data.clues;
+        : await GameAPI.initGame(mode as 'daily' | 'archives');
+      this.evidence = data.evidence;
       if (data.username) {
         this.userGreeting.textContent = `Hey ${data.username} 👋`;
       }
@@ -532,7 +537,7 @@ class SnooCluesGame {
       this.isWinner = data.isWinner;
       this.streak = data.streak;
       this.rank = data.rank || "Rookie Sleuth";
-      this.coldCasesSolved = data.coldCasesSolved;
+      this.archivesSolved = data.archivesSolved;
       this.currentCategory = data.category || "";
       this.audioAssets = data.audioAssets;
 
@@ -548,36 +553,41 @@ class SnooCluesGame {
       }
     } catch (error: any) {
       console.error(error);
-      const message = error.name === 'AbortError'
-        ? "Request timed out. Please try again."
-        : "Unable to load investigation. Please check your connection and try again.";
+      let message = "Unable to load Case File. Please check your connection and try again.";
+
+      if (error.name === 'AbortError') {
+        message = "Sleuth HQ is taking too long to respond. Please check your connection.";
+      } else if (error.message) {
+        message = error.message;
+      }
+
       this.showFeedback(message, "error");
     }
   }
 
   private updateGameUI(): void {
-    typewriter(this.clue1Text, this.clues[0]);
-    this.clue2Text.textContent = this.clues[1];
-    this.clue3Text.textContent = this.clues[2];
+    typewriter(this.evidence1Text, this.evidence[0]);
+    this.evidence2Text.textContent = this.evidence[1];
+    this.evidence3Text.textContent = this.evidence[2];
     this.attemptsCount.textContent = this.attempts.toString();
     this.streakValue.textContent = this.streak.toString();
     this.rankValue.textContent = this.rank;
 
-    [this.clue2Card, this.clue3Card].forEach(c => {
+    [this.evidence2Card, this.evidence3Card].forEach(c => {
       c.classList.add("locked");
       c.classList.remove("visible");
     });
-    [this.clue2Text, this.clue3Text].forEach(t => t.classList.add("hidden"));
-    [this.revealClue2Btn, this.revealClue3Btn].forEach(b => b.style.display = "block");
+    [this.evidence2Text, this.evidence3Text].forEach(t => t.classList.add("hidden"));
+    [this.revealEvidence2Btn, this.revealEvidence3Btn].forEach(b => b.style.display = "block");
   }
 
-  private revealClue(n: 2 | 3): void {
-    const cardObj = n === 2 ? this.clue2Card : this.clue3Card;
-    const text = n === 2 ? this.clue2Text : this.clue3Text;
-    const btn = n === 2 ? this.revealClue2Btn : this.revealClue3Btn;
+  private revealEvidence(n: 2 | 3): void {
+    const cardObj = n === 2 ? this.evidence2Card : this.evidence3Card;
+    const text = n === 2 ? this.evidence2Text : this.evidence3Text;
+    const btn = n === 2 ? this.revealEvidence2Btn : this.revealEvidence3Btn;
 
-    if (n > this.cluesRevealed) {
-      this.cluesRevealed = n;
+    if (n > this.evidenceFound) {
+      this.evidenceFound = n;
     }
 
     cardObj.classList.remove("locked");
@@ -587,7 +597,7 @@ class SnooCluesGame {
 
     this.playSound('rustle');
     dispatchMascotAction('reveal');
-    typewriter(text, this.clues[n - 1] as string);
+    typewriter(text, this.evidence[n - 1] as string);
     vibrate(20);
   }
 
@@ -607,7 +617,7 @@ class SnooCluesGame {
       this.streakValue.textContent = this.streak.toString();
       this.rank = data.rank ?? this.rank;
       this.rankValue.textContent = this.rank;
-      this.coldCasesSolved = data.coldCasesSolved ?? this.coldCasesSolved;
+      this.archivesSolved = data.archivesSolved ?? this.archivesSolved;
 
       if (data.correct) {
         this.isWinner = true;
@@ -637,11 +647,16 @@ class SnooCluesGame {
       }
     } catch (error: any) {
       console.error(error);
-      const message = error?.message === 'LOGIN_REQUIRED'
-        ? "You must be logged in to Reddit to submit guesses and earn streak/leaderboard."
-        : error?.name === 'AbortError'
-          ? "Submission timed out. Please try again."
-          : "Unable to submit guess. Please check your connection and try again.";
+      let message = "Unable to submit findings. Please check your connection and try again.";
+
+      if (error.message === 'LOGIN_REQUIRED') {
+        message = "Sleuth identity not verified. Please log in to Reddit to submit findings and earn rank.";
+      } else if (error.name === 'AbortError') {
+        message = "Sleuth HQ is taking too long. Report failed. Please try again.";
+      } else if (error.message) {
+        message = error.message;
+      }
+
       this.showFeedback(message, "error");
       this.submitBtn.disabled = false;
       this.guessInput.disabled = false;
@@ -652,16 +667,16 @@ class SnooCluesGame {
     try {
       const data = await GameAPI.shareResult({
         attempts: this.attempts,
-        cluesRevealed: this.cluesRevealed,
+        evidenceFound: this.evidenceFound,
         mode: this.currentGameMode || 'daily'
       });
       if (data.success) {
-        btnElement.textContent = "✅ Shared!";
+        btnElement.textContent = "✅ Findings Reported!";
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       this.showFeedback(
-        "Failed to share result to Reddit. Please try again.",
+        error.message || "Failed to report findings to HQ. Please try again.",
         "error"
       );
     }
@@ -682,10 +697,10 @@ class SnooCluesGame {
       const data = await GameAPI.fetchLeaderboard();
       this.renderLeaderboard(data.leaderboard);
     } catch (error) {
-      console.error("Leaderboard fetch failed:", error);
+      console.error("Detective rankings fetch failed:", error);
       this.leaderboardList.innerHTML = `
         <div class="leaderboard-item error">
-          Failed to load rankings.
+          Failed to load detective rankings.
         </div>
       `;
     }
@@ -722,35 +737,35 @@ class SnooCluesGame {
     };
     modalMap[t].classList.add("hidden");
 
-    // Automatically load new cold case when closing win modal in unlimited mode
-    if (t === 'win' && this.currentGameMode === 'unlimited') {
-      console.log("[Logic] Unlimited mode: Automatically starting next case");
-      this.initGame('unlimited');
+    // Automatically load new archive case when closing win modal in archives mode
+    if (t === 'win' && this.currentGameMode === 'archives') {
+      console.log("[Logic] Archives mode: Automatically starting next case");
+      this.initGame('archives');
     }
   }
 
   private resetGameUI(isAbandon: boolean = false): void {
     console.log("[UI] Performing comprehensive state reset");
     this.currentGameMode = null;
-    this.shareBtn.textContent = "📢 Share to Reddit";
-    this.clues = ["", "", ""];
+    this.shareBtn.textContent = "📢 Report Findings";
+    this.evidence = ["", "", ""];
     this.attempts = 0;
-    this.cluesRevealed = 1;
+    this.evidenceFound = 1;
     this.isWinner = false;
     this.hasPlayed = false;
     this.audioAssets = undefined;
 
-    // 1. Clue Reset
-    this.clue1Text.textContent = "NO ACTIVE CASE";
-    this.clue2Text.textContent = "???";
-    this.clue3Text.textContent = "???";
+    // 1. Evidence Reset
+    this.evidence1Text.textContent = "NO ACTIVE CASE FILE";
+    this.evidence2Text.textContent = "???";
+    this.evidence3Text.textContent = "???";
 
-    [this.clue2Card, this.clue3Card].forEach(c => {
+    [this.evidence2Card, this.evidence3Card].forEach(c => {
       c.classList.add("locked");
       c.classList.remove("visible");
     });
-    [this.clue2Text, this.clue3Text].forEach(t => t.classList.add("hidden"));
-    [this.revealClue2Btn, this.revealClue3Btn].forEach(b => b.style.display = "block");
+    [this.evidence2Text, this.evidence3Text].forEach(t => t.classList.add("hidden"));
+    [this.revealEvidence2Btn, this.revealEvidence3Btn].forEach(b => b.style.display = "block");
 
     // 2. Input & Feedback Reset
     this.guessInput.value = "";
@@ -778,8 +793,8 @@ class SnooCluesGame {
     if (playedAnswer) playedAnswer.textContent = "r/...";
 
     // 5. Global Aesthetic Reset
-    this.gameContainer.classList.remove('cold-case');
-    this.gameSubtitle.textContent = "The Daily Subreddit Investigation";
+    this.gameContainer.classList.remove('archives-case');
+    this.gameSubtitle.textContent = "The Daily Subreddit Case File";
     this.currentModeTag.textContent = "DAILY CASE";
     this.currentModeTag.className = "mode-tag daily";
 
@@ -803,14 +818,14 @@ class SnooCluesGame {
 
   private showMascotTip(): void {
     const DETECTIVE_TIPS = [
-      "Look for keywords in the clues—they often point to the sub's niche!",
+      "Look for keywords in the evidence—they often point to the Subreddit's niche!",
       "Common prefixes like 'ask', 'today', or 'mildly' are very popular on Reddit.",
-      "Check the emoji at the start of Clue #3—it's usually a direct hint!",
+      "Check the emoji at the start of Evidence #3—it's usually a direct hint!",
       "Don't worry about 'r/'—I'll handle that for you.",
-      "Cold cases are great for practice and still earn you rank points!",
-      "The daily case resets at midnight UTC. Don't break your streak!",
-      "Some subreddits are compound words. Try combining them if it sounds right.",
-      "Mascot says: 'I'm watching your progress, Detective. No pressure!'"
+      "The Archives are great for practice and still earn you rank points!",
+      "The Daily Case File resets at midnight UTC. Don't break your streak!",
+      "Some Subreddits are compound words. Try combining them if it sounds right.",
+      "Mascot says: 'I'm watching your progress, Sleuth. No pressure!'"
     ];
 
     let tip = DETECTIVE_TIPS[Math.floor(Math.random() * DETECTIVE_TIPS.length)];
@@ -818,18 +833,18 @@ class SnooCluesGame {
     // Add category-specific hint if available to help explain clues
     if (this.currentCategory) {
       const categoryMap: Record<string, string> = {
-        'wholesome': 'This community is known for its positive and heartwarming content.',
+        'wholesome': 'This Subreddit is known for its positive and heartwarming content.',
         'gaming': 'This case involves the world of pixels, consoles, and video games.',
-        'humor': 'Expect something funny—this sub is all about jokes and laughter.',
-        'knowledge': 'This is an educational hub where people share facts and trivia.',
-        'science': 'The clues point toward a rigorous, science-focused community.',
-        'entertainment': 'This subreddit is a major hub for movies, TV, or music fans.',
-        'visual': 'This community is primarily focused on photos and visual content.',
-        'lifestyle': 'The clues describe a community centered around a specific hobby or life path.',
+        'humor': 'Expect something funny—this Subreddit is all about jokes and laughter.',
+        'knowledge': 'This is an educational hub where Sleuths share facts and trivia.',
+        'science': 'The evidence points toward a rigorous, science-focused Subreddit.',
+        'entertainment': 'This Subreddit is a major hub for movies, TV, or music fans.',
+        'visual': 'This Subreddit is primarily focused on photos and visual content.',
+        'lifestyle': 'The evidence describes a Subreddit centered around a specific hobby or life path.',
         'nature': 'This case is about the natural world, plants, or wild animals.',
-        'news': 'The clues are referencing global events or current news cycles.',
-        'meta': 'This is a meta-subreddit—it\'s about Reddit itself or general internet trends.',
-        'community': 'This is a case submitted by a fellow detective in the field!'
+        'news': 'The evidence is referencing global events or current news cycles.',
+        'meta': 'This is a meta-Subreddit—it\'s about Reddit itself or general internet trends.',
+        'community': 'This is a Case File submitted by a fellow Sleuth in the field!'
       };
 
       const categoryHint = categoryMap[this.currentCategory.toLowerCase()];
@@ -844,12 +859,12 @@ class SnooCluesGame {
 
   private async handleCaseSubmission(): Promise<void> {
     const sub = (document.getElementById("submitSubreddit") as HTMLInputElement).value;
-    const c1 = (document.getElementById("submitClue1") as HTMLTextAreaElement).value;
-    const c2 = (document.getElementById("submitClue2") as HTMLTextAreaElement).value;
-    const c3 = (document.getElementById("submitClue3") as HTMLTextAreaElement).value;
+    const e1 = (document.getElementById("submitEvidence1") as HTMLTextAreaElement).value;
+    const e2 = (document.getElementById("submitEvidence2") as HTMLTextAreaElement).value;
+    const e3 = (document.getElementById("submitEvidence3") as HTMLTextAreaElement).value;
 
-    if (!sub || !c1 || !c2 || !c3) {
-      alert("Please fill in all fields!");
+    if (!sub || !e1 || !e2 || !e3) {
+      this.showFeedback("Please fill in all evidence fields!", "error");
       return;
     }
 
@@ -859,22 +874,22 @@ class SnooCluesGame {
     try {
       const res = await GameAPI.submitCommunityCase({
         subreddit: sub,
-        clues: [c1, c2, c3]
+        evidence: [e1, e2, e3]
       });
       if (res.success) {
-        this.showFeedback("✅ Case Submitted!", "success");
+        this.showFeedback("✅ Case File Submitted!", "success");
         this.closeModal("submit");
         // Clear form
         (document.getElementById("submitSubreddit") as HTMLInputElement).value = "";
-        (document.getElementById("submitClue1") as HTMLTextAreaElement).value = "";
-        (document.getElementById("submitClue2") as HTMLTextAreaElement).value = "";
-        (document.getElementById("submitClue3") as HTMLTextAreaElement).value = "";
+        (document.getElementById("submitEvidence1") as HTMLTextAreaElement).value = "";
+        (document.getElementById("submitEvidence2") as HTMLTextAreaElement).value = "";
+        (document.getElementById("submitEvidence3") as HTMLTextAreaElement).value = "";
       }
-    } catch (e) {
-      this.showFeedback("Failed to submit case.", "error");
+    } catch (error: any) {
+      this.showFeedback(error.message || "Failed to submit Case File.", "error");
     } finally {
       this.submitCaseBtn.disabled = false;
-      this.submitCaseBtn.textContent = "Submit Case";
+      this.submitCaseBtn.textContent = "Submit Case File";
     }
   }
 }

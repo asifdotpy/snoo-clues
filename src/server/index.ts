@@ -34,12 +34,12 @@ function lastWinDateKey(postId: string, username: string): string {
   return `last_win_date:${postId}:${username}`;
 }
 
-function coldCasesKey(postId: string, username: string): string {
-  return `cold_cases:${postId}:${username}`;
+function archivesKey(postId: string, username: string): string {
+  return `archives_solved:${postId}:${username}`;
 }
 
-function coldCaseAnswerKey(postId: string, username: string): string {
-  return `cold_case_answer:${postId}:${username}`;
+function archivesAnswerKey(postId: string, username: string): string {
+  return `archives_answer:${postId}:${username}`;
 }
 
 function communityCasesKey(): string {
@@ -55,14 +55,14 @@ async function getUserStreak(postId: string, username: string): Promise<number> 
   return value ? parseInt(value, 10) : 0;
 }
 
-async function getColdCasesSolved(postId: string, username: string): Promise<number> {
-  const value = await redis.get(coldCasesKey(postId, username));
+async function getArchivesSolved(postId: string, username: string): Promise<number> {
+  const value = await redis.get(archivesKey(postId, username));
   return value ? parseInt(value, 10) : 0;
 }
 
-async function incrementColdCases(postId: string, username: string): Promise<number> {
-  const key = coldCasesKey(postId, username);
-  const current = await getColdCasesSolved(postId, username);
+async function incrementArchivesSolved(postId: string, username: string): Promise<number> {
+  const key = archivesKey(postId, username);
+  const current = await getArchivesSolved(postId, username);
   const newValue = current + 1;
   await redis.set(key, newValue.toString());
   return newValue;
@@ -172,14 +172,14 @@ const router = express.Router();
 router.get("/api/init", async (_req, res): Promise<void> => {
   const { postId } = context;
   if (!postId) {
-    res.status(400).json({ status: "error", message: "postId is required" });
+    res.status(400).json({ status: "error", message: "Case File ID (postId) is missing from context." });
     return;
   }
   try {
     const username = await getUsername();
     res.json({ type: "init", postId: postId, username: username });
   } catch (error) {
-    res.status(400).json({ status: "error", message: "Initialization failed" });
+    res.status(500).json({ status: "error", message: "Sleuth initialization failed. Please try again." });
   }
 });
 
@@ -187,7 +187,7 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
   try {
     const postId = context.postId;
     if (!postId) {
-      res.status(400).json({ error: "Missing postId" });
+      res.status(400).json({ error: "Unable to identify the Case File (Missing postId)." });
       return;
     }
     const username = await getUsername();
@@ -197,17 +197,17 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
     const attempts = await getUserAttempts(postId, username, today);
     const winner = await isWinner(postId, username, today);
     const streak = await getUserStreak(postId, username);
-    const coldCases = await getColdCasesSolved(postId, username);
+    const archivesCount = await getArchivesSolved(postId, username);
     const score = await redis.zScore(leaderboardKey(postId), username) || 0;
     res.json({
       type: "game_init",
       username: username,
-      clues: puzzle.clues,
+      evidence: puzzle.evidence,
       hasPlayedToday: hasPlayed,
       attempts: attempts,
       isWinner: winner,
       streak: streak,
-      coldCasesSolved: coldCases,
+      archivesSolved: archivesCount,
       category: puzzle.category,
       answer: winner ? puzzle.subreddit : undefined,
       rank: getDetectiveRank(score),
@@ -218,7 +218,7 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
       }
     } as GameInitResponse);
   } catch (err) {
-    res.status(500).json({ error: "Failed" });
+    res.status(500).json({ error: "The Daily Case File could not be retrieved from the archives." });
   }
 });
 
@@ -226,12 +226,12 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
   try {
     const postId = context.postId;
     if (!postId) {
-      res.status(400).json({ error: "Missing postId" });
+      res.status(400).json({ error: "Unable to identify the Case File (Missing postId)." });
       return;
     }
     const username = await getUsername();
     const streak = await getUserStreak(postId, username);
-    const coldCases = await getColdCasesSolved(postId, username);
+    const archivesCount = await getArchivesSolved(postId, username);
     const score = await redis.zScore(leaderboardKey(postId), username) || 0;
 
     // Pick a random puzzle that isn't the daily one
@@ -244,18 +244,17 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
       : dailyPuzzle;
 
     // Store the answer for validation
-    await redis.set(coldCaseAnswerKey(postId, username), puzzle.subreddit);
-    // Store category for hints in unlimited mode if needed, but we can just send it
+    await redis.set(archivesAnswerKey(postId, username), puzzle.subreddit);
 
     res.json({
       type: "game_init",
       username: username,
-      clues: puzzle.clues,
-      hasPlayedToday: false, // Unlimited mode
+      evidence: puzzle.evidence,
+      hasPlayedToday: false, // Archives mode
       attempts: 0,
       isWinner: false,
       streak: streak,
-      coldCasesSolved: coldCases,
+      archivesSolved: archivesCount,
       category: puzzle.category,
       rank: getDetectiveRank(score),
       audioAssets: {
@@ -265,7 +264,7 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
       }
     } as GameInitResponse);
   } catch (err) {
-    res.status(500).json({ error: "Failed" });
+    res.status(500).json({ error: "Failed to pull a random Case File from the Archives." });
   }
 });
 
@@ -273,56 +272,61 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
   try {
     const postId = context.postId;
     if (!postId) {
-      res.status(400).json({ error: "Missing postId" });
+      res.status(400).json({ error: "Unable to identify Case File (Missing postId)." });
       return;
     }
     const username = await getUsername();
     if (username === "anonymous") {
-      res.status(401).json({ error: "Login required" });
+      res.status(401).json({ error: "Sleuth identity not verified. Please log in to Reddit to submit findings." });
       return;
     }
 
-    const { guess, mode } = req.body as (GuessRequest & { mode?: 'daily' | 'unlimited' | 'community' });
+    const { guess, mode } = req.body as (GuessRequest & { mode?: 'daily' | 'archives' | 'community' });
     if (!guess) {
-      res.status(400).json({ error: "Invalid" });
+      res.status(400).json({ error: "No subreddit was provided for analysis." });
       return;
     }
 
-    const isUnlimited = mode === 'unlimited';
+    const isArchives = mode === 'archives';
     const isCommunity = mode === 'community';
     if (!mode) {
-      console.warn(`[Guess] Missing mode for user ${username}. Defaulting to daily.`);
+      console.warn(`[Guess] Missing mode for sleuth ${username}. Defaulting to daily.`);
     }
     const today = getTodayDateKey();
 
     // Determine the answer to check against
     let correctAnswer = "";
-    if (isUnlimited) {
-      correctAnswer = await redis.get(coldCaseAnswerKey(postId, username)) || "";
+    if (isArchives) {
+      correctAnswer = await redis.get(archivesAnswerKey(postId, username)) || "";
     } else if (isCommunity) {
       correctAnswer = await redis.get(communityCaseAnswerKey(postId, username)) || "";
     } else {
       const puzzle = getTodaysPuzzle();
       correctAnswer = puzzle.subreddit;
       if (await isWinner(postId, username, today)) {
-        res.status(400).json({ error: "Already solved daily" });
+        res.status(400).json({ error: "This Daily Case File has already been closed." });
         return;
       }
     }
 
+    if (!correctAnswer) {
+      res.status(404).json({ error: "The targeted Case File does not exist in our active records." });
+      return;
+    }
+
     const isCorrect = normalizeSubredditName(guess) === normalizeSubredditName(correctAnswer);
     let streak = await getUserStreak(postId, username);
-    let coldCasesSolved = await getColdCasesSolved(postId, username);
+    let archivesSolvedCount = await getArchivesSolved(postId, username);
     let score = await redis.zScore(leaderboardKey(postId), username) || 0;
     let attempts = 0;
 
-    if (!isUnlimited) {
+    if (!isArchives) {
       attempts = await incrementAttempts(postId, username, today);
     }
 
     if (isCorrect) {
-      if (isUnlimited || isCommunity) {
-        coldCasesSolved = await incrementColdCases(postId, username);
+      if (isArchives || isCommunity) {
+        archivesSolvedCount = await incrementArchivesSolved(postId, username);
         // Practice cases still increment rank score but not streak. Award 1 point.
         score = await incrementUserScore(postId, username, 1);
       } else {
@@ -337,14 +341,14 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
       type: "guess_result",
       correct: isCorrect,
       answer: isCorrect ? correctAnswer : undefined,
-      attempts: isUnlimited ? 0 : attempts, // Attempts only track for daily
+      attempts: isArchives ? 0 : attempts, // Attempts only track for daily/community
       streak: streak,
-      coldCasesSolved: coldCasesSolved,
+      archivesSolved: archivesSolvedCount,
       rank: isCorrect ? getDetectiveRank(score) : undefined,
       audioTrigger: isCorrect ? 'correct' : 'wrong'
     } as GuessResponse);
   } catch (error) {
-    res.status(500).json({ error: "Failed" });
+    res.status(500).json({ error: "Sleuth HQ encountered an error while processing your findings." });
   }
 });
 
@@ -352,13 +356,13 @@ router.get("/api/game/leaderboard", async (_req, res): Promise<void> => {
   try {
     const postId = context.postId;
     if (!postId) {
-      res.status(400).json({ error: "Missing postId" });
+      res.status(400).json({ error: "Unable to identify Case File for rankings (Missing postId)." });
       return;
     }
     const leaderboard = await getTopDetectives(postId);
     res.json({ type: "leaderboard_data", leaderboard });
   } catch (error) {
-    res.status(500).json({ error: "Failed" });
+    res.status(500).json({ error: "Failed to retrieve the detective rankings from HQ." });
   }
 });
 
@@ -366,12 +370,12 @@ router.post("/api/game/abandon", async (_req, res): Promise<void> => {
   try {
     const postId = context.postId;
     if (!postId) {
-      res.status(400).json({ error: "Missing postId" });
+      res.status(400).json({ error: "Unable to identify the Case File to abandon (Missing postId)." });
       return;
     }
     const username = await getUsername();
     if (username === "anonymous") {
-      res.status(401).json({ error: "Login required" });
+      res.status(401).json({ error: "Sleuth identity not verified. Login required to manage Case Files." });
       return;
     }
 
@@ -382,7 +386,7 @@ router.post("/api/game/abandon", async (_req, res): Promise<void> => {
 
     res.json({ success: true, streak: 0 });
   } catch (err) {
-    res.status(500).json({ error: "Failed to abandon game" });
+    res.status(500).json({ error: "Failed to properly abandon the investigation at HQ." });
   }
 });
 
@@ -390,25 +394,25 @@ router.post("/api/game/share", async (req, res): Promise<void> => {
   try {
     const { postId } = context;
     if (!postId) {
-      res.status(400).json({ error: "Missing postId" });
+      res.status(400).json({ error: "Unable to identify Case File for reporting (Missing postId)." });
       return;
     }
     const username = await getUsername();
     if (username === "anonymous") {
-      res.status(401).json({ error: "Login required" });
+      res.status(401).json({ error: "Sleuth identity not verified. Login required to report findings." });
       return;
     }
 
-    const { attempts, cluesRevealed, mode } = req.body as ShareRequest;
+    const { attempts, evidenceFound, mode } = req.body as ShareRequest;
 
     let emojiRow = "";
     for (let i = 1; i <= 3; i++) {
-      emojiRow += i <= cluesRevealed ? "🔎 " : "⬛ ";
+      emojiRow += i <= evidenceFound ? "🔎 " : "⬛ ";
     }
 
     const today = getTodayDateKey();
     let correctAnswer = "";
-    let caseTitle = "Investigation";
+    let caseTitle = "Case File";
 
     if (mode === 'daily') {
       const puzzle = getTodaysPuzzle();
@@ -416,12 +420,12 @@ router.post("/api/game/share", async (req, res): Promise<void> => {
       caseTitle = `Daily Case #${getTodayCaseNumber()}`;
       // Verify they actually won
       if (!(await isWinner(postId, username, today))) {
-        res.status(403).json({ error: "You must solve the case first!" });
+        res.status(403).json({ error: "You must close the Case File before reporting your findings!" });
         return;
       }
-    } else if (mode === 'unlimited') {
-      correctAnswer = await redis.get(coldCaseAnswerKey(postId, username)) || "???";
-      caseTitle = "Cold Case";
+    } else if (mode === 'archives') {
+      correctAnswer = await redis.get(archivesAnswerKey(postId, username)) || "???";
+      caseTitle = "Archives Case";
     } else if (mode === 'community') {
       correctAnswer = await redis.get(communityCaseAnswerKey(postId, username)) || "???";
       caseTitle = "Community Case";
@@ -440,31 +444,31 @@ r/${correctAnswer}`;
     res.json({ type: "share_result", success: true, commentUrl: `https://reddit.com${comment.permalink}` });
   } catch (err) {
     console.error("[Share] Error:", err);
-    res.status(500).json({ error: "Failed to share" });
+    res.status(500).json({ error: "HQ failed to post your reported findings. Please try again." });
   }
 });
 
 router.post("/api/game/community/submit", async (req, res): Promise<void> => {
   try {
-    const { subreddit, clues } = req.body as CommunitySubmissionRequest;
-    if (!subreddit || !clues || clues.length !== 3) {
-      res.status(400).json({ error: "Invalid submission" });
+    const { subreddit, evidence } = req.body as CommunitySubmissionRequest;
+    if (!subreddit || !evidence || evidence.length !== 3) {
+      res.status(400).json({ error: "The submitted Case File is incomplete or invalid." });
       return;
     }
 
     const username = await getUsername();
     const submission = {
       subreddit: normalizeSubredditName(subreddit),
-      clues,
+      evidence,
       author: username,
       category: "community",
       timestamp: Date.now()
     };
 
     await redis.lPush(communityCasesKey(), JSON.stringify(submission));
-    res.json({ success: true, message: "Case submitted to the community files!" });
+    res.json({ success: true, message: "Case File successfully submitted to the community archives!" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to submit" });
+    res.status(500).json({ error: "HQ failed to process your Case File submission." });
   }
 });
 
@@ -472,30 +476,30 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
   try {
     const { postId } = context;
     if (!postId) {
-      res.status(400).json({ error: "Missing postId" });
+      res.status(400).json({ error: "Unable to identify Case File (Missing postId)." });
       return;
     }
     const username = await getUsername();
     const score = await redis.zScore(leaderboardKey(postId), username) || 0;
     const streak = await getUserStreak(postId, username);
-    const coldCases = await getColdCasesSolved(postId, username);
+    const archivesCount = await getArchivesSolved(postId, username);
 
     // Get a random community case
     const len = await redis.lLen(communityCasesKey());
     if (len === 0) {
-      res.status(404).json({ error: "No community cases found yet. Be the first to submit one!" });
+      res.status(404).json({ error: "No community Case Files found. Be the first Sleuth to submit one!" });
       return;
     }
 
     const randomIndex = Math.floor(Math.random() * len);
     const raw = await redis.lRange(communityCasesKey(), randomIndex, randomIndex);
     if (!raw || raw.length === 0) {
-      res.status(404).json({ error: "Failed to fetch community case" });
+      res.status(404).json({ error: "Failed to retrieve a community Case File from the records." });
       return;
     }
 
     // Devvit lRange returns string[]
-    const puzzle = JSON.parse(raw[0]) as { subreddit: string, clues: [string, string, string], category?: string };
+    const puzzle = JSON.parse(raw[0]) as { subreddit: string, evidence: [string, string, string], category?: string };
 
     // Store answer for validation
     await redis.set(communityCaseAnswerKey(postId, username), puzzle.subreddit);
@@ -503,12 +507,12 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
     res.json({
       type: "game_init",
       username: username,
-      clues: puzzle.clues,
+      evidence: puzzle.evidence,
       hasPlayedToday: false,
       attempts: 0,
       isWinner: false,
       streak: streak,
-      coldCasesSolved: coldCases,
+      archivesSolved: archivesCount,
       category: puzzle.category || "community",
       rank: getDetectiveRank(score),
       audioAssets: {
@@ -518,16 +522,16 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
       }
     } as GameInitResponse);
   } catch (err) {
-    res.status(500).json({ error: "Failed" });
+    res.status(500).json({ error: "Sleuth HQ encountered an error while pulling a community Case File." });
   }
 });
 
 router.post("/internal/on-app-install", async (_req, res): Promise<void> => {
   try {
     const post = await createPost();
-    res.json({ status: "success", message: `Post created: ${post.id}` });
+    res.json({ status: "success", message: `Investigation Board created: ${post.id}` });
   } catch (error) {
-    res.status(400).json({ status: "error" });
+    res.status(400).json({ status: "error", message: "Failed to create investigation board." });
   }
 });
 
@@ -536,7 +540,7 @@ router.post("/internal/menu/post-create", async (_req, res): Promise<void> => {
     const post = await createPost();
     res.json({ navigateTo: `https://reddit.com/r/${context.subredditName}/comments/${post.id}` });
   } catch (error) {
-    res.status(400).json({ status: "error" });
+    res.status(400).json({ status: "error", message: "Failed to create investigation board." });
   }
 });
 

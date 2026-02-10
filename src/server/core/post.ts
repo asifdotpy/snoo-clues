@@ -13,7 +13,7 @@ export const createPost = async () => {
     splash: {
       appDisplayName: "Snoo-Clues",
       heading: "Can you solve it?",
-      description: "Find the hidden clues and solve the mystery!",
+      description: "Analyze the evidence and close the Case File!",
       backgroundUri: "splash_bg_premium.png",
       appIconUri: "logo_premium_1024_pixel.png",
       buttonLabel: "Play Now",

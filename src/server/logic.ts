@@ -28,7 +28,7 @@ export function getTodaysPuzzleInternal(today: Date, puzzles: Puzzle[]): DailyPu
 
     return {
         subreddit: p.subreddit,
-        clues: p.clues,
+        evidence: p.evidence,
         date: todayKey,
         category: p.category
     };

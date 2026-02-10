@@ -20,13 +20,13 @@
     <div class="loading-content">
       <img src="img/logo.png" alt="Snoo-Clues Logo" class="premium-logo" />
       <div class="spinner" id="spinner"></div>
-      <div class="status" id="status">Initializing Game...</div>
+      <div class="status" id="status">Initializing Sleuth Case Files...</div>
       <progress value="0" max="100" id="progress" hidden="1"></progress>
       <div class="detective-briefing">
-        <p>🔍 Observe 3 clues. Guess the subreddit. Maintain your streak. Good luck, Detective.</p>
+        <p>🔍 Analyze 3 pieces of evidence. Identify the Subreddit. Maintain your streak. Good luck, Sleuth.</p>
       </div>
-      <button id="start-investigation-btn" class="start-investigation-btn hidden">
-        START INVESTIGATION
+      <button id="start-case-file-btn" class="start-investigation-btn hidden">
+        OPEN CASE FILE
       </button>
     </div>
   </div>
@@ -39,20 +39,20 @@
       <p>Choose your investigation mode:</p>
       <div class="selection-options">
         <button class="selection-btn daily-btn" id="startDailyBtn">
-          <span class="btn-title">TODAY'S INVESTIGATION</span>
-          <span class="btn-subtitle">The 24-hour daily challenge</span>
+          <span class="btn-title">TODAY'S CASE FILE</span>
+          <span class="btn-subtitle">The 24-hour official challenge</span>
         </button>
-        <button class="selection-btn cold-btn" id="startColdBtn">
-          <span class="btn-title">BROWSE COLD CASES</span>
+        <button class="selection-btn cold-btn" id="startArchivesBtn">
+          <span class="btn-title">THE ARCHIVES</span>
           <span class="btn-subtitle">Unlimited practice files</span>
         </button>
         <button class="selection-btn community-btn" id="startCommunityBtn">
-          <span class="btn-title">COMMUNITY FILES</span>
-          <span class="btn-subtitle">Cases submitted by users</span>
+          <span class="btn-title">COMMUNITY CASE FILES</span>
+          <span class="btn-subtitle">Cases submitted by fellow Sleuths</span>
         </button>
       </div>
       <div class="selection-footer">
-        <button id="openSubmitModalBtn" class="modal-btn submit-case-trigger">➕ Submit a New Case</button>
+        <button id="openSubmitModalBtn" class="modal-btn submit-case-trigger">➕ Submit a New Case File</button>
         <button id="selectionExitToHome" class="back-btn">⌂ Return to Main Menu</button>
       </div>
     </div>
@@ -84,35 +84,35 @@
           <div class="header-titles">
             <h1>Snoo-Clues</h1>
             <div class="rank-badge">RANK: <span id="rank-value">Rookie Sleuth</span></div>
-            <button id="mascot-tip-btn" class="tip-btn" title="Get a Detective Tip">💡 Tip</button>
+            <button id="mascot-tip-btn" class="tip-btn" title="Get a Sleuth Tip">💡 Tip</button>
           </div>
           <div class="streak-badge">🔥 Streak: <span id="streak-value">0</span></div>
         </div>
-        <p class="game-subtitle">The Daily Subreddit Investigation</p>
+        <p class="game-subtitle">The Daily Subreddit Case File</p>
       </header>
 
       <div class="clues-container">
         <div class="clue-card visible">
           <div class="clue-header">
-            <span class="clue-number">Clue #1</span>
+            <span class="clue-number">Evidence #1</span>
           </div>
-          <p class="clue-text" id="clue1Text">Loading...</p>
+          <p class="clue-text" id="evidence1Text">Loading...</p>
         </div>
 
-        <div class="clue-card locked" id="clue2Card">
+        <div class="clue-card locked" id="evidence2Card">
           <div class="clue-header">
-            <span class="clue-number">Clue #2</span>
-            <button class="reveal-btn" id="revealClue2">Show Clue</button>
+            <span class="clue-number">Evidence #2</span>
+            <button class="reveal-btn" id="revealEvidence2">Show Evidence</button>
           </div>
-          <p class="clue-text hidden" id="clue2Text">???</p>
+          <p class="clue-text hidden" id="evidence2Text">???</p>
         </div>
 
-        <div class="clue-card locked" id="clue3Card">
+        <div class="clue-card locked" id="evidence3Card">
           <div class="clue-header">
-            <span class="clue-number">Clue #3</span>
-            <button class="reveal-btn" id="revealClue3">Show Clue</button>
+            <span class="clue-number">Evidence #3</span>
+            <button class="reveal-btn" id="revealEvidence3">Show Evidence</button>
           </div>
-          <p class="clue-text hidden" id="clue3Text">???</p>
+          <p class="clue-text hidden" id="evidence3Text">???</p>
         </div>
       </div>
 
@@ -129,7 +129,7 @@
       </div>
 
       <div class="leaderboard-section">
-        <h3>Top Detectives</h3>
+        <h3>Top Sleuths</h3>
         <div id="leaderboardList" class="leaderboard-list">
           <div class="leaderboard-item loading">Loading rankings...</div>
         </div>
@@ -144,8 +144,8 @@
       <div class="stamp-container">
         <div id="case-closed-stamp" class="case-closed-stamp hidden">CASE CLOSED</div>
       </div>
-      <h2>Case Solved!</h2>
-      <p>Excellent work, <span id="win-rank-name">Detective</span>. You've identified the community:</p>
+      <h2>Case File Solved!</h2>
+      <p>Excellent work, <span id="win-rank-name">Sleuth</span>. You've identified the Subreddit:</p>
       <p id="correct-answer" class="answer-reveal">r/...</p>
       <div class="stats-row">
         <div class="stat-box">
@@ -158,8 +158,8 @@
         </div>
       </div>
       <div class="modal-actions">
-        <button id="share-btn" class="modal-btn share-btn">📢 Share to Reddit</button>
-        <button id="keep-training-btn" class="modal-btn training-btn">🔥 KEEP TRAINING: Open a Cold Case</button>
+        <button id="share-btn" class="modal-btn share-btn">📢 Report Findings</button>
+        <button id="keep-training-btn" class="modal-btn training-btn">🔥 KEEP TRAINING: Open The Archives</button>
         <button class="modal-btn secondary close-modal-btn">Close</button>
       </div>
     </div>
@@ -169,8 +169,8 @@
   <div class="modal hidden" id="playedModal">
     <div class="modal-content">
       <button class="modal-close-btn played-close-x">&times;</button>
-      <h2>Already Solved</h2>
-      <p>This case is already closed for today. You correctly identified:</p>
+      <h2>Case File Already Closed</h2>
+      <p>This Case File is already closed for today. You correctly identified:</p>
       <p id="played-answer" class="answer-reveal">r/...</p>
       <div class="stats-row">
         <div class="stat-box">
@@ -182,10 +182,10 @@
           <div class="stat-label">Streak</div>
         </div>
       </div>
-      <p class="next-puzzle">Return tomorrow for a new investigation.</p>
+      <p class="next-puzzle">Return tomorrow for a new Case File.</p>
       <div class="modal-actions">
-        <button class="modal-btn secondary close-modal-btn">View Clues</button>
-        <button id="playedToColdBtn" class="modal-btn training-btn">Browse Cold Cases</button>
+        <button class="modal-btn secondary close-modal-btn">View Evidence</button>
+        <button id="playedToArchivesBtn" class="modal-btn training-btn">Open The Archives</button>
       </div>
     </div>
   </div>
@@ -194,8 +194,8 @@
   <div class="modal hidden" id="submitModal">
     <div class="modal-content submit-case-form">
       <button class="modal-close-btn" id="closeSubmitModal">&times;</button>
-      <h2>Submit a Case</h2>
-      <p>Help expand the Snoo-Clues archives! Provide a subreddit and 3 progressive clues.</p>
+      <h2>Submit a Case File</h2>
+      <p>Help expand the Snoo-Clues Archives! Provide a Subreddit and 3 pieces of progressive evidence.</p>
 
       <div class="form-group">
         <label for="submitSubreddit">Subreddit Name (r/)</label>
@@ -203,22 +203,22 @@
       </div>
 
       <div class="form-group">
-        <label for="submitClue1">Clue #1 (Easiest/Vague)</label>
-        <textarea id="submitClue1" placeholder="e.g. A place for cute animals..."></textarea>
+        <label for="submitEvidence1">Evidence #1 (Vague)</label>
+        <textarea id="submitEvidence1" placeholder="e.g. A place for cute animals..."></textarea>
       </div>
 
       <div class="form-group">
-        <label for="submitClue2">Clue #2 (Moderate)</label>
-        <textarea id="submitClue2" placeholder="e.g. Often features cats and dogs..."></textarea>
+        <label for="submitEvidence2">Evidence #2 (Moderate)</label>
+        <textarea id="submitEvidence2" placeholder="e.g. Often features cats and dogs..."></textarea>
       </div>
 
       <div class="form-group">
-        <label for="submitClue3">Clue #3 (Most Specific)</label>
-        <textarea id="submitClue3" placeholder="e.g. The name is the sound you make when you see something cute..."></textarea>
+        <label for="submitEvidence3">Evidence #3 (Specific)</label>
+        <textarea id="submitEvidence3" placeholder="e.g. The name is the sound you make when you see something cute..."></textarea>
       </div>
 
       <div class="modal-actions">
-        <button id="submitCaseBtn" class="modal-btn">Submit Case</button>
+        <button id="submitCaseBtn" class="modal-btn">Submit Case File</button>
         <button id="cancelSubmitBtn" class="modal-btn secondary">Cancel</button>
       </div>
     </div>

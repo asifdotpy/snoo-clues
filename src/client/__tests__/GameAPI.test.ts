@@ -7,7 +7,7 @@ describe('GameAPI', () => {
     });
 
     it('initGame fetches correctly for daily mode', async () => {
-        const mockData = { clues: ['A', 'B', 'C'] };
+        const mockData = { evidence: ['A', 'B', 'C'] };
         (fetch as any).mockResolvedValue({
             ok: true,
             json: () => Promise.resolve(mockData),
@@ -18,14 +18,14 @@ describe('GameAPI', () => {
         expect(result).toEqual(mockData);
     });
 
-    it('initGame fetches correctly for unlimited mode', async () => {
-        const mockData = { clues: ['X', 'Y', 'Z'] };
+    it('initGame fetches correctly for archives mode', async () => {
+        const mockData = { evidence: ['X', 'Y', 'Z'] };
         (fetch as any).mockResolvedValue({
             ok: true,
             json: () => Promise.resolve(mockData),
         });
 
-        const result = await GameAPI.initGame('unlimited');
+        const result = await GameAPI.initGame('archives');
         expect(fetch).toHaveBeenCalledWith('/api/game/random', expect.objectContaining({ timeout: 5000 }));
         expect(result).toEqual(mockData);
     });
@@ -45,7 +45,10 @@ describe('GameAPI', () => {
     });
 
     it('handles errors gracefully', async () => {
-        (fetch as any).mockResolvedValue({ ok: false });
-        await expect(GameAPI.initGame('daily')).rejects.toThrow('Failed to initialize daily game');
+        (fetch as any).mockResolvedValue({
+            ok: false,
+            json: () => Promise.resolve({ error: "The Daily Case File could not be retrieved from the archives." })
+        });
+        await expect(GameAPI.initGame('daily')).rejects.toThrow('The Daily Case File could not be retrieved from the archives.');
     });
 });

@@ -43,7 +43,7 @@ export default class GameLoader {
         this.spinnerElement = document.getElementById("spinner") as HTMLElement;
         this.canvasElement = document.getElementById("canvas") as HTMLCanvasElement;
         this.loadingElement = document.getElementById("loading") as HTMLElement;
-        this.startButton = document.getElementById("start-investigation-btn") as HTMLButtonElement;
+        this.startButton = document.getElementById("start-case-file-btn") as HTMLButtonElement;
 
         this.canvasElement.addEventListener("click", () => {
             this.canvasElement.focus();
@@ -116,20 +116,20 @@ export default class GameLoader {
                 }
             }
         };
-        window.Module.setStatus("Initializing Game...");
+        window.Module.setStatus("Initializing Sleuth Case Files...");
     }
 
     private ensureAspectRatio() {
         if (this.startingAspect) {
             console.log("[GameLoader] Engine ready, auto-starting game");
-            this.statusElement.innerHTML = "Case Files Ready.";
+            this.statusElement.innerHTML = "Sleuth Case Files Ready.";
             this.spinnerElement.hidden = true;
             this.progressElement.hidden = true;
 
             // Ensure no retry/error messages are visible
             const retryBtn = this.statusElement.querySelector('button');
             if (retryBtn) {
-                this.statusElement.innerHTML = "Case Files Ready.";
+                this.statusElement.innerHTML = "Sleuth Case Files Ready.";
             }
 
             // Since we're using the native Reddit Play button, we have user activation.

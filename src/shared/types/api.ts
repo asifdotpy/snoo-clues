@@ -8,18 +8,18 @@ export type InitResponse = {
 export type DailyPuzzle = {
   date: string;
   subreddit: string;
-  clues: [string, string, string];
+  evidence: [string, string, string];
 };
 
 export type GameInitResponse = {
   type: "game_init";
   username: string;
-  clues: [string, string, string];
+  evidence: [string, string, string];
   hasPlayedToday: boolean;
   attempts: number;
   isWinner: boolean;
   streak: number;
-  coldCasesSolved: number;
+  archivesSolved: number;
   category?: string | undefined;
   answer?: string | undefined;
   rank?: string | undefined;
@@ -40,15 +40,15 @@ export type GuessResponse = {
   answer?: string | undefined; // Only sent if correct
   attempts: number;
   streak?: number | undefined;
-  coldCasesSolved?: number | undefined;
+  archivesSolved?: number | undefined;
   rank?: string | undefined;
   audioTrigger?: 'correct' | 'wrong';
 };
 
 export type ShareRequest = {
   attempts: number;
-  cluesRevealed: number;
-  mode?: 'daily' | 'unlimited' | 'community';
+  evidenceFound: number;
+  mode?: 'daily' | 'archives' | 'community';
 };
 
 export type ShareResponse = {
@@ -74,7 +74,7 @@ export type LeaderboardResponse = {
 
 export type CommunitySubmissionRequest = {
   subreddit: string;
-  clues: [string, string, string];
+  evidence: [string, string, string];
 };
 
 export type CommunitySubmissionResponse = {

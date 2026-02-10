@@ -13,9 +13,9 @@ describe('Technical Audit: DOM Integrity', () => {
 
     it('should find all required DOM elements queried by SnooCluesGame', () => {
         const requiredIds = [
-            'clue1Text', 'clue2Text', 'clue3Text',
-            'clue2Card', 'clue3Card',
-            'revealClue2', 'revealClue3',
+            'evidence1Text', 'evidence2Text', 'evidence3Text',
+            'evidence2Card', 'evidence3Card',
+            'revealEvidence2', 'revealEvidence3',
             'guessInput', 'submitBtn',
             'attemptsCount', 'feedbackMessage',
             'winModal', 'playedModal', 'confirmModal',
@@ -25,11 +25,11 @@ describe('Technical Audit: DOM Integrity', () => {
             'rank-value', 'win-rank-name',
             'case-closed-stamp', 'leaderboardList',
             'share-btn', 'selectionModal',
-            'startDailyBtn', 'startColdBtn',
+            'startDailyBtn', 'startArchivesBtn',
             'keep-training-btn', 'gameOverlay',
             'confirm-yes-btn', 'confirm-no-btn',
             'closeSelectionModal', 'currentModeTag',
-            'playedToColdBtn'
+            'playedToArchivesBtn'
         ];
 
         requiredIds.forEach(id => {

@@ -46,12 +46,12 @@
     border-left: 1px solid rgba(255, 69, 0, 0.05);
 }
 
-.game-container.cold-case {
+.game-container.archives-case {
     background: #f8fbff;
     box-shadow: 0 20px 25px -5px rgba(0, 100, 255, 0.1), 0 10px 10px -5px rgba(0, 100, 255, 0.04), inset 2px 0 5px rgba(0, 100, 200, 0.05);
 }
 
-.game-container.cold-case::before {
+.game-container.archives-case::before {
     background: rgba(0, 100, 255, 0.15);
     border-left: 1px solid rgba(0, 100, 255, 0.05);
 }
@@ -91,7 +91,7 @@
     color: white;
 }
 
-.mode-tag.unlimited {
+.mode-tag.archives {
     background: #0066cc;
     color: white;
 }

@@ -104,14 +104,14 @@
   color: var(--orange-400);
 }
 
-/* Cold case aesthetic override */
-.game-container.cold-case {
+/* Archives case aesthetic override */
+.game-container.archives-case {
   background: #f0f7ff;
   border-color: #cce4ff;
 }
 
-.game-container.cold-case::after {
-  content: "COLD CASE FILE - FOR TRAINING ONLY";
+.game-container.archives-case::after {
+  content: "ARCHIVES CASE FILE - FOR TRAINING ONLY";
   position: absolute;
   top: 50%;
   left: 50%;
