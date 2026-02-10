@@ -27,16 +27,16 @@ import {
 
 // Daily puzzles are dynamically selected from ALL_PUZZLES based on the current date
 
-function streakKey(postId: string, username: string): string {
-  return `streak:${postId}:${username}`;
+function streakKey(username: string): string {
+  return `streak:${username}`;
 }
 
-function lastWinDateKey(postId: string, username: string): string {
-  return `last_win_date:${postId}:${username}`;
+function lastWinDateKey(username: string): string {
+  return `last_win_date:${username}`;
 }
 
-function archivesKey(postId: string, username: string): string {
-  return `archives_solved:${postId}:${username}`;
+function archivesKey(username: string): string {
+  return `archives_solved:${username}`;
 }
 
 function archivesAnswerKey(postId: string, username: string): string {
@@ -51,29 +51,29 @@ function communityCaseAnswerKey(postId: string, username: string): string {
   return `community_case_answer:${postId}:${username}`;
 }
 
-async function getUserStreak(postId: string, username: string): Promise<number> {
-  const value = await redis.get(streakKey(postId, username));
+async function getUserStreak(username: string): Promise<number> {
+  const value = await redis.get(streakKey(username));
   return value ? parseInt(value, 10) : 0;
 }
 
-async function getArchivesSolved(postId: string, username: string): Promise<number> {
-  const value = await redis.get(archivesKey(postId, username));
+async function getArchivesSolved(username: string): Promise<number> {
+  const value = await redis.get(archivesKey(username));
   return value ? parseInt(value, 10) : 0;
 }
 
-async function incrementArchivesSolved(postId: string, username: string): Promise<number> {
-  const key = archivesKey(postId, username);
-  const current = await getArchivesSolved(postId, username);
+async function incrementArchivesSolved(username: string): Promise<number> {
+  const key = archivesKey(username);
+  const current = await getArchivesSolved(username);
   const newValue = current + 1;
   await redis.set(key, newValue.toString());
   return newValue;
 }
 
-async function updateStreak(postId: string, username: string, today: string): Promise<number> {
-  const sKey = streakKey(postId, username);
-  const dKey = lastWinDateKey(postId, username);
+async function updateStreak(username: string, today: string): Promise<number> {
+  const sKey = streakKey(username);
+  const dKey = lastWinDateKey(username);
   const lastWinDate = await redis.get(dKey);
-  let currentStreak = await getUserStreak(postId, username);
+  let currentStreak = await getUserStreak(username);
 
   currentStreak = calculateNewStreak(lastWinDate ?? null, today, currentStreak);
 
@@ -82,18 +82,18 @@ async function updateStreak(postId: string, username: string, today: string): Pr
   return currentStreak;
 }
 
-function leaderboardKey(postId: string): string {
-  return `leaderboard:${postId}`;
+function leaderboardKey(): string {
+  return `leaderboard:global`;
 }
 
-async function incrementUserScore(postId: string, username: string, amount: number = 1): Promise<number> {
-  const key = leaderboardKey(postId);
+async function incrementUserScore(username: string, amount: number = 1): Promise<number> {
+  const key = leaderboardKey();
   // Devvit Redis API: zIncrBy(key, member, value) returns the new score
   return await redis.zIncrBy(key, username, amount);
 }
 
-async function getTopSleuths(postId: string): Promise<LeaderboardEntry[]> {
-  const key = leaderboardKey(postId);
+async function getTopSleuths(): Promise<LeaderboardEntry[]> {
+  const key = leaderboardKey();
   const top = await redis.zRange(key, 0, 9, { by: 'rank', reverse: true });
   return top.map((member) => ({
     username: member.member,
@@ -116,16 +116,16 @@ function getTodayDateKey(): string {
   return new Date().toISOString().split('T')[0] ?? "unknown";
 }
 
-function playedKey(postId: string, username: string, date: string): string {
-  return `played:${postId}:${username}:${date}`;
+function playedKey(username: string, date: string): string {
+  return `played:${username}:${date}`;
 }
 
-function attemptsKey(postId: string, username: string, date: string): string {
-  return `attempts:${postId}:${username}:${date}`;
+function attemptsKey(username: string, date: string): string {
+  return `attempts:${username}:${date}`;
 }
 
-function winnerKey(postId: string, username: string, date: string): string {
-  return `winner:${postId}:${username}:${date}`;
+function winnerKey(username: string, date: string): string {
+  return `winner:${username}:${date}`;
 }
 
 async function getUsername(): Promise<string> {
@@ -133,34 +133,34 @@ async function getUsername(): Promise<string> {
   return u ?? "anonymous";
 }
 
-async function hasPlayedToday(postId: string, username: string, date: string): Promise<boolean> {
-  return (await redis.get(playedKey(postId, username, date))) === "true";
+async function hasPlayedToday(username: string, date: string): Promise<boolean> {
+  return (await redis.get(playedKey(username, date))) === "true";
 }
 
-async function isWinner(postId: string, username: string, date: string): Promise<boolean> {
-  return (await redis.get(winnerKey(postId, username, date))) === "true";
+async function isWinner(username: string, date: string): Promise<boolean> {
+  return (await redis.get(winnerKey(username, date))) === "true";
 }
 
-async function getUserAttempts(postId: string, username: string, date: string): Promise<number> {
-  const value = await redis.get(attemptsKey(postId, username, date));
+async function getUserAttempts(username: string, date: string): Promise<number> {
+  const value = await redis.get(attemptsKey(username, date));
   return value ? parseInt(value, 10) : 0;
 }
 
-async function incrementAttempts(postId: string, username: string, date: string): Promise<number> {
-  const key = attemptsKey(postId, username, date);
-  const current = await getUserAttempts(postId, username, date);
+async function incrementAttempts(username: string, date: string): Promise<number> {
+  const key = attemptsKey(username, date);
+  const current = await getUserAttempts(username, date);
   const newValue = current + 1;
   await redis.set(key, newValue.toString(), { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
   return newValue;
 }
 
-async function markAsPlayed(postId: string, username: string, date: string): Promise<void> {
-  await redis.set(playedKey(postId, username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
+async function markAsPlayed(username: string, date: string): Promise<void> {
+  await redis.set(playedKey(username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
 }
 
-async function markAsWinner(postId: string, username: string, date: string): Promise<void> {
-  await redis.set(winnerKey(postId, username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
-  await markAsPlayed(postId, username, date);
+async function markAsWinner(username: string, date: string): Promise<void> {
+  await redis.set(winnerKey(username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
+  await markAsPlayed(username, date);
 }
 
 const app = express();
@@ -194,12 +194,12 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
     const username = await getUsername();
     const today = getTodayDateKey();
     const puzzle = getTodaysPuzzle();
-    const hasPlayed = await hasPlayedToday(postId, username, today);
-    const attempts = await getUserAttempts(postId, username, today);
-    const winner = await isWinner(postId, username, today);
-    const streak = await getUserStreak(postId, username);
-    const archivesCount = await getArchivesSolved(postId, username);
-    const score = await redis.zScore(leaderboardKey(postId), username) || 0;
+    const hasPlayed = await hasPlayedToday(username, today);
+    const attempts = await getUserAttempts(username, today);
+    const winner = await isWinner(username, today);
+    const streak = await getUserStreak(username);
+    const archivesCount = await getArchivesSolved(username);
+    const score = await redis.zScore(leaderboardKey(), username) || 0;
     res.json({
       type: "game_init",
       username: username,
@@ -232,9 +232,9 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
       return;
     }
     const username = await getUsername();
-    const streak = await getUserStreak(postId, username);
-    const archivesCount = await getArchivesSolved(postId, username);
-    const score = await redis.zScore(leaderboardKey(postId), username) || 0;
+    const streak = await getUserStreak(username);
+    const archivesCount = await getArchivesSolved(username);
+    const score = await redis.zScore(leaderboardKey(), username) || 0;
 
     // Pick a random puzzle that isn't the daily one
     const dailyPuzzle = getTodaysPuzzle();
@@ -306,7 +306,7 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     } else {
       const puzzle = getTodaysPuzzle();
       correctAnswer = puzzle.subreddit;
-      if (await isWinner(postId, username, today)) {
+      if (await isWinner(username, today)) {
         res.status(400).json({ error: "This Daily Case File has already been closed." });
         return;
       }
@@ -318,25 +318,25 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
     }
 
     const isCorrect = normalizeSubredditName(guess) === normalizeSubredditName(correctAnswer);
-    let streak = await getUserStreak(postId, username);
-    let archivesSolvedCount = await getArchivesSolved(postId, username);
-    let score = await redis.zScore(leaderboardKey(postId), username) || 0;
+    let streak = await getUserStreak(username);
+    let archivesSolvedCount = await getArchivesSolved(username);
+    let score = await redis.zScore(leaderboardKey(), username) || 0;
     let attempts = 0;
 
     if (!isArchives) {
-      attempts = await incrementAttempts(postId, username, today);
+      attempts = await incrementAttempts(username, today);
     }
 
     if (isCorrect) {
       if (isArchives || isCommunity) {
-        archivesSolvedCount = await incrementArchivesSolved(postId, username);
+        archivesSolvedCount = await incrementArchivesSolved(username);
         // Practice cases still increment rank score but not streak. Award 1 point.
-        score = await incrementUserScore(postId, username, 1);
+        score = await incrementUserScore(username, 1);
       } else {
-        await markAsWinner(postId, username, today);
-        streak = await updateStreak(postId, username, today);
+        await markAsWinner(username, today);
+        streak = await updateStreak(username, today);
         // Daily cases are more prestigious. Award 10 points.
-        score = await incrementUserScore(postId, username, 10);
+        score = await incrementUserScore(username, 10);
       }
     }
 
@@ -363,7 +363,7 @@ router.get("/api/game/leaderboard", async (_req, res): Promise<void> => {
       res.status(400).json({ error: "Unable to identify Case File for rankings (Missing postId)." });
       return;
     }
-    const leaderboard = await getTopSleuths(postId);
+    const leaderboard = await getTopSleuths();
     res.json({ type: "leaderboard_data", leaderboard });
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve the sleuth rankings from HQ." });
@@ -383,8 +383,8 @@ router.post("/api/game/abandon", async (_req, res): Promise<void> => {
       return;
     }
 
-    const sKey = streakKey(postId, username);
-    const dKey = lastWinDateKey(postId, username);
+    const sKey = streakKey(username);
+    const dKey = lastWinDateKey(username);
     await redis.set(sKey, "0");
     await redis.del(dKey);
 
@@ -423,7 +423,7 @@ router.post("/api/game/share", async (req, res): Promise<void> => {
       correctAnswer = puzzle.subreddit;
       caseTitle = `Daily Case #${getTodayCaseNumber()}`;
       // Verify they actually won
-      if (!(await isWinner(postId, username, today))) {
+      if (!(await isWinner(username, today))) {
         res.status(403).json({ error: "You must close the Case File before reporting your findings!" });
         return;
       }
@@ -485,9 +485,9 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
       return;
     }
     const username = await getUsername();
-    const score = await redis.zScore(leaderboardKey(postId), username) || 0;
-    const streak = await getUserStreak(postId, username);
-    const archivesCount = await getArchivesSolved(postId, username);
+    const score = await redis.zScore(leaderboardKey(), username) || 0;
+    const streak = await getUserStreak(username);
+    const archivesCount = await getArchivesSolved(username);
 
     // Get a random community case
     let len = await redis.zCard(communityCasesKey());
