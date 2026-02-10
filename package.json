@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "snoo-clues",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
@@ -19,8 +19,8 @@
     "type-check": "tsc --build"
   },
   "dependencies": {
-    "@devvit/web": "0.12.11",
-    "devvit": "0.12.11",
+    "@devvit/web": "0.12.12",
+    "devvit": "0.12.12",
     "express": "5.1.0"
   },
   "devDependencies": {
