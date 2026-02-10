@@ -5,6 +5,7 @@ import {
   GuessResponse,
   ShareRequest,
   LeaderboardEntry,
+  CommunitySubmissionRequest,
 } from "../shared/types/api";
 import {
   createServer,
@@ -74,7 +75,7 @@ async function updateStreak(postId: string, username: string, today: string): Pr
   const lastWinDate = await redis.get(dKey);
   let currentStreak = await getUserStreak(postId, username);
 
-  currentStreak = calculateNewStreak(lastWinDate, today, currentStreak);
+  currentStreak = calculateNewStreak(lastWinDate ?? null, today, currentStreak);
 
   await redis.set(sKey, currentStreak.toString());
   await redis.set(dKey, today);
@@ -218,6 +219,7 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
       }
     } as GameInitResponse);
   } catch (err) {
+    console.error("[Game Init] Error:", err);
     res.status(500).json({ error: "The Daily Case File could not be retrieved from the archives." });
   }
 });
@@ -264,6 +266,7 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
       }
     } as GameInitResponse);
   } catch (err) {
+    console.error("[Game Random] Error:", err);
     res.status(500).json({ error: "Failed to pull a random Case File from the Archives." });
   }
 });
@@ -348,6 +351,7 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
       audioTrigger: isCorrect ? 'correct' : 'wrong'
     } as GuessResponse);
   } catch (error) {
+    console.error("[Guess] Error:", error);
     res.status(500).json({ error: "Sleuth HQ encountered an error while processing your findings." });
   }
 });
@@ -465,9 +469,10 @@ router.post("/api/game/community/submit", async (req, res): Promise<void> => {
       timestamp: Date.now()
     };
 
-    await redis.lPush(communityCasesKey(), JSON.stringify(submission));
+    await redis.zAdd(communityCasesKey(), { member: JSON.stringify(submission), score: Date.now() });
     res.json({ success: true, message: "Case File successfully submitted to the community archives!" });
   } catch (err) {
+    console.error("[Community Submit] Error:", err);
     res.status(500).json({ error: "HQ failed to process your Case File submission." });
   }
 });
@@ -485,7 +490,7 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
     const archivesCount = await getArchivesSolved(postId, username);
 
     // Get a random community case
-    let len = await redis.lLen(communityCasesKey());
+    let len = await redis.zCard(communityCasesKey());
     if (len === 0) {
       console.log("[Community] Seeding initial test case for hackathon verification.");
       const seedCase = {
@@ -499,19 +504,19 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
         category: "community",
         timestamp: Date.now()
       };
-      await redis.lPush(communityCasesKey(), JSON.stringify(seedCase));
+      await redis.zAdd(communityCasesKey(), { member: JSON.stringify(seedCase), score: Date.now() });
       len = 1;
     }
 
     const randomIndex = Math.floor(Math.random() * len);
-    const raw = await redis.lRange(communityCasesKey(), randomIndex, randomIndex);
-    if (!raw || raw.length === 0) {
+    const raw = await redis.zRange(communityCasesKey(), randomIndex, randomIndex, { by: 'rank' });
+    if (!raw || raw.length === 0 || !raw[0]) {
       res.status(404).json({ error: "Failed to retrieve a community Case File from the records." });
       return;
     }
 
-    // Devvit lRange returns string[]
-    const puzzle = JSON.parse(raw[0]) as { subreddit: string, evidence: [string, string, string], category?: string };
+    // Devvit zRange returns { member: string, score: number }[]
+    const puzzle = JSON.parse(raw[0].member) as { subreddit: string, evidence: [string, string, string], category?: string };
 
     // Store answer for validation
     await redis.set(communityCaseAnswerKey(postId, username), puzzle.subreddit);
@@ -534,6 +539,7 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
       }
     } as GameInitResponse);
   } catch (err) {
+    console.error("[Community Random] Error:", err);
     res.status(500).json({ error: "Sleuth HQ encountered an error while pulling a community Case File." });
   }
 });
