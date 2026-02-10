@@ -31,6 +31,7 @@ class SnooCluesGame {
   private rank: string = "Rookie Sleuth";
   private coldCasesSolved: number = 0;
   private cluesRevealed: number = 1;
+  private currentCategory: string = "";
   private currentGameMode: 'daily' | 'unlimited' | 'community' | null = null;
   private audioAssets?: GameInitResponse['audioAssets'];
   private pendingExitTarget: 'selection' | 'home' | null = null;
@@ -532,6 +533,7 @@ class SnooCluesGame {
       this.streak = data.streak;
       this.rank = data.rank || "Rookie Sleuth";
       this.coldCasesSolved = data.coldCasesSolved;
+      this.currentCategory = data.category || "";
       this.audioAssets = data.audioAssets;
 
       this.updateGameUI();
@@ -665,14 +667,14 @@ class SnooCluesGame {
     }
   }
 
-  private showFeedback(m: string, t: "success" | "error"): void {
+  private showFeedback(m: string, t: "success" | "error", duration: number = 3000): void {
     this.feedbackMessage.textContent = m;
     this.feedbackMessage.className = `feedback-message ${t} active`;
 
-    // Auto-clear after short delay for better UX
+    // Auto-clear after delay for better UX
     setTimeout(() => {
       this.feedbackMessage.classList.remove('active');
-    }, 3000);
+    }, duration);
   }
 
   private async fetchLeaderboard(): Promise<void> {
@@ -810,8 +812,33 @@ class SnooCluesGame {
       "Some subreddits are compound words. Try combining them if it sounds right.",
       "Mascot says: 'I'm watching your progress, Detective. No pressure!'"
     ];
-    const tip = DETECTIVE_TIPS[Math.floor(Math.random() * DETECTIVE_TIPS.length)];
-    this.showFeedback(`🔎 Tip: ${tip}`, "success");
+
+    let tip = DETECTIVE_TIPS[Math.floor(Math.random() * DETECTIVE_TIPS.length)];
+
+    // Add category-specific hint if available to help explain clues
+    if (this.currentCategory) {
+      const categoryMap: Record<string, string> = {
+        'wholesome': 'This community is known for its positive and heartwarming content.',
+        'gaming': 'This case involves the world of pixels, consoles, and video games.',
+        'humor': 'Expect something funny—this sub is all about jokes and laughter.',
+        'knowledge': 'This is an educational hub where people share facts and trivia.',
+        'science': 'The clues point toward a rigorous, science-focused community.',
+        'entertainment': 'This subreddit is a major hub for movies, TV, or music fans.',
+        'visual': 'This community is primarily focused on photos and visual content.',
+        'lifestyle': 'The clues describe a community centered around a specific hobby or life path.',
+        'nature': 'This case is about the natural world, plants, or wild animals.',
+        'news': 'The clues are referencing global events or current news cycles.',
+        'meta': 'This is a meta-subreddit—it\'s about Reddit itself or general internet trends.',
+        'community': 'This is a case submitted by a fellow detective in the field!'
+      };
+
+      const categoryHint = categoryMap[this.currentCategory.toLowerCase()];
+      if (categoryHint) {
+        tip = `Detective's Analysis: ${categoryHint}`;
+      }
+    }
+
+    this.showFeedback(`🔎 Tip: ${tip}`, "success", 10000); // 10 seconds duration
     dispatchMascotAction('reveal'); // Reuse reveal animation for tip
   }
 

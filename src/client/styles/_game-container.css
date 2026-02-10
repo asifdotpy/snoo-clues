@@ -23,8 +23,8 @@
     max-width: 440px;
     margin: var(--space-4) auto;
     background: var(--paper-light);
-    padding: var(--space-6) var(--space-5) var(--space-10) var(--space-10);
-    border-radius: 2px var(--radius-lg) var(--radius-lg) 2px;
+    padding: var(--space-6) var(--space-8) var(--space-10) var(--space-12);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl), inset 2px 0 5px rgba(0, 0, 0, 0.05);
     font-family: inherit;
     text-align: left;
@@ -38,7 +38,7 @@
 .game-container::before {
     content: "";
     position: absolute;
-    left: var(--space-8);
+    left: var(--space-10);
     top: 0;
     bottom: 0;
     width: 2px;

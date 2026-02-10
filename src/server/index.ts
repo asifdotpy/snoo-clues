@@ -101,7 +101,7 @@ async function getTopDetectives(postId: string): Promise<LeaderboardEntry[]> {
 }
 
 
-function getTodaysPuzzle(): DailyPuzzle {
+function getTodaysPuzzle(): DailyPuzzle & { category: string } {
   return getTodaysPuzzleInternal(new Date(), ALL_PUZZLES);
 }
 
@@ -208,6 +208,7 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
       isWinner: winner,
       streak: streak,
       coldCasesSolved: coldCases,
+      category: puzzle.category,
       answer: winner ? puzzle.subreddit : undefined,
       rank: getDetectiveRank(score),
       audioAssets: {
@@ -244,6 +245,7 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
 
     // Store the answer for validation
     await redis.set(coldCaseAnswerKey(postId, username), puzzle.subreddit);
+    // Store category for hints in unlimited mode if needed, but we can just send it
 
     res.json({
       type: "game_init",
@@ -254,6 +256,7 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
       isWinner: false,
       streak: streak,
       coldCasesSolved: coldCases,
+      category: puzzle.category,
       rank: getDetectiveRank(score),
       audioAssets: {
         rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",
@@ -454,6 +457,7 @@ router.post("/api/game/community/submit", async (req, res): Promise<void> => {
       subreddit: normalizeSubredditName(subreddit),
       clues,
       author: username,
+      category: "community",
       timestamp: Date.now()
     };
 
@@ -491,7 +495,7 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
     }
 
     // Devvit lRange returns string[]
-    const puzzle = JSON.parse(raw[0]) as { subreddit: string, clues: [string, string, string] };
+    const puzzle = JSON.parse(raw[0]) as { subreddit: string, clues: [string, string, string], category?: string };
 
     // Store answer for validation
     await redis.set(communityCaseAnswerKey(postId, username), puzzle.subreddit);
@@ -505,6 +509,7 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
       isWinner: false,
       streak: streak,
       coldCasesSolved: coldCases,
+      category: puzzle.category || "community",
       rank: getDetectiveRank(score),
       audioAssets: {
         rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",

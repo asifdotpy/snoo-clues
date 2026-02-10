@@ -20,6 +20,7 @@ export type GameInitResponse = {
   isWinner: boolean;
   streak: number;
   coldCasesSolved: number;
+  category?: string | undefined;
   answer?: string | undefined;
   rank?: string | undefined;
   audioAssets?: {

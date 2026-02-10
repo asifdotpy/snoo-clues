@@ -17,7 +17,7 @@ export function calculateNewStreak(lastWinDate: string | null, today: string, cu
 /**
  * Selects a puzzle based on the date modulo the number of available puzzles.
  */
-export function getTodaysPuzzleInternal(today: Date, puzzles: Puzzle[]): DailyPuzzle {
+export function getTodaysPuzzleInternal(today: Date, puzzles: Puzzle[]): DailyPuzzle & { category: string } {
     const todayKey = today.toISOString().split('T')[0] ?? "2025-01-01";
     const epoch = new Date("2025-01-01").getTime();
     const current = new Date(todayKey).getTime();
@@ -29,7 +29,8 @@ export function getTodaysPuzzleInternal(today: Date, puzzles: Puzzle[]): DailyPu
     return {
         subreddit: p.subreddit,
         clues: p.clues,
-        date: todayKey
+        date: todayKey,
+        category: p.category
     };
 }
 
