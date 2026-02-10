@@ -13,6 +13,7 @@ export function setupSettingsUI(): void {
   const settingsPanel = document.getElementById('settings-panel');
   const muteBtn = document.getElementById('mute-btn') as HTMLButtonElement;
   const musicMuteBtn = document.getElementById('music-mute-btn') as HTMLButtonElement;
+  const splashMuteBtn = document.getElementById('splash-mute-btn') as HTMLButtonElement;
 
   if (!settingsBtn || !settingsPanel || !muteBtn || !musicMuteBtn) {
     console.warn('[Settings] Required DOM elements for settings not found');
@@ -23,6 +24,10 @@ export function setupSettingsUI(): void {
     const isMuted = Audio.isMuted();
     muteBtn.textContent = isMuted ? '🔇 Master Mute: On' : '🔊 Master Mute: Off';
     muteBtn.classList.toggle('muted', isMuted);
+
+    if (splashMuteBtn) {
+      splashMuteBtn.textContent = isMuted ? '🔇' : '🔊';
+    }
 
     const isMusicMuted = Audio.isMusicMuted();
     musicMuteBtn.textContent = isMusicMuted ? '🔇 Background Music: Off' : '🎵 Background Music: On';
@@ -35,6 +40,15 @@ export function setupSettingsUI(): void {
     Audio.toggleMuted();
     updateMuteLabel();
   });
+
+  if (splashMuteBtn) {
+    splashMuteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      Audio.playSound('click');
+      Audio.toggleMuted();
+      updateMuteLabel();
+    });
+  }
 
   musicMuteBtn.addEventListener('click', (e) => {
     e.stopPropagation();

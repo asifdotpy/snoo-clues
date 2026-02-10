@@ -86,6 +86,13 @@
   opacity: 1;
 }
 
+.streak-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+}
+
 .streak-badge {
   background: var(--gray-800);
   color: var(--gray-50);
@@ -98,10 +105,42 @@
   white-space: nowrap;
   display: inline-block;
   transform: rotate(-1deg);
+  transition: all 0.3s ease;
+}
+
+.streak-badge.active {
+  animation: heartbeat 2s infinite ease-in-out;
+  border-color: var(--orange-500);
 }
 
 .streak-badge span {
   color: var(--orange-400);
+}
+
+.streak-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: var(--space-2);
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: rotate(-1deg) scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.4);
+  }
+
+  50% {
+    transform: rotate(-1deg) scale(1.05);
+    box-shadow: 0 0 15px 5px rgba(255, 69, 0, 0.2);
+  }
+
+  100% {
+    transform: rotate(-1deg) scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 69, 0, 0);
+  }
 }
 
 /* Archives case aesthetic override */

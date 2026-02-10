@@ -3,7 +3,29 @@
    ======================================== */
 
 .selection-hub {
-    /* Uses base .modal-content styles */
+    background-color: #f3e5ab !important;
+    background-image: repeating-linear-gradient(
+        transparent,
+        transparent 31px,
+        rgba(0, 0, 0, 0.05) 31px,
+        rgba(0, 0, 0, 0.05) 32px
+    ) !important;
+    border-left: 12px solid #e6d598 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.selection-hub::after {
+    content: "TOP SECRET";
+    position: absolute;
+    bottom: 20px;
+    right: -30px;
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(255, 0, 0, 0.05);
+    transform: rotate(-15deg);
+    pointer-events: none;
+    letter-spacing: 5px;
 }
 
 #user-greeting {

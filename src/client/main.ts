@@ -59,6 +59,7 @@ class SnooCluesGame {
   private playedAttemptsCount!: HTMLElement;
   private playedStreakVal!: HTMLElement;
   private streakValue!: HTMLElement;
+  private streakBadge!: HTMLElement;
   private winStreakVal!: HTMLElement;
   private rankValue!: HTMLElement;
   private winRankName!: HTMLElement;
@@ -154,6 +155,7 @@ class SnooCluesGame {
     this.playedAttemptsCount = document.getElementById('played-attempts-count')!;
     this.playedStreakVal = document.getElementById('played-streak-val')!;
     this.streakValue = document.getElementById('streak-value')!;
+    this.streakBadge = document.getElementById('streakBadge')!;
     this.winStreakVal = document.getElementById('win-streak-val')!;
     this.rankValue = document.getElementById('rank-value')!;
     this.winRankName = document.getElementById('win-rank-name')!;
@@ -418,9 +420,9 @@ class SnooCluesGame {
         this.handleExit(false);
       } else {
         // Home exit with no progress still shows a "safety" confirmation
-        this.confirmModalTitle.textContent = "Return to Main Menu?";
+        this.confirmModalTitle.textContent = "Retreat to HQ?";
         this.confirmModalText.textContent = "Going back to the splash screen. Your streak is safe. Continue?";
-        this.confirmYesBtn.textContent = "Yes, Exit";
+        this.confirmYesBtn.textContent = "Yes, Retreat";
         this.showModal("confirm");
       }
       return;
@@ -428,9 +430,9 @@ class SnooCluesGame {
 
     // Progress exists, show abandonment warning
     if (target === 'home') {
-      this.confirmModalTitle.textContent = "Exit to Main Menu?";
-      this.confirmModalText.textContent = "Your current Case File progress will be lost and your streak will reset. Exit anyway?";
-      this.confirmYesBtn.textContent = "Yes, Exit";
+      this.confirmModalTitle.textContent = "Retreat to HQ?";
+      this.confirmModalText.textContent = "Your current Case File progress will be lost and your streak will reset. Retreat anyway?";
+      this.confirmYesBtn.textContent = "Yes, Retreat";
     } else {
       this.confirmModalTitle.textContent = "Abandon Case?";
       this.confirmModalText.textContent = "Abandoning this Case File will forfeit your current progress and reset your streak to 0. Retreat?";
@@ -455,7 +457,7 @@ class SnooCluesGame {
           console.error("Failed to abandon game:", error);
         }
         this.streak = 0;
-        this.streakValue.textContent = "0";
+        this.updateStreakDisplay();
       }
 
       this.resetGameUI(isAbandon); // Pass isAbandon to skip immediate idle reset
@@ -483,7 +485,7 @@ class SnooCluesGame {
           console.error("Failed to abandon game:", error);
         }
         this.streak = 0;
-        this.streakValue.textContent = "0";
+        this.updateStreakDisplay();
       } else {
         dispatchMascotAction('switch_mode');
       }
@@ -542,6 +544,7 @@ class SnooCluesGame {
       this.audioAssets = data.audioAssets;
 
       this.updateGameUI();
+      this.updateStreakDisplay();
 
       if (this.hasPlayed && mode === 'daily') {
         this.playedAttemptsCount.textContent = this.attempts.toString();
@@ -565,12 +568,21 @@ class SnooCluesGame {
     }
   }
 
+  private updateStreakDisplay(): void {
+    this.streakValue.textContent = this.streak.toString();
+    if (this.streak > 0) {
+      this.streakBadge.classList.add('active');
+    } else {
+      this.streakBadge.classList.remove('active');
+    }
+  }
+
   private updateGameUI(): void {
     typewriter(this.evidence1Text, this.evidence[0]);
     this.evidence2Text.textContent = this.evidence[1];
     this.evidence3Text.textContent = this.evidence[2];
     this.attemptsCount.textContent = this.attempts.toString();
-    this.streakValue.textContent = this.streak.toString();
+    this.updateStreakDisplay();
     this.rankValue.textContent = this.rank;
 
     [this.evidence2Card, this.evidence3Card].forEach(c => {
@@ -614,7 +626,7 @@ class SnooCluesGame {
       this.attempts = data.attempts;
       this.attemptsCount.textContent = this.attempts.toString();
       this.streak = data.streak ?? this.streak;
-      this.streakValue.textContent = this.streak.toString();
+      this.updateStreakDisplay();
       this.rank = data.rank ?? this.rank;
       this.rankValue.textContent = this.rank;
       this.archivesSolved = data.archivesSolved ?? this.archivesSolved;
@@ -777,7 +789,7 @@ class SnooCluesGame {
 
     // 3. Counter Reset
     this.attemptsCount.textContent = "0";
-    this.streakValue.textContent = "0";
+    this.updateStreakDisplay();
     this.rank = "Rookie Sleuth";
     this.rankValue.textContent = this.rank;
 
@@ -817,6 +829,13 @@ class SnooCluesGame {
   }
 
   private showMascotTip(): void {
+    // Official Case File restriction
+    if (this.currentGameMode !== 'archives') {
+      this.showFeedback("🔎 Tip: Archives only, Sleuth! This is an official Case File—no outside interference permitted.", "success", 10000);
+      dispatchMascotAction('reveal');
+      return;
+    }
+
     const SLEUTH_TIPS = [
       "Look for keywords in the evidence—they often point to the Subreddit's niche!",
       "Common prefixes like 'ask', 'today', or 'mildly' are very popular on Reddit.",
@@ -896,5 +915,6 @@ class SnooCluesGame {
 
 document.addEventListener('DOMContentLoaded', () => {
   const game = new SnooCluesGame();
+  (window as any).gameInstance = game;
   new GameLoader(game);
 });
