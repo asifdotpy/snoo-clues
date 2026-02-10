@@ -3,10 +3,15 @@
    ======================================== */
 
 .loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background: #000 !important;
     overflow: hidden;
     animation: fadeInBackground 1.5s ease-out;
-    position: relative;
+    z-index: 10000;
 }
 
 .splash-mute-btn {

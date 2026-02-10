@@ -176,12 +176,12 @@ export default class GameLoader {
             setTimeout(() => {
                 if (this.startButton.classList.contains("hidden") && this.loadingElement.style.display !== "none") {
                     console.log("[GameLoader] Timeout: Game engine failed to signal completion.");
-                    this.statusElement.innerHTML = "Engine loading slowly... <button onclick=\"location.reload()\" style=\"color: #ff4500; background: none; border: 1px solid #ff4500; padding: 2px 5px; cursor: pointer; font-family: inherit;\">Retry?</button>";
+                    this.statusElement.innerHTML = "Gathering Case Files...";
 
                     // Allow another 5 seconds before showing button anyway
                     setTimeout(() => {
                         if (this.startButton.classList.contains("hidden") && this.loadingElement.style.display !== "none") {
-                             this.ensureAspectRatio();
+                            this.ensureAspectRatio();
                         }
                     }, 5000);
                 }

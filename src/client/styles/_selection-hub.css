@@ -4,15 +4,23 @@
 
 .selection-hub {
     background-color: #f3e5ab !important;
-    background-image: repeating-linear-gradient(
-        transparent,
-        transparent 31px,
-        rgba(0, 0, 0, 0.05) 31px,
-        rgba(0, 0, 0, 0.05) 32px
-    ) !important;
+    background-image: repeating-linear-gradient(transparent,
+            transparent 31px,
+            rgba(0, 0, 0, 0.05) 31px,
+            rgba(0, 0, 0, 0.05) 32px) !important;
     border-left: 12px solid #e6d598 !important;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto !important;
+    max-height: 85vh !important;
+}
+
+.selection-hub::-webkit-scrollbar {
+    width: 6px;
+}
+
+.selection-hub::-webkit-scrollbar-thumb {
+    background-color: var(--orange-500);
+    border-radius: 10px;
 }
 
 .selection-hub::after {
@@ -29,19 +37,19 @@
 }
 
 #user-greeting {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--orange-600);
     font-weight: 800;
-    margin: var(--space-2) 0;
+    margin: var(--space-1) 0;
     display: block;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .selection-hub h3 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--gray-900);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
     font-weight: 800;
     letter-spacing: -0.025em;
 }
@@ -49,13 +57,13 @@
 .selection-options {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-2);
 }
 
 .selection-btn {
     background: var(--paper-white);
     border: 1.5px solid var(--gray-200);
-    padding: var(--space-5);
+    padding: var(--space-3) var(--space-5);
     cursor: pointer;
     font-family: inherit;
     text-align: left;
@@ -100,13 +108,13 @@
 }
 
 .selection-footer {
-    margin-top: var(--space-8);
-    padding-top: var(--space-6);
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
     border-top: 1px solid var(--gray-200);
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-2);
     align-items: center;
 }
 
