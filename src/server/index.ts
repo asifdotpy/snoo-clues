@@ -150,16 +150,19 @@ async function incrementAttempts(username: string, date: string): Promise<number
   const key = attemptsKey(username, date);
   const current = await getUserAttempts(username, date);
   const newValue = current + 1;
-  await redis.set(key, newValue.toString(), { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
+  // Use 30-day expiration for attempts to allow for monthly stat tracking
+  await redis.set(key, newValue.toString(), { expiration: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
   return newValue;
 }
 
 async function markAsPlayed(username: string, date: string): Promise<void> {
-  await redis.set(playedKey(username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
+  // Use 30-day expiration for played status
+  await redis.set(playedKey(username, date), "true", { expiration: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
 }
 
 async function markAsWinner(username: string, date: string): Promise<void> {
-  await redis.set(winnerKey(username, date), "true", { expiration: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
+  // No expiration for winners to keep a permanent record of solved Daily Cases
+  await redis.set(winnerKey(username, date), "true");
   await markAsPlayed(username, date);
 }
 
