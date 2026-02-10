@@ -205,33 +205,51 @@
   <div class="modal hidden" id="submitModal">
     <div class="modal-content submit-case-form">
       <button class="modal-close-btn" id="closeSubmitModal">&times;</button>
-      <h2>Submit a Case File</h2>
-      <p>Help expand the Snoo-Clues Archives! Provide a Subreddit and 3 pieces of progressive evidence.</p>
 
-      <div class="form-group">
-        <label for="submitSubreddit">Subreddit Name (r/)</label>
-        <input type="text" id="submitSubreddit" placeholder="e.g. aww" />
+      <div id="submitFormArea">
+        <h2>Submit a Case File</h2>
+        <p>Help expand the Snoo-Clues Archives! Provide a Subreddit and 3 pieces of progressive evidence.</p>
+
+        <div class="form-group">
+          <label for="submitSubreddit">Subreddit Name</label>
+          <div class="input-row submission-input-row">
+            <span class="r-prefix">r/</span>
+            <input type="text" id="submitSubreddit" class="guess-input" placeholder="e.g. aww" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="submitEvidence1">Evidence #1 (Vague)</label>
+          <textarea id="submitEvidence1" placeholder="e.g. A place for cute animals..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="submitEvidence2">Evidence #2 (Moderate)</label>
+          <textarea id="submitEvidence2" placeholder="e.g. Often features cats and dogs..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="submitEvidence3">Evidence #3 (Specific)</label>
+          <textarea id="submitEvidence3"
+            placeholder="e.g. The name is the sound you make when you see something cute..."></textarea>
+        </div>
+
+        <p class="feedback-message" id="submitFeedback"></p>
+
+        <div class="modal-actions">
+          <button id="submitCaseBtn" class="modal-btn">Submit Case File</button>
+          <button id="cancelSubmitBtn" class="modal-btn secondary">Cancel</button>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="submitEvidence1">Evidence #1 (Vague)</label>
-        <textarea id="submitEvidence1" placeholder="e.g. A place for cute animals..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="submitEvidence2">Evidence #2 (Moderate)</label>
-        <textarea id="submitEvidence2" placeholder="e.g. Often features cats and dogs..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="submitEvidence3">Evidence #3 (Specific)</label>
-        <textarea id="submitEvidence3"
-          placeholder="e.g. The name is the sound you make when you see something cute..."></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button id="submitCaseBtn" class="modal-btn">Submit Case File</button>
-        <button id="cancelSubmitBtn" class="modal-btn secondary">Cancel</button>
+      <div id="submitSuccessArea" class="hidden">
+        <div class="success-icon">✅</div>
+        <h2>Case File Submitted!</h2>
+        <p>Your contribution has been added to the Community Archives. Thank you for helping fellow Sleuths!</p>
+        <div class="modal-actions">
+          <button id="submitAnotherBtn" class="modal-btn">Submit Another</button>
+          <button id="successCloseBtn" class="modal-btn secondary">Close</button>
+        </div>
       </div>
     </div>
   </div>

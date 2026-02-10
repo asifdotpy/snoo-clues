@@ -224,3 +224,34 @@
     border-color: var(--orange-500);
     box-shadow: 0 0 0 3px var(--orange-50);
 }
+
+.submission-input-row {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    70% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
