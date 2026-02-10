@@ -91,6 +91,7 @@ class SnooCluesGame {
   private closeSubmitModalBtn!: HTMLButtonElement;
   private submitCaseBtn!: HTMLButtonElement;
   private cancelSubmitBtn!: HTMLButtonElement;
+  private copyTriggers!: NodeListOf<HTMLElement>;
 
   constructor() {
     this.initDOMElements();
@@ -187,6 +188,7 @@ class SnooCluesGame {
     this.closeSubmitModalBtn = document.getElementById("closeSubmitModal") as HTMLButtonElement;
     this.submitCaseBtn = document.getElementById("submitCaseBtn") as HTMLButtonElement;
     this.cancelSubmitBtn = document.getElementById("cancelSubmitBtn") as HTMLButtonElement;
+    this.copyTriggers = document.querySelectorAll(".copy-trigger");
 
     // Handle Case Selection modal close button
     if (this.closeSelectionBtn) {
@@ -250,6 +252,13 @@ class SnooCluesGame {
     this.closePlayedModalBtn.addEventListener("click", () => {
       this.playSound('click');
       this.closeModal("played");
+    });
+
+    this.copyTriggers.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const clueNum = (e.target as HTMLElement).getAttribute("data-clue");
+        this.handleCopyClue(clueNum);
+      });
     });
 
     // Share from win modal
@@ -591,6 +600,11 @@ class SnooCluesGame {
     });
     [this.evidence2Text, this.evidence3Text].forEach(t => t.classList.add("hidden"));
     [this.revealEvidence2Btn, this.revealEvidence3Btn].forEach(b => b.style.display = "block");
+    this.copyTriggers.forEach(t => {
+      if (t.getAttribute("data-clue") !== "1") {
+        t.classList.add("hidden");
+      }
+    });
   }
 
   private revealEvidence(n: 2 | 3): void {
@@ -610,7 +624,27 @@ class SnooCluesGame {
     this.playSound('rustle');
     dispatchMascotAction('reveal');
     typewriter(text, this.evidence[n - 1] as string);
+
+    // Show copy trigger for this clue
+    const copyTrigger = document.querySelector(`.copy-trigger[data-clue="${n}"]`);
+    if (copyTrigger) copyTrigger.classList.remove("hidden");
+
     vibrate(20);
+  }
+
+  private handleCopyClue(num: string | null): void {
+    if (!num) return;
+    const index = parseInt(num) - 1;
+    const text = this.evidence[index];
+    if (!text) return;
+
+    this.playSound('click');
+    navigator.clipboard.writeText(text).then(() => {
+      this.showFeedback(`🔎 Evidence #${num} copied to clipboard!`, "success", 3000);
+    }).catch(err => {
+      console.error("Failed to copy:", err);
+      this.showFeedback("Failed to copy evidence.", "error", 3000);
+    });
   }
 
   private async submitGuess(): Promise<void> {

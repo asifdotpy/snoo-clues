@@ -99,6 +99,7 @@
         <div class="clue-card visible">
           <div class="clue-header">
             <span class="clue-number">Evidence #1</span>
+            <span class="copy-trigger" data-clue="1">Copy</span>
           </div>
           <p class="clue-text" id="evidence1Text">Loading...</p>
         </div>
@@ -106,7 +107,10 @@
         <div class="clue-card locked" id="evidence2Card">
           <div class="clue-header">
             <span class="clue-number">Evidence #2</span>
-            <button class="reveal-btn" id="revealEvidence2">Show Evidence</button>
+            <div class="header-actions">
+              <span class="copy-trigger hidden" id="copyClue2" data-clue="2">Copy</span>
+              <button class="reveal-btn" id="revealEvidence2">Show Evidence</button>
+            </div>
           </div>
           <p class="clue-text hidden" id="evidence2Text">???</p>
         </div>
@@ -114,7 +118,10 @@
         <div class="clue-card locked" id="evidence3Card">
           <div class="clue-header">
             <span class="clue-number">Evidence #3</span>
-            <button class="reveal-btn" id="revealEvidence3">Show Evidence</button>
+            <div class="header-actions">
+              <span class="copy-trigger hidden" id="copyClue3" data-clue="3">Copy</span>
+              <button class="reveal-btn" id="revealEvidence3">Show Evidence</button>
+            </div>
           </div>
           <p class="clue-text hidden" id="evidence3Text">???</p>
         </div>
@@ -218,7 +225,8 @@
 
       <div class="form-group">
         <label for="submitEvidence3">Evidence #3 (Specific)</label>
-        <textarea id="submitEvidence3" placeholder="e.g. The name is the sound you make when you see something cute..."></textarea>
+        <textarea id="submitEvidence3"
+          placeholder="e.g. The name is the sound you make when you see something cute..."></textarea>
       </div>
 
       <div class="modal-actions">

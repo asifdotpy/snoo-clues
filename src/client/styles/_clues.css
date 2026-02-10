@@ -43,6 +43,31 @@
     align-items: center;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.copy-trigger {
+    color: var(--orange-500);
+    cursor: pointer;
+    font-size: 0.7rem;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.copy-trigger:hover {
+    color: var(--orange-600);
+    text-decoration-thickness: 2px;
+}
+
+.copy-trigger.hidden {
+    display: none;
+}
+
 .clue-number {
     color: var(--orange-600);
 }
