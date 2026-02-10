@@ -697,10 +697,10 @@ class SnooCluesGame {
       const data = await GameAPI.fetchLeaderboard();
       this.renderLeaderboard(data.leaderboard);
     } catch (error) {
-      console.error("Detective rankings fetch failed:", error);
+      console.error("Sleuth rankings fetch failed:", error);
       this.leaderboardList.innerHTML = `
         <div class="leaderboard-item error">
-          Failed to load detective rankings.
+          Failed to load Sleuth rankings.
         </div>
       `;
     }
@@ -817,7 +817,7 @@ class SnooCluesGame {
   }
 
   private showMascotTip(): void {
-    const DETECTIVE_TIPS = [
+    const SLEUTH_TIPS = [
       "Look for keywords in the evidence—they often point to the Subreddit's niche!",
       "Common prefixes like 'ask', 'today', or 'mildly' are very popular on Reddit.",
       "Check the emoji at the start of Evidence #3—it's usually a direct hint!",
@@ -828,7 +828,7 @@ class SnooCluesGame {
       "Mascot says: 'I'm watching your progress, Sleuth. No pressure!'"
     ];
 
-    let tip = DETECTIVE_TIPS[Math.floor(Math.random() * DETECTIVE_TIPS.length)];
+    let tip = SLEUTH_TIPS[Math.floor(Math.random() * SLEUTH_TIPS.length)];
 
     // Add category-specific hint if available to help explain clues
     if (this.currentCategory) {
@@ -849,7 +849,7 @@ class SnooCluesGame {
 
       const categoryHint = categoryMap[this.currentCategory.toLowerCase()];
       if (categoryHint) {
-        tip = `Detective's Analysis: ${categoryHint}`;
+        tip = `Sleuth's Analysis: ${categoryHint}`;
       }
     }
 

@@ -7,7 +7,7 @@
 
 ## 1. What This Project Is
 
-**Snoo-Clues** is a **daily subreddit guessing game** for Reddit, built with **Devvit** and a **hybrid GameMaker + HTML/TS** frontend. Players see three progressive clues and guess the subreddit; they can play the daily case (one per day, UTC) or browse “Cold Cases” (unlimited practice). Streaks, a global leaderboard, and detective ranks round out the experience.
+**Snoo-Clues** is a **daily subreddit guessing game** for Reddit, built with **Devvit** and a **hybrid GameMaker + HTML/TS** frontend. Players see three progressive clues and guess the subreddit; they can play the daily case (one per day, UTC) or browse “Cold Cases” (unlimited practice). Streaks, a global leaderboard, and sleuth ranks round out the experience.
 
 - **Platform:** Reddit (Devvit 0.12.x)
 - **Frontend:** Vite + TypeScript, modular CSS, GameMaker WASM for canvas/mascot/audio
@@ -32,7 +32,7 @@
 **Notable details:**
 
 - Guess normalization is shared and used on both client and server — consistent behavior and no duplicated logic.
-- Leaderboard uses Redis sorted sets; `getTopDetectives()` uses `zRange` and maps `member`/`score` directly (no N+1 `zScore` calls).
+- Leaderboard uses Redis sorted sets; `getTopSleuths()` uses `zRange` and maps `member`/`score` directly (no N+1 `zScore` calls).
 - Cold Case pool has an explicit fallback when the pool is empty (e.g. single-puzzle edge case).
 
 ---
@@ -44,7 +44,7 @@ From `docs/HACKATHON_PRE_SUBMISSION_AUDIT.md`:
 | Item | Audit | Current status |
 |------|--------|----------------|
 | **zIncrBy argument order** | 🔴 Critical | **Fixed** — `index.ts` uses `redis.zIncrBy(key, username, amount)`. |
-| **README vs getDetectiveRank()** | 🔴 Critical | **Resolved** — README now documents point-based ranks and tier names that match `logic.ts` (Rookie Sleuth 0–9, Junior Detective 10–49, etc.). |
+| **README vs getSleuthRank()** | 🔴 Critical | **Resolved** — README now documents point-based ranks and tier names that match `logic.ts` (Rookie Sleuth 0–9, Junior Sleuth 10–49, etc.). |
 | **Cold Case empty pool** | 🟠 High | **Fixed** — Guard in place: `pool.length > 0 ? pool[random] : dailyPuzzle`. |
 | **Leaderboard zRange usage** | 🟠 High | **Addressed** — Code uses `zRange` result’s `member` and `score`; no extra `zScore` round-trips. |
 | **Abandon flow / resetGameUI** | 🟠 High | **Documented** — Audit and Case-Selection doc reference fixes; `resetGameUI()` in `main.ts` is comprehensive; manual verification recommended. |
@@ -58,7 +58,7 @@ The two critical issues from the audit are **resolved**; high-priority items are
 - **Streak:** `calculateNewStreak()` in `logic.ts` is tested (5 cases in `streak-logic.test.ts`) and used correctly in `updateStreak()` with Redis.
 - **Puzzle selection:** `getTodaysPuzzleInternal()` uses epoch 2025-01-01 and `abs(diffDays) % puzzles.length`; covered by `puzzle-logic.test.ts`.
 - **Guess validation:** Client normalizes before submit; server normalizes guess and answer and compares; normalization tests in `product-logic.test.ts`.
-- **Ranks:** `getDetectiveRank(score)` is point-based and aligned with README (0–9, 10–49, 50–99, 100–199, 200+).
+- **Ranks:** `getSleuthRank(score)` is point-based and aligned with README (0–9, 10–49, 50–99, 100–199, 200+).
 - **Mode handling:** If `mode` is missing on guess, server defaults to daily and logs a warning — reasonable; explicit validation would be a small improvement.
 
 **Timezone:** Streaks and “today” use UTC (`getTodayDateKey()`). README states “Daily puzzles reset at midnight UTC” and “Your streak is based on UTC dates” — appropriate and documented.

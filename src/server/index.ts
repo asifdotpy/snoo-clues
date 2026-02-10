@@ -19,7 +19,7 @@ import { createPost } from "./core/post.js";
 import { ALL_PUZZLES } from "./data/puzzles.js";
 import {
   normalizeSubredditName,
-  getDetectiveRank,
+  getSleuthRank,
   calculateNewStreak,
   getTodaysPuzzleInternal
 } from "./logic.js";
@@ -91,7 +91,7 @@ async function incrementUserScore(postId: string, username: string, amount: numb
   return await redis.zIncrBy(key, username, amount);
 }
 
-async function getTopDetectives(postId: string): Promise<LeaderboardEntry[]> {
+async function getTopSleuths(postId: string): Promise<LeaderboardEntry[]> {
   const key = leaderboardKey(postId);
   const top = await redis.zRange(key, 0, 9, { by: 'rank', reverse: true });
   return top.map((member) => ({
@@ -210,7 +210,7 @@ router.get("/api/game/init", async (_req, res): Promise<void> => {
       archivesSolved: archivesCount,
       category: puzzle.category,
       answer: winner ? puzzle.subreddit : undefined,
-      rank: getDetectiveRank(score),
+      rank: getSleuthRank(score),
       audioAssets: {
         rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",
         victory: "https://www.soundjay.com/human/sounds/applause-01.mp3",
@@ -256,7 +256,7 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
       streak: streak,
       archivesSolved: archivesCount,
       category: puzzle.category,
-      rank: getDetectiveRank(score),
+      rank: getSleuthRank(score),
       audioAssets: {
         rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",
         victory: "https://www.soundjay.com/human/sounds/applause-01.mp3",
@@ -344,7 +344,7 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
       attempts: isArchives ? 0 : attempts, // Attempts only track for daily/community
       streak: streak,
       archivesSolved: archivesSolvedCount,
-      rank: isCorrect ? getDetectiveRank(score) : undefined,
+      rank: isCorrect ? getSleuthRank(score) : undefined,
       audioTrigger: isCorrect ? 'correct' : 'wrong'
     } as GuessResponse);
   } catch (error) {
@@ -359,10 +359,10 @@ router.get("/api/game/leaderboard", async (_req, res): Promise<void> => {
       res.status(400).json({ error: "Unable to identify Case File for rankings (Missing postId)." });
       return;
     }
-    const leaderboard = await getTopDetectives(postId);
+    const leaderboard = await getTopSleuths(postId);
     res.json({ type: "leaderboard_data", leaderboard });
   } catch (error) {
-    res.status(500).json({ error: "Failed to retrieve the detective rankings from HQ." });
+    res.status(500).json({ error: "Failed to retrieve the sleuth rankings from HQ." });
   }
 });
 
@@ -514,7 +514,7 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
       streak: streak,
       archivesSolved: archivesCount,
       category: puzzle.category || "community",
-      rank: getDetectiveRank(score),
+      rank: getSleuthRank(score),
       audioAssets: {
         rustle: "https://www.soundjay.com/misc/sounds/paper-rustle-1.mp3",
         victory: "https://www.soundjay.com/human/sounds/applause-01.mp3",

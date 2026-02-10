@@ -97,28 +97,28 @@ await redis.zIncrBy(key, username, amount);  // ✅ (key, member, value)
 
 ---
 
-## 5. 🔴 CRITICAL: Detective Rank README vs Code Mismatch
+## 5. 🔴 CRITICAL: Sleuth Rank README vs Code Mismatch
 
 **README.md promises:**
 - Rookie Sleuth (0–1 Wins)
 - Private Eye (2–5 Wins)
-- Senior Detective (6–10 Wins)
+- Senior Sleuth (6–10 Wins)
 - Inspector (11–20 Wins)
 - Master Investigator (21+ Wins)
 
 **logic.ts implements (score-based):**
 - Rookie Sleuth (0–9 points)
-- Junior Detective (10–49)
+- Junior Sleuth (10–49)
 - Senior Investigator (50–99)
-- Lead Profiler (100–199)
-- Chief of Detectives (200+)
+- Lead Sleuth (100–199)
+- Chief of Sleuths (200+)
 
 **Scoring:** Daily win = 10 pts, Cold case win = 1 pt. So "wins" ≠ "points".
 
 **Impact:** Users expecting "Private Eye" at 2 wins will see "Rookie Sleuth" (score 20). Major UX/marketing mismatch.
 
 **Options:**
-1. **Align code to README:** Change `getDetectiveRank()` to use win counts and the stated tier names.
+1. **Align code to README:** Change `getSleuthRank()` to use win counts and the stated tier names.
 2. **Align README to code:** Update README to reflect point-based ranks and actual tier names.
 
 ---
@@ -206,7 +206,7 @@ Share requires `isWinner` for today. Uses `attempts` from request body for the c
 
 ### Must Do
 - [ ] Fix `zIncrBy` argument order in `incrementUserScore()`
-- [ ] Resolve README vs `getDetectiveRank()` mismatch (code or docs)
+- [ ] Resolve README vs `getSleuthRank()` mismatch (code or docs)
 
 ### Should Do
 - [ ] Add empty-pool guard for Cold Case random selection
@@ -227,6 +227,6 @@ Share requires `isWinner` for today. Uses `attempts` from request body for the c
 | Streak | `logic.ts` | `calculateNewStreak()` |
 | Puzzle | `logic.ts` | `getTodaysPuzzleInternal()` |
 | Guess | `index.ts` | `POST /api/game/guess` |
-| Ranks | `logic.ts` | `getDetectiveRank()` |
-| Leaderboard | `index.ts` | `incrementUserScore()`, `getTopDetectives()` |
+| Ranks | `logic.ts` | `getSleuthRank()` |
+| Leaderboard | `index.ts` | `incrementUserScore()`, `getTopSleuths()` |
 | Normalization | `shared/utils/normalization.ts` | `normalizeSubredditName()` |

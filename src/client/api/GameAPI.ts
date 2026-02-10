@@ -113,7 +113,7 @@ export class GameAPI {
 
         if (!response.ok) {
             const data = await response.json().catch(() => ({}));
-            throw new Error(data.error || "Failed to fetch detective rankings.");
+            throw new Error(data.error || "Failed to fetch Sleuth rankings.");
         }
 
         return response.json();

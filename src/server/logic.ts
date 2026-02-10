@@ -35,17 +35,17 @@ export function getTodaysPuzzleInternal(today: Date, puzzles: Puzzle[]): DailyPu
 }
 
 /**
- * Returns the Detective Rank based on score (points).
+ * Returns the Sleuth Rank based on score (points).
  * 0-9: Rookie Sleuth
- * 10-49: Junior Detective
- * 50-99: Senior Investigator
- * 100-199: Lead Profiler
- * 200+: Chief of Detectives
+ * 10-49: Junior Sleuth
+ * 50-99: Senior Sleuth
+ * 100-199: Lead Sleuth
+ * 200+: Chief of Sleuths
  */
-export function getDetectiveRank(score: number): string {
+export function getSleuthRank(score: number): string {
     if (score < 10) return "Rookie Sleuth";
-    if (score < 50) return "Junior Detective";
-    if (score < 100) return "Senior Investigator";
-    if (score < 200) return "Lead Profiler";
-    return "Chief of Detectives";
+    if (score < 50) return "Junior Sleuth";
+    if (score < 100) return "Senior Sleuth";
+    if (score < 200) return "Lead Sleuth";
+    return "Chief of Sleuths";
 }

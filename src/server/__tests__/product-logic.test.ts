@@ -1,19 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { getDetectiveRank } from '../logic';
+import { getSleuthRank } from '../logic';
 import { normalizeSubredditName } from '../../shared/utils/normalization';
 
 describe('Product Logic: Ranks', () => {
     it('should assign correct ranks based on points', () => {
-        expect(getDetectiveRank(0)).toBe("Rookie Sleuth");
-        expect(getDetectiveRank(9)).toBe("Rookie Sleuth");
-        expect(getDetectiveRank(10)).toBe("Junior Detective");
-        expect(getDetectiveRank(49)).toBe("Junior Detective");
-        expect(getDetectiveRank(50)).toBe("Senior Investigator");
-        expect(getDetectiveRank(99)).toBe("Senior Investigator");
-        expect(getDetectiveRank(100)).toBe("Lead Profiler");
-        expect(getDetectiveRank(199)).toBe("Lead Profiler");
-        expect(getDetectiveRank(200)).toBe("Chief of Detectives");
-        expect(getDetectiveRank(1000)).toBe("Chief of Detectives");
+        expect(getSleuthRank(0)).toBe("Rookie Sleuth");
+        expect(getSleuthRank(9)).toBe("Rookie Sleuth");
+        expect(getSleuthRank(10)).toBe("Junior Sleuth");
+        expect(getSleuthRank(49)).toBe("Junior Sleuth");
+        expect(getSleuthRank(50)).toBe("Senior Sleuth");
+        expect(getSleuthRank(99)).toBe("Senior Sleuth");
+        expect(getSleuthRank(100)).toBe("Lead Sleuth");
+        expect(getSleuthRank(199)).toBe("Lead Sleuth");
+        expect(getSleuthRank(200)).toBe("Chief of Sleuths");
+        expect(getSleuthRank(1000)).toBe("Chief of Sleuths");
     });
 });
 

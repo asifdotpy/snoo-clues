@@ -18,23 +18,23 @@ The implementation uses a **hybrid approach**:
 - **Visual Feedback**: A flame-themed streak counter is displayed in the game header.
 
 ### 🏆 Global Leaderboard & Rankings
-- **Detective Rankings**: Tracks all users' total successful investigations using a Redis **ZSET (Sorted Set)**.
-- **Top Detectives**: A real-time leaderboard shows the community's top 10 sleuths.
-- **Detective Ranks**: Users earn titles based on their total wins:
-  - **Rookie Sleuth** (0-1 Wins)
-  - **Private Eye** (2-5 Wins)
-  - **Senior Detective** (6-10 Wins)
-  - **Inspector** (11-20 Wins)
-  - **Master Investigator** (21+ Wins)
+- **Sleuth Rankings**: Tracks all users' total successful investigations using a Redis **ZSET (Sorted Set)**.
+- **Top Sleuths**: A real-time leaderboard shows the community's top 10 sleuths.
+- **Sleuth Ranks**: Users earn titles based on their total points (Daily = 10 pts, Archives = 1 pt):
+  - **Rookie Sleuth** (0-9 points)
+  - **Junior Sleuth** (10-49 points)
+  - **Senior Sleuth** (50-99 points)
+  - **Lead Sleuth** (100-199 points)
+  - **Chief of Sleuths** (200+ points)
 
 ### ✨ Visual & UX Polish
-- **Detective Notebook Theme**: Premium aged paper aesthetic with typewriter-style typography.
+- **Sleuth Notebook Theme**: Premium aged paper aesthetic with typewriter-style typography.
 - **"Case Closed" Stamp**: A dramatic red stamp animation triggers upon correctly identifying a community.
-- **Cold Case Aesthetic**: Unlimited practice mode features a **light blue notebook** with a **"PRACTICE" watermark** to distinguish it from official daily files.
+- **The Archives Aesthetic**: Unlimited practice mode features a **light blue notebook** with a **"PRACTICE" watermark** to distinguish it from official daily files.
 - **Seamless Navigation**: Added a **"Back Button" (Change Case Type)** to the header, allowing users to switch between modes without refreshing.
-- **Explicit Mode Indicators**: Color-coded tags (**DAILY CASE** vs **COLD CASE**) in the header for constant orientation.
+- **Explicit Mode Indicators**: Color-coded tags (**DAILY CASE** vs **ARCHIVES**) in the header for constant orientation.
 - **Animated Feedback**: Guess results now use smooth fade-in/out animations and auto-clear for a non-cluttered workspace.
-- **Recursive Play**: Added "Browse Cold Cases" directly to the 'already played' screen for the daily investigation.
+- **Recursive Play**: Added "Browse Archivess" directly to the 'already played' screen for the daily investigation.
 - **Responsive Design**: Tailored for both Desktop and Reddit Mobile.
 ### 🏗️ Hybrid Bridge (The $5k Closer)
 Established a bidirectional communication bridge between the Devvit UI and the GameMaker engine:
@@ -51,7 +51,7 @@ Established a bidirectional communication bridge between the Devvit UI and the G
 #### [index.ts](file:///home/asif1/games/snoo-clues/src/server/index.ts)
 
 **✅ Expanded Subreddit Database**
-- Added 50+ diverse subreddits to the "Cold Case" pool for unlimited replayability.
+- Added 50+ diverse subreddits to the "Archives" pool for unlimited replayability.
 - Today's case (2026-02-01): **r/aww**
 
 **✅ Implemented Redis State & Logic**
@@ -91,8 +91,8 @@ Established a bidirectional communication bridge between the Devvit UI and the G
 
 ## Key Features Implemented
 
-### ⚖️ Detective Ranks
-Every win counts toward your permanent record. Move from **Rookie Sleuth** to **Master Investigator** as you solve more cases.
+### ⚖️ Sleuth Ranks
+Every win counts toward your permanent record. Move from **Rookie Sleuth** to **Chief of Sleuths** as you solve more cases.
 
 ### 🔥 Consecutive Streaks
 The streak system uses a "Last Win Date" check in Redis to ensure users visit every day. A missed day resets the flame!
@@ -138,10 +138,10 @@ The project is fully version-controlled on GitHub:
 
 🎉 **Snoo-Clues is now polished and ready!**
 
-✅ 50+ diverse subreddits (Cold Case files)
+✅ 50+ diverse subreddits (Archives files)
 ✅ Bidirectional mascot bridge for GameMaker engine
 ✅ Redis-backed streaks & leaderboards
-✅ Detective Rank system
+✅ Sleuth Rank system
 ✅ Premium 'Case Closed' animations
 ✅ Multi-modal UX (Daily vs. Unlimited)
 ✅ GameMaker $5k prize eligibility locked in!
