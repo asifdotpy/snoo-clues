@@ -33,4 +33,25 @@ describe('Streak Logic Tests', () => {
         const currentStreak = 5;
         expect(calculateNewStreak(lastWin, today, currentStreak)).toBe(1);
     });
+
+    it('should handle month boundaries correctly', () => {
+        const lastWin = "2025-01-31";
+        const today = "2025-02-01";
+        const currentStreak = 10;
+        expect(calculateNewStreak(lastWin, today, currentStreak)).toBe(11);
+    });
+
+    it('should handle year boundaries correctly', () => {
+        const lastWin = "2024-12-31";
+        const today = "2025-01-01";
+        const currentStreak = 365;
+        expect(calculateNewStreak(lastWin, today, currentStreak)).toBe(366);
+    });
+
+    it('should return 1 if last win was in the future (sanity check for clock skew)', () => {
+        const lastWin = "2025-01-02";
+        const today = "2025-01-01";
+        const currentStreak = 5;
+        expect(calculateNewStreak(lastWin, today, currentStreak)).toBe(1);
+    });
 });
