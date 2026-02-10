@@ -91,6 +91,12 @@ class SnooCluesGame {
   private closeSubmitModalBtn!: HTMLButtonElement;
   private submitCaseBtn!: HTMLButtonElement;
   private cancelSubmitBtn!: HTMLButtonElement;
+  private submitFormArea!: HTMLElement;
+  private submitSuccessArea!: HTMLElement;
+  private submitAnotherBtn!: HTMLButtonElement;
+  private successCloseBtn!: HTMLButtonElement;
+  private submitSubredditInput!: HTMLInputElement;
+  private submitFeedback!: HTMLElement;
   private copyTriggers!: NodeListOf<HTMLElement>;
 
   constructor() {
@@ -188,6 +194,12 @@ class SnooCluesGame {
     this.closeSubmitModalBtn = document.getElementById("closeSubmitModal") as HTMLButtonElement;
     this.submitCaseBtn = document.getElementById("submitCaseBtn") as HTMLButtonElement;
     this.cancelSubmitBtn = document.getElementById("cancelSubmitBtn") as HTMLButtonElement;
+    this.submitFormArea = document.getElementById("submitFormArea")!;
+    this.submitSuccessArea = document.getElementById("submitSuccessArea")!;
+    this.submitAnotherBtn = document.getElementById("submitAnotherBtn") as HTMLButtonElement;
+    this.successCloseBtn = document.getElementById("successCloseBtn") as HTMLButtonElement;
+    this.submitSubredditInput = document.getElementById("submitSubreddit") as HTMLInputElement;
+    this.submitFeedback = document.getElementById("submitFeedback")!;
     this.copyTriggers = document.querySelectorAll(".copy-trigger");
 
     // Handle Case Selection modal close button
@@ -370,6 +382,7 @@ class SnooCluesGame {
     // Submit case listeners
     this.openSubmitModalBtn.addEventListener("click", () => {
       this.playSound('click');
+      this.resetSubmissionForm();
       this.showModal("submit");
     });
 
@@ -384,6 +397,20 @@ class SnooCluesGame {
     this.submitCaseBtn.addEventListener("click", () => {
       this.playSound('click');
       this.handleCaseSubmission();
+    });
+
+    this.submitAnotherBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.resetSubmissionForm();
+    });
+
+    this.successCloseBtn.addEventListener("click", () => {
+      this.playSound('click');
+      this.closeModal("submit");
+    });
+
+    this.submitSubredditInput.addEventListener("input", () => {
+      this.submitSubredditInput.value = this.submitSubredditInput.value.toLowerCase();
     });
   }
 
@@ -659,6 +686,17 @@ class SnooCluesGame {
     });
   }
 
+  private resetSubmissionForm(): void {
+    this.submitFormArea.classList.remove("hidden");
+    this.submitSuccessArea.classList.add("hidden");
+    this.submitSubredditInput.value = "";
+    (document.getElementById("submitEvidence1") as HTMLTextAreaElement).value = "";
+    (document.getElementById("submitEvidence2") as HTMLTextAreaElement).value = "";
+    (document.getElementById("submitEvidence3") as HTMLTextAreaElement).value = "";
+    this.submitFeedback.textContent = "";
+    this.submitFeedback.classList.remove("active");
+  }
+
   private async submitGuess(): Promise<void> {
     const guess = normalizeSubredditName(this.guessInput.value);
     if (!guess) return;
@@ -740,13 +778,13 @@ class SnooCluesGame {
     }
   }
 
-  private showFeedback(m: string, t: "success" | "error", duration: number = 3000): void {
-    this.feedbackMessage.textContent = m;
-    this.feedbackMessage.className = `feedback-message ${t} active`;
+  private showFeedback(m: string, t: "success" | "error", duration: number = 3000, target: HTMLElement = this.feedbackMessage): void {
+    target.textContent = m;
+    target.className = `feedback-message ${t} active`;
 
     // Auto-clear after delay for better UX
     setTimeout(() => {
-      this.feedbackMessage.classList.remove('active');
+      target.classList.remove('active');
     }, duration);
   }
 
@@ -923,13 +961,27 @@ class SnooCluesGame {
   }
 
   private async handleCaseSubmission(): Promise<void> {
-    const sub = (document.getElementById("submitSubreddit") as HTMLInputElement).value;
-    const e1 = (document.getElementById("submitEvidence1") as HTMLTextAreaElement).value;
-    const e2 = (document.getElementById("submitEvidence2") as HTMLTextAreaElement).value;
-    const e3 = (document.getElementById("submitEvidence3") as HTMLTextAreaElement).value;
+    const subRaw = this.submitSubredditInput.value;
+    const sub = normalizeSubredditName(subRaw);
+    const e1 = (document.getElementById("submitEvidence1") as HTMLTextAreaElement).value.trim();
+    const e2 = (document.getElementById("submitEvidence2") as HTMLTextAreaElement).value.trim();
+    const e3 = (document.getElementById("submitEvidence3") as HTMLTextAreaElement).value.trim();
 
-    if (!sub || !e1 || !e2 || !e3) {
-      this.showFeedback("Please fill in all evidence fields!", "error");
+    // Validation
+    if (!sub) {
+      this.showFeedback("Please provide a Subreddit name!", "error", 3000, this.submitFeedback);
+      return;
+    }
+    if (sub.length < 3) {
+      this.showFeedback("Subreddit name is too short (min 3 characters).", "error", 3000, this.submitFeedback);
+      return;
+    }
+    if (!e1 || !e2 || !e3) {
+      this.showFeedback("Please fill in all 3 evidence fields!", "error", 3000, this.submitFeedback);
+      return;
+    }
+    if (e1.length < 5 || e2.length < 5 || e3.length < 5) {
+      this.showFeedback("Evidence descriptions are too short!", "error", 3000, this.submitFeedback);
       return;
     }
 
@@ -942,16 +994,12 @@ class SnooCluesGame {
         evidence: [e1, e2, e3]
       });
       if (res.success) {
-        this.showFeedback("✅ Case File Submitted!", "success");
-        this.closeModal("submit");
-        // Clear form
-        (document.getElementById("submitSubreddit") as HTMLInputElement).value = "";
-        (document.getElementById("submitEvidence1") as HTMLTextAreaElement).value = "";
-        (document.getElementById("submitEvidence2") as HTMLTextAreaElement).value = "";
-        (document.getElementById("submitEvidence3") as HTMLTextAreaElement).value = "";
+        this.playSound('victory');
+        this.submitFormArea.classList.add("hidden");
+        this.submitSuccessArea.classList.remove("hidden");
       }
     } catch (error: any) {
-      this.showFeedback(error.message || "Failed to submit Case File.", "error");
+      this.showFeedback(error.message || "Failed to submit Case File.", "error", 3000, this.submitFeedback);
     } finally {
       this.submitCaseBtn.disabled = false;
       this.submitCaseBtn.textContent = "Submit Case File";
