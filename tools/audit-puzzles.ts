@@ -30,12 +30,12 @@ function audit() {
         seen.add(sub);
 
         // 2. Check for exactly 3 clues
-        if (p.clues.length !== 3) {
+        if (p.evidence.length !== 3) {
             report.invalidClueCount.push(p.subreddit);
         }
 
         // 3. Check for empty clues
-        if (p.clues.some((c) => !c || c.trim() === "")) {
+        if (p.evidence.some((c) => !c || c.trim() === "")) {
             report.emptyClues.push(p.subreddit);
         }
 

@@ -4,16 +4,16 @@ const path = require('path');
 const puzzlesPath = path.join(__dirname, '../src/server/data/puzzles.ts');
 const content = fs.readFileSync(puzzlesPath, 'utf8');
 
-// Simple regex to extract subreddit and clues
-// Matches: { subreddit: "...", clues: ["...", "...", "..."] }
-const puzzleRegex = /\{\s*subreddit:\s*"([^"]+)",\s*clues:\s*\["([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\]\s*\}/g;
+// Simple regex to extract subreddit and evidence
+// Matches: { subreddit: "...", evidence: ["...", "...", "..."] }
+const puzzleRegex = /\{\s*subreddit:\s*"([^"]+)",\s*evidence:\s*\["([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\]\s*\}/g;
 
 let match;
 const puzzles = [];
 while ((match = puzzleRegex.exec(content)) !== null) {
     puzzles.push({
         subreddit: match[1],
-        clues: [match[2], match[3], match[4]]
+        evidence: [match[2], match[3], match[4]]
     });
 }
 
@@ -35,8 +35,8 @@ puzzles.forEach(p => {
     if (seen.has(sub)) report.duplicates.push(p.subreddit);
     seen.add(sub);
 
-    if (p.clues.length !== 3) report.invalidClueCount.push(p.subreddit);
-    if (p.clues.some(c => !c || c.trim() === "")) report.emptyClues.push(p.subreddit);
+    if (p.evidence.length !== 3) report.invalidClueCount.push(p.subreddit);
+    if (p.evidence.some(c => !c || c.trim() === "")) report.emptyClues.push(p.subreddit);
     if (p.subreddit.length > 16) report.tooLong.push(p.subreddit);
 });
 
