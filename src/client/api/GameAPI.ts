@@ -65,7 +65,7 @@ export class GameAPI {
     /**
      * Submit a guess
      */
-    static async submitGuess(guess: string, mode: 'daily' | 'archives' | 'community' | null): Promise<GuessResponse> {
+    static async submitGuess(guess: string, mode: 'daily' | 'archives' | 'community'): Promise<GuessResponse> {
         const response = await this.fetchWithTimeout("/api/game/guess", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -89,7 +89,7 @@ export class GameAPI {
     /**
      * Share result to Reddit
      */
-    static async shareResult(data: { attempts: number; evidenceFound: number; mode: string }): Promise<ShareResponse> {
+    static async shareResult(data: { attempts: number; evidenceFound: number; mode: 'daily' | 'archives' | 'community' }): Promise<ShareResponse> {
         const response = await this.fetchWithTimeout("/api/game/share", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

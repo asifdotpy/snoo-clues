@@ -51,6 +51,14 @@ function communityCaseAnswerKey(username: string): string {
   return `community_case_answer:${username}`;
 }
 
+function archivesSolvedStatusKey(username: string): string {
+  return `archives_solved_status:${username}`;
+}
+
+function communitySolvedStatusKey(username: string): string {
+  return `community_solved_status:${username}`;
+}
+
 async function getUserStreak(username: string): Promise<number> {
   const sKey = streakKey(username);
   const dKey = lastWinDateKey(username);
@@ -262,6 +270,7 @@ router.get("/api/game/random", async (_req, res): Promise<void> => {
 
     // Store the answer for validation
     await redis.set(archivesAnswerKey(username), puzzle.subreddit);
+    await redis.set(archivesSolvedStatusKey(username), "false");
 
     res.json({
       type: "game_init",
@@ -299,17 +308,19 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
       return;
     }
 
-    const { guess, mode } = req.body as (GuessRequest & { mode?: 'daily' | 'archives' | 'community' });
+    const { guess, mode } = req.body as GuessRequest;
     if (!guess) {
       res.status(400).json({ error: "No subreddit was provided for analysis." });
       return;
     }
 
+    if (!mode || !['daily', 'archives', 'community'].includes(mode)) {
+      res.status(400).json({ error: "Mystery unsolved: invalid investigation mode." });
+      return;
+    }
+
     const isArchives = mode === 'archives';
     const isCommunity = mode === 'community';
-    if (!mode) {
-      console.warn(`[Guess] Missing mode for sleuth ${username}. Defaulting to daily.`);
-    }
     const today = getTodayDateKey();
 
     // Determine the answer to check against
@@ -347,6 +358,13 @@ router.post("/api/game/guess", async (req, res): Promise<void> => {
         archivesSolvedCount = await incrementArchivesSolved(username);
         // Practice cases still increment rank score but not streak. Award 1 point.
         score = await incrementUserScore(username, 1);
+
+        // Mark as solved for sharing verification
+        if (isArchives) {
+          await redis.set(archivesSolvedStatusKey(username), "true");
+        } else if (isCommunity) {
+          await redis.set(communitySolvedStatusKey(username), "true");
+        }
       } else {
         await markAsWinner(username, today);
         streak = await updateStreak(username, today);
@@ -419,6 +437,11 @@ router.post("/api/game/share", async (req, res): Promise<void> => {
 
     const { attempts, evidenceFound, mode } = req.body as ShareRequest;
 
+    if (evidenceFound < 1 || evidenceFound > 3) {
+      res.status(400).json({ error: "Mystery unsolved: invalid evidence count." });
+      return;
+    }
+
     let emojiRow = "";
     for (let i = 1; i <= 3; i++) {
       emojiRow += i <= evidenceFound ? "🔎 " : "⬛ ";
@@ -434,20 +457,35 @@ router.post("/api/game/share", async (req, res): Promise<void> => {
       caseTitle = `Daily Case #${getTodayCaseNumber()}`;
       // Verify they actually won
       if (!(await isWinner(username, today))) {
-        res.status(403).json({ error: "You must close the Case File before reporting your findings!" });
+        res.status(403).json({ error: "Mystery unsolved: you must close the Case File before reporting!" });
         return;
       }
     } else if (mode === 'archives') {
+      const solved = await redis.get(archivesSolvedStatusKey(username));
+      if (solved !== "true") {
+        res.status(403).json({ error: "Mystery unsolved: you must close the Case File before reporting!" });
+        return;
+      }
       correctAnswer = await redis.get(archivesAnswerKey(username)) || "???";
       caseTitle = "Archives Case";
     } else if (mode === 'community') {
+      const solved = await redis.get(communitySolvedStatusKey(username));
+      if (solved !== "true") {
+        res.status(403).json({ error: "Mystery unsolved: you must close the Case File before reporting!" });
+        return;
+      }
       correctAnswer = await redis.get(communityCaseAnswerKey(username)) || "???";
       caseTitle = "Community Case";
+    } else {
+      res.status(400).json({ error: "Mystery unsolved: invalid reporting mode." });
+      return;
     }
 
+    const displayAttempts = Math.min(attempts, 10);
+    const attemptsSuffix = attempts > 10 ? "+" : "";
     const text = `Snoo-Clues ${caseTitle}
 ${emojiRow.trim()}
-I solved it in ${attempts} attempt${attempts !== 1 ? 's' : ''}! 🔍🎉
+I solved it in ${displayAttempts}${attemptsSuffix} attempt${(displayAttempts === 1 && !attemptsSuffix) ? '' : 's'}! 🔍🎉
 r/${correctAnswer}`;
 
     const comment = await reddit.submitComment({
@@ -529,6 +567,7 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
 
     // Store answer for validation
     await redis.set(communityCaseAnswerKey(username), puzzle.subreddit);
+    await redis.set(communitySolvedStatusKey(username), "false");
 
     res.json({
       type: "game_init",

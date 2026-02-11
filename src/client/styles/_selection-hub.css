@@ -60,6 +60,14 @@
     gap: var(--space-2);
 }
 
+.utc-notice {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    font-style: italic;
+    margin: var(--space-2) 0;
+    text-align: center;
+}
+
 .selection-btn {
     background: var(--paper-white);
     border: 1.5px solid var(--gray-200);

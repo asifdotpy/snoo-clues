@@ -77,6 +77,13 @@
     margin-bottom: var(--space-1);
 }
 
+.utc-game-notice {
+    font-size: 0.7rem;
+    color: var(--gray-400);
+    margin-top: -5px;
+    margin-bottom: var(--space-4);
+}
+
 .mode-tag {
     display: inline-block;
     font-size: 0.7rem;
