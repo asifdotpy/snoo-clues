@@ -15,7 +15,7 @@ export const createPost = async () => {
       heading: "Can you solve it?",
       description: "Analyze the evidence and close the Case File!",
       backgroundUri: "splash_bg_premium.png",
-      appIconUri: "logo_premium_1024_pixel.png",
+      appIconUri: "logo_premium.png",
       buttonLabel: "Play Now",
     },
   });

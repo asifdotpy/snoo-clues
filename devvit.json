@@ -1,8 +1,16 @@
 {
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
   "name": "snoo-clues",
+  "description": "A daily subreddit guessing game where Sleuths analyze evidence to identify the hidden community.",
+  "version": "0.1.0",
+  "author": "asifdotpy",
+  "license": "BSD-3-Clause",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
   "marketingAssets": {
-    "icon": "assets/logo_premium_1024_pixel.png"
+    "icon": "assets/logo_premium.png"
   },
   "media": {
     "dir": "assets"
