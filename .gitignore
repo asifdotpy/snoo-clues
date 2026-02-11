@@ -12,6 +12,8 @@ dist/
 # IDE
 .vscode/
 .idea/
+playwright-report/
+test-results/
 *.swp
 *.swo
 
