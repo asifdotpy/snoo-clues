@@ -14,7 +14,6 @@ import { Audio } from "./utils/AudioHelper";
 import { AUDIO_CONFIG } from "./config/AudioAssets";
 
 import type {
-  GameInitResponse,
   LeaderboardEntry,
 } from "../shared/types/api";
 
@@ -33,7 +32,6 @@ class SnooCluesGame {
   private evidenceFound: number = 1;
   private currentCategory: string = "";
   private currentGameMode: 'daily' | 'archives' | 'community' | null = null;
-  private audioAssets?: GameInitResponse['audioAssets'];
   private pendingExitTarget: 'selection' | 'home' | null = null;
 
   // DOM Elements
@@ -134,9 +132,6 @@ class SnooCluesGame {
       // Register the zero-latency synth fallback
       Audio.registerSynth(name, config.synthFallback.freq, config.synthFallback.duration);
     });
-
-    const isMuted = Audio.isMuted();
-    console.log(`[Audio] Modular system initialized. Muted: ${isMuted}`);
   }
 
   private initDOMElements(): void {
@@ -415,7 +410,6 @@ class SnooCluesGame {
   }
 
   public showMainMenu(keepCurrentMascot: boolean = false): void {
-    console.log("[Navigation] Showing Main Menu (Selection Hub)");
 
     // 1. Hide Loading/Splash Screen
     this.loadingElement.classList.add("hidden");
@@ -448,7 +442,6 @@ class SnooCluesGame {
   }
 
   private requestExitConfirmation(target: 'selection' | 'home'): void {
-    console.log(`[Navigation] Requesting exit to: ${target}`);
     this.pendingExitTarget = target;
 
     if (!this.hasCaseProgress()) {
@@ -483,7 +476,6 @@ class SnooCluesGame {
     this.pendingExitTarget = null;
 
     if (target === 'home') {
-      console.log("[Navigation] Executing Exit to Home");
       Audio.pauseMusic();
 
       if (isAbandon) {
@@ -512,7 +504,6 @@ class SnooCluesGame {
         this.startInvestigationBtn.disabled = false;
       }
     } else {
-      console.log("[Navigation] Executing Return to Selection Hub");
 
       if (isAbandon) {
         try {
@@ -577,7 +568,6 @@ class SnooCluesGame {
       this.rank = data.rank || "Rookie Sleuth";
       this.archivesSolved = data.archivesSolved;
       this.currentCategory = data.category || "";
-      this.audioAssets = data.audioAssets;
 
       this.updateGameUI();
       this.updateStreakDisplay();
@@ -835,13 +825,11 @@ class SnooCluesGame {
 
     // Automatically load new archive case when closing win modal in archives mode
     if (t === 'win' && this.currentGameMode === 'archives') {
-      console.log("[Logic] Archives mode: Automatically starting next case");
       this.initGame('archives');
     }
   }
 
   private resetGameUI(isAbandon: boolean = false): void {
-    console.log("[UI] Performing comprehensive state reset");
     this.currentGameMode = null;
     this.shareBtn.textContent = "📢 Report Findings";
     this.evidence = ["", "", ""];
@@ -849,7 +837,6 @@ class SnooCluesGame {
     this.evidenceFound = 1;
     this.isWinner = false;
     this.hasPlayed = false;
-    this.audioAssets = undefined;
 
     // 1. Evidence Reset
     this.evidence1Text.textContent = "NO ACTIVE CASE FILE";

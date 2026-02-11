@@ -11,7 +11,7 @@ export class AudioManager {
   private sounds: Map<string, HTMLAudioElement> = new Map();
   private failedSounds: Set<string> = new Set();
   private synths: Map<string, { freq: number; duration: number }> = new Map();
-  private music?: HTMLAudioElement;
+  private music: HTMLAudioElement | undefined;
   private mutedKey = 'snoo_audio_muted';
   private musicMutedKey = 'snoo_music_muted';
   private muted = false;
@@ -47,7 +47,6 @@ export class AudioManager {
         }
         // Also try to play music if it should be playing
         if (!this.muted && this.music && this.music.paused) {
-          console.log('[Audio] Resuming music after user interaction');
           this.music.play().catch((err) => {
             console.warn('[Audio] Failed to resume music on user interaction:', err);
           });
@@ -105,7 +104,6 @@ export class AudioManager {
         this.music.muted = this.muted || this.musicMuted;
         this.music.volume = 0.5; // Set reasonable default volume
         this.music.crossOrigin = 'anonymous'; // ← Critical for CORS
-        console.log(`[Audio] Music registered from: ${src}`);
         
         this.music.onerror = () => {
           console.error(`[Audio] Background music failed to load from ${src}. Check CORS and URL accessibility.`);
@@ -113,7 +111,6 @@ export class AudioManager {
         };
         
         this.music.oncanplay = () => {
-          console.log('[Audio] BGM is ready to play');
         };
       }
     } catch (e) {
@@ -198,7 +195,6 @@ export class AudioManager {
 
   playMusic(): void {
     if (this.muted || this.musicMuted) {
-      console.log('[Audio] Music playback skipped - audio or music is muted');
       return;
     }
     if (!this.music) {
@@ -218,7 +214,6 @@ export class AudioManager {
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            console.log('[Audio] BGM playing successfully');
             // Also trigger GameMaker BGM if available
             triggerGameMakerBGM();
           })
@@ -238,7 +233,6 @@ export class AudioManager {
     try {
       if (this.music && !this.music.paused) {
         this.music.pause();
-        console.log('[Audio] BGM paused');
       }
       pauseGameMakerBGM();
     } catch (e) {
