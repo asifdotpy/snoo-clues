@@ -1,60 +1,69 @@
 /**
- * GameMaker Runtime Type Definitions
- *
- * This module contains type declarations for the GameMaker HTML5 runtime
- * and its integration with the browser environment.
+ * Global type definitions for GameMaker callbacks and bridge functions
  */
 
 declare global {
-    interface Window {
-        Module: any;
-        GM_tick?: (time: number) => void;
-        onGameSetWindowSize?: (width: number, height: number) => void;
-        manifestFiles?: () => string;
-        manifestFilesMD5?: () => string[];
-        log_next_game_state?: () => void;
-        wallpaper_update_config?: (config: string) => void;
-        wallpaper_reset_config?: () => void;
-        setAddAsyncMethod?: (method: any) => void;
-        setJSExceptionHandler?: (handler: any) => void;
-        hasJSExceptionHandler?: () => boolean;
-        doJSExceptionHandler?: (exceptionJSON: string) => void;
-        setWadLoadCallback?: (callback: any) => void;
-        onFirstFrameRendered?: () => void;
-        triggerAd?: (adId: string, ...callbacks: any[]) => void;
-        triggerPayment?: (itemId: string, callback: any) => void;
-        toggleElement?: (id: string) => void;
-        set_acceptable_rollback?: (frames: number) => void;
-        report_stats?: (statsData: any) => void;
-        g_pAddAsyncMethod?: any;
-        g_pJSExceptionHandler?: any;
-        g_pWadLoadCallback?: any;
-        dispatchMascotAction?: (actionType: string) => void;
-    }
+  /**
+   * Triggers a mascot reaction in GameMaker
+   * @param actionType The type of action to trigger (e.g., 'correct', 'wrong', 'reveal')
+   */
+  function gmCallback_mascot_react(actionType: string): void;
+
+  /**
+   * Sets the audio state in GameMaker
+   * @param isMuted Whether audio is muted
+   */
+  function gmCallback_set_audio_state(isMuted: boolean): void;
+
+  /**
+   * Triggers background music playback in GameMaker
+   */
+  function gmCallback_play_bgm(): void;
+
+  /**
+   * Triggers background music pause in GameMaker
+   */
+  function gmCallback_pause_bgm(): void;
+
+  interface Window {
+    /**
+     * Devvit/GameMaker Module
+     */
+    Module: any;
+
+    /**
+     * Dispatches a mascot action to GameMaker
+     */
+    dispatchMascotAction?: (actionType: string) => void;
+
+    /**
+     * Game instance exposed for testing
+     */
+    gameInstance?: any;
+
+    // GameMaker runner globals
+    GM_tick?: (time: number) => void;
+    onGameSetWindowSize?: (width: number, height: number) => void;
+    manifestFiles?: () => string;
+    manifestFilesMD5?: () => string[];
+    log_next_game_state?: () => void;
+    wallpaper_update_config?: (config: string) => void;
+    wallpaper_reset_config?: () => void;
+    setAddAsyncMethod?: (method: any) => void;
+    setJSExceptionHandler?: (handler: any) => void;
+    hasJSExceptionHandler?: () => boolean;
+    doJSExceptionHandler?: (exceptionJSON: string) => void;
+    setWadLoadCallback?: (callback: any) => void;
+    onFirstFrameRendered?: () => void;
+    triggerAd?: (adId: string, ...callbacks: any[]) => void;
+    triggerPayment?: (itemId: string, callback: any) => void;
+    toggleElement?: (id: string) => void;
+    set_acceptable_rollback?: (frames: number) => void;
+    report_stats?: (statsData: any) => void;
+    g_pAddAsyncMethod?: any;
+    g_pJSExceptionHandler?: any;
+    g_pWadLoadCallback?: any;
+  }
 }
 
-/**
- * GameMaker callback function for mascot reactions
- * This is called from the HTML5/JavaScript layer to trigger animations in GameMaker
- */
-declare function gmCallback_mascot_react(actionType: string): void;
-
-/**
- * GameMaker callback function to set the audio state (muted/unmuted)
- * This allows the TS layer to control sounds played within the GameMaker WASM
- */
-declare function gmCallback_set_audio_state(isMuted: boolean): void;
-
-/**
- * GameMaker callback function to play background music
- * Allows the TS layer to trigger BGM playback in GameMaker
- */
-declare function gmCallback_play_bgm(): void;
-
-/**
- * GameMaker callback function to pause background music
- * Allows the TS layer to stop BGM in GameMaker
- */
-declare function gmCallback_pause_bgm(): void;
-
-export { };
+export {};

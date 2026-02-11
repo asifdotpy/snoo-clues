@@ -13,7 +13,6 @@ import "../types/gamemaker";
  */
 export function setupHybridBridge(): void {
     window.dispatchMascotAction = (actionType: string) => {
-        console.log(`[Hybrid Bridge] Mascot Action: ${actionType}`);
 
         if (typeof gmCallback_mascot_react === 'function') {
             gmCallback_mascot_react(actionType);
@@ -38,7 +37,6 @@ export function dispatchMascotAction(actionType: string): void {
  * @param isMuted - Whether the audio should be muted
  */
 export function syncAudioState(isMuted: boolean): void {
-    console.log(`[Hybrid Bridge] Sync Audio State: ${isMuted ? 'MUTED' : 'UNMUTED'}`);
 
     if (typeof gmCallback_set_audio_state === 'function') {
         gmCallback_set_audio_state(isMuted);
@@ -53,7 +51,6 @@ export function syncAudioState(isMuted: boolean): void {
  * Trigger background music playback in GameMaker (if available)
  */
 export function triggerGameMakerBGM(): void {
-    console.log('[Hybrid Bridge] Trigger BGM');
     
     if (typeof gmCallback_play_bgm === 'function') {
         gmCallback_play_bgm();
@@ -66,7 +63,6 @@ export function triggerGameMakerBGM(): void {
  * Trigger background music pause in GameMaker (if available)
  */
 export function pauseGameMakerBGM(): void {
-    console.log('[Hybrid Bridge] Pause BGM');
     
     if (typeof gmCallback_pause_bgm === 'function') {
         gmCallback_pause_bgm();

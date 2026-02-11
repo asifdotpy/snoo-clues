@@ -502,7 +502,6 @@ router.get("/api/game/community/random", async (_req, res): Promise<void> => {
     // Get a random community case
     let len = await redis.zCard(communityCasesKey());
     if (len === 0) {
-      console.log("[Community] Seeding initial test case for hackathon verification.");
       const seedCase = {
         subreddit: "ProgrammerHumor",
         evidence: [

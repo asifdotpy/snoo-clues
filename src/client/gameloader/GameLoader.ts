@@ -6,7 +6,6 @@
  */
 
 import '../types/gamemaker';
-import { Audio } from '../utils/AudioHelper';
 
 /**
  * Manifest structure for GameMaker runner
@@ -31,10 +30,9 @@ export default class GameLoader {
     private canvasElement: HTMLCanvasElement;
     private loadingElement: HTMLElement;
     private startButton: HTMLButtonElement;
-    private startingHeight?: number;
     private startingWidth?: number;
     private startingAspect?: number;
-    private game?: IGame;
+    private game: IGame | undefined;
 
     constructor(game?: IGame) {
         this.game = game;
@@ -59,7 +57,6 @@ export default class GameLoader {
             preRun: [],
             postRun: [],
             print: (text: string) => {
-                console.log(text);
                 if (text === "Entering main loop.") {
                     this.ensureAspectRatio();
                 }
@@ -69,7 +66,6 @@ export default class GameLoader {
             },
             canvas: this.canvasElement,
             setStatus: (text: string) => {
-                console.log("[GameLoader] setStatus:", text);
                 if (!window.Module.setStatus.last) {
                     window.Module.setStatus.last = { time: Date.now(), text: "" };
                 }
@@ -83,15 +79,15 @@ export default class GameLoader {
                 // Format 1: "Label (10/100)" or just "(10/100)"
                 const bracketMatch = text.match(/\((\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)\)/);
                 if (bracketMatch) {
-                    val = parseFloat(bracketMatch[1]);
-                    max = parseFloat(bracketMatch[2]);
+                    val = parseFloat(bracketMatch[1]!);
+                    max = parseFloat(bracketMatch[2]!);
                     percent = Math.round((val / max) * 100);
                 }
                 // Format 2: "Label 50%" or just "50%"
                 else {
                     const percentMatch = text.match(/(\d+(?:\.\d+)?)%/);
                     if (percentMatch) {
-                        percent = Math.round(parseFloat(percentMatch[1]));
+                        percent = Math.round(parseFloat(percentMatch[1]!));
                     }
                 }
 
@@ -121,7 +117,6 @@ export default class GameLoader {
 
     private ensureAspectRatio() {
         if (this.startingAspect) {
-            console.log("[GameLoader] Engine ready, auto-starting game");
             this.statusElement.innerHTML = "Sleuth Case Files Ready.";
             this.spinnerElement.hidden = true;
             this.progressElement.hidden = true;
@@ -135,14 +130,12 @@ export default class GameLoader {
             // Since we're using the native Reddit Play button, we have user activation.
             // We can automatically transition to the main menu once loaded.
             if (this.game) {
-                console.log("[GameLoader] Triggering auto-start");
                 this.game.showMainMenu();
             } else {
                 this.startButton.classList.remove("hidden");
             }
         } else {
             // If aspect ratio not ready, try again in a bit
-            console.log("[GameLoader] Engine ready but aspect ratio missing, retrying...");
             setTimeout(() => this.ensureAspectRatio(), 100);
         }
     }
@@ -153,7 +146,6 @@ export default class GameLoader {
                 const { width, height } = entry.contentRect;
                 if (!this.startingWidth) {
                     this.startingWidth = width;
-                    this.startingHeight = height;
                     this.startingAspect = width / height;
                 }
             }
@@ -164,18 +156,15 @@ export default class GameLoader {
     private async loadGame() {
         try {
             if (window.manifestFiles && window.manifestFilesMD5) {
-                const manifest: RunnerManifest = {
-                    manifestFiles: window.manifestFiles().split(","),
-                    manifestFilesMD5: window.manifestFilesMD5(),
-                };
-                console.log("Loading game with manifest:", manifest);
+                // Manifest accessed to ensure it is valid/loaded if needed by runner
+                window.manifestFiles();
+                window.manifestFilesMD5();
             }
 
             // Safety fallback: ensure loading screen shows start button eventually
             // Increased to 10 seconds per audit requirements
             setTimeout(() => {
                 if (this.startButton.classList.contains("hidden") && this.loadingElement.style.display !== "none") {
-                    console.log("[GameLoader] Timeout: Game engine failed to signal completion.");
                     this.statusElement.innerHTML = "Gathering Case Files...";
 
                     // Allow another 5 seconds before showing button anyway
