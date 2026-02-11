@@ -77,6 +77,7 @@ class SnooCluesGame {
   private keepTrainingBtn!: HTMLButtonElement;
   private gameContainer!: HTMLElement;
   private gameSubtitle!: HTMLElement;
+  private utcGameNotice!: HTMLElement;
   private currentModeTag!: HTMLElement;
   private playedToArchivesBtn!: HTMLButtonElement;
   private exitToHomeBtn!: HTMLButtonElement;
@@ -172,6 +173,7 @@ class SnooCluesGame {
     this.gameOverlay = document.getElementById("gameOverlay")!;
     this.gameContainer = document.querySelector(".game-container")!;
     this.gameSubtitle = document.querySelector(".game-subtitle")!;
+    this.utcGameNotice = document.getElementById("utcGameNotice")!;
     this.closeWinModalBtn = this.winModal.querySelector(".close-modal-btn") as HTMLButtonElement;
     this.closePlayedModalBtn = this.playedModal.querySelector(".close-modal-btn") as HTMLButtonElement;
     this.confirmYesBtn = document.getElementById("confirm-yes-btn") as HTMLButtonElement;
@@ -539,16 +541,19 @@ class SnooCluesGame {
     if (mode === 'archives') {
       this.gameContainer.classList.add('archives-case');
       this.gameSubtitle.textContent = "The Archives (Cold Case Practice)";
+      this.utcGameNotice.classList.add('hidden');
       this.currentModeTag.textContent = "ARCHIVES";
       this.currentModeTag.className = "mode-tag archives";
     } else if (mode === 'community') {
       this.gameContainer.classList.add('archives-case'); // Reuse archives blue for now
       this.gameSubtitle.textContent = "Community Case File (User Contributed)";
+      this.utcGameNotice.classList.add('hidden');
       this.currentModeTag.textContent = "COMMUNITY";
       this.currentModeTag.className = "mode-tag archives";
     } else {
       this.gameContainer.classList.remove('archives-case');
       this.gameSubtitle.textContent = "The Daily Subreddit Case File";
+      this.utcGameNotice.classList.remove('hidden');
       this.currentModeTag.textContent = "DAILY CASE";
       this.currentModeTag.className = "mode-tag daily";
     }
@@ -696,6 +701,9 @@ class SnooCluesGame {
     dispatchMascotAction('searching');
 
     try {
+      if (!this.currentGameMode) {
+        throw new Error("Mystery unsolved: investigation mode not selected.");
+      }
       const data = await GameAPI.submitGuess(guess, this.currentGameMode);
       this.attempts = data.attempts;
       this.attemptsCount.textContent = this.attempts.toString();
@@ -751,10 +759,13 @@ class SnooCluesGame {
 
   private async shareResult(btnElement: HTMLButtonElement = this.shareBtn): Promise<void> {
     try {
+      if (!this.currentGameMode) {
+        throw new Error("Mystery unsolved: investigation mode not selected.");
+      }
       const data = await GameAPI.shareResult({
         attempts: this.attempts,
         evidenceFound: this.evidenceFound,
-        mode: this.currentGameMode || 'daily'
+        mode: this.currentGameMode
       });
       if (data.success) {
         btnElement.textContent = "✅ Findings Reported!";

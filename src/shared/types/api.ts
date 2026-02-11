@@ -32,6 +32,7 @@ export type GameInitResponse = {
 
 export type GuessRequest = {
   guess: string;
+  mode: 'daily' | 'archives' | 'community';
 };
 
 export type GuessResponse = {
@@ -48,7 +49,7 @@ export type GuessResponse = {
 export type ShareRequest = {
   attempts: number;
   evidenceFound: number;
-  mode?: 'daily' | 'archives' | 'community';
+  mode: 'daily' | 'archives' | 'community';
 };
 
 export type ShareResponse = {
