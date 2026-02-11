@@ -150,7 +150,7 @@
 }
 
 .game-container.archives-case::after {
-  content: "ARCHIVES CASE FILE - FOR TRAINING ONLY";
+  content: "COLD CASE FILE - FOR TRAINING ONLY";
   position: absolute;
   top: 50%;
   left: 50%;

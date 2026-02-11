@@ -547,7 +547,7 @@ class SnooCluesGame {
     // Toggle aesthetics
     if (mode === 'archives') {
       this.gameContainer.classList.add('archives-case');
-      this.gameSubtitle.textContent = "The Archives (Practice)";
+      this.gameSubtitle.textContent = "The Archives (Cold Case Practice)";
       this.currentModeTag.textContent = "ARCHIVES";
       this.currentModeTag.className = "mode-tag archives";
     } else if (mode === 'community') {
@@ -914,8 +914,8 @@ class SnooCluesGame {
 
   private showMascotTip(): void {
     // Official Case File restriction
-    if (this.currentGameMode !== 'archives') {
-      this.showFeedback("🔎 Tip: Archives only, Sleuth! This is an official Case File—no outside interference permitted.", "success", 10000);
+    if (this.currentGameMode !== 'archives' && this.currentGameMode !== 'community') {
+      this.showFeedback("🔎 Tip: Archives and Community files only, Sleuth! This is an official Daily Case File—no outside interference permitted.", "success", 10000);
       dispatchMascotAction('reveal');
       return;
     }
@@ -974,6 +974,15 @@ class SnooCluesGame {
     }
     if (sub.length < 3) {
       this.showFeedback("Subreddit name is too short (min 3 characters).", "error", 3000, this.submitFeedback);
+      return;
+    }
+    if (sub.length > 21) {
+      this.showFeedback("Subreddit name is too long (max 21 characters).", "error", 3000, this.submitFeedback);
+      return;
+    }
+    const subRegex = /^[a-zA-Z0-9_]+$/;
+    if (!subRegex.test(sub)) {
+      this.showFeedback("Subreddit name contains invalid characters! Only alphanumeric and underscores allowed.", "error", 3000, this.submitFeedback);
       return;
     }
     if (!e1 || !e2 || !e3) {
