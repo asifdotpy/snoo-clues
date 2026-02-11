@@ -138,4 +138,32 @@ describe('Submission Modal Logic', () => {
 
         expect(subInput.value).toBe('mysubreddit');
     });
+
+    it('shows error feedback for long subreddit name', async () => {
+        const openBtn = document.getElementById('openSubmitModalBtn');
+        fireEvent.click(openBtn!);
+
+        const subInput = document.getElementById('submitSubreddit') as HTMLInputElement;
+        fireEvent.input(subInput, { target: { value: 'a'.repeat(22) } });
+
+        const submitBtn = document.getElementById('submitCaseBtn');
+        fireEvent.click(submitBtn!);
+
+        const feedback = document.getElementById('submitFeedback');
+        await waitFor(() => expect(feedback?.textContent).toBe('Subreddit name is too long (max 21 characters).'));
+    });
+
+    it('shows error feedback for invalid characters in subreddit name', async () => {
+        const openBtn = document.getElementById('openSubmitModalBtn');
+        fireEvent.click(openBtn!);
+
+        const subInput = document.getElementById('submitSubreddit') as HTMLInputElement;
+        fireEvent.input(subInput, { target: { value: 'test-sub!' } });
+
+        const submitBtn = document.getElementById('submitCaseBtn');
+        fireEvent.click(submitBtn!);
+
+        const feedback = document.getElementById('submitFeedback');
+        await waitFor(() => expect(feedback?.textContent).toBe('Subreddit name contains invalid characters! Only alphanumeric and underscores allowed.'));
+    });
 });
