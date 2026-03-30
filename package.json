@@ -16,7 +16,8 @@
     "dev:server": "cd src/server && vite build --watch",
     "login": "devvit login",
     "launch": "npm run build && npm run deploy && devvit publish",
-    "type-check": "tsc --build"
+    "type-check": "tsc --build",
+    "test:playtest": "playwright test"
   },
   "dependencies": {
     "@devvit/web": "0.12.12",
@@ -24,6 +25,7 @@
     "express": "5.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/express": "5.0.1",
